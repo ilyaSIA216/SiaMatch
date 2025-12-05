@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Все функции - Match Россия</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateX(10px);
+            background: rgba(255,255,255,0.15);
+        }
+        .feature-icon {
+            font-size: 30px;
+            margin-right: 15px;
+            min-width: 50px;
+        }
+        .feature-text h3 {
+            margin: 0 0 5px 0;
+        }
+        .feature-text p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">🚀 Все функции</h1>
+        
+        <div class="feature-card" onclick="goToSwipes()">
+            <div class="feature-icon">❤️</div>
+            <div class="feature-text">
+                <h3>Знакомства</h3>
+                <p>Свайпайте анкеты и находите мэтчи</p>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="goToUploadPhoto()">
+            <div class="feature-icon">📸</div>
+            <div class="feature-text">
+                <h3>Загрузка фото</h3>
+                <p>Добавьте фото для вашего профиля</p>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="goToChatDemo()">
+            <div class="feature-icon">💬</div>
+            <div class="feature-text">
+                <h3>Чат</h3>
+                <p>Общайтесь с вашими мэтчами</p>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="goToRegistration()">
+            <div class="feature-icon">👤</div>
+            <div class="feature-text">
+                <h3>Профиль</h3>
+                <p>Редактируйте ваши данные</p>
+            </div>
+        </div>
+        
+        <button onclick="goBack()" style="
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
+            cursor: pointer;
+        ">
+            ← На главную
+        </button>
+    </div>
+    
+    <script>
+        const tg = Telegram.WebApp;
+        tg.expand();
+        
+        function goToSwipes() {
+            window.location.href = 'swipes.html';
+        }
+        
+        function goToUploadPhoto() {
+            window.location.href = 'upload-photo.html';
+        }
+        
+        function goToChatDemo() {
+            window.location.href = 'chat.html';
+        }
+        
+        function goToRegistration() {
+            window.location.href = 'registration.html';
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        tg.MainButton.setText('На главную');
+        tg.MainButton.onClick(goBack);
+        tg.MainButton.show();
+    </script>
+</body>
+</html>
