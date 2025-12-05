@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Знакомства - Match Россия</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -10,63 +10,97 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8f9fa;
             height: 100vh;
             overflow: hidden;
-            touch-action: pan-y;
-            -webkit-tap-highlight-color: transparent;
         }
         
         .container {
-            width: 100%;
+            max-width: 100%;
             height: 100vh;
             position: relative;
-            overflow: hidden;
         }
         
-        /* КАРТОЧКА НА ВЕСЬ ЭКРАН */
-        .card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 0;
-            left: 0;
+        /* Шапка */
+        .header {
+            position: fixed;
             top: 0;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: grab;
-            user-select: none;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 20px;
             display: flex;
-            flex-direction: column;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .card:active {
-            cursor: grabbing;
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* ФОТОПРОФИЛЬ - 70% экрана */
-        .card-photo {
+        .back-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Карточка пользователя */
+        .user-card {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            bottom: 120px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .user-photo {
             width: 100%;
-            height: 70vh;
+            height: 60%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            align-items: center;
-            padding: 30px 20px;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
         }
         
-        .photo-emoji {
-            font-size: 120px;
+        .photo-placeholder {
+            font-size: 80px;
+            text-align: center;
+            color: white;
+            opacity: 0.8;
             margin-bottom: 20px;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
         }
         
         .photo-gradient {
@@ -74,130 +108,76 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 150px;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            height: 100px;
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
         }
         
-        /* ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ */
-        .card-info {
-            flex: 1;
+        .user-info {
             padding: 25px;
-            background: white;
-            border-top-left-radius: 30px;
-            border-top-right-radius: 30px;
-            margin-top: -30px;
-            position: relative;
-            z-index: 2;
         }
         
-        .name-age {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 10px;
-        }
-        
-        .card-name {
-            font-size: 32px;
+        .user-name-age {
+            font-size: 28px;
             font-weight: bold;
+            margin-bottom: 10px;
             color: #333;
-            margin-right: 10px;
         }
         
-        .card-age {
-            font-size: 24px;
-            color: #666;
-        }
-        
-        .card-location {
+        .user-location {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            color: #667eea;
-            font-size: 18px;
-            font-weight: 500;
+            gap: 8px;
         }
         
-        .location-icon {
-            margin-right: 8px;
-            font-size: 20px;
-        }
-        
-        .card-bio {
-            color: #555;
-            font-size: 18px;
+        .user-bio {
+            color: #666;
             line-height: 1.5;
-            margin-bottom: 25px;
+            font-size: 16px;
+            margin-bottom: 20px;
         }
         
-        .card-tags {
+        .user-interests {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-top: 20px;
         }
         
-        .tag {
+        .interest-tag {
             background: #f0f2f5;
             color: #667eea;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 15px;
             font-size: 14px;
             font-weight: 500;
         }
         
-        /* ИНДИКАТОРЫ СВАЙПА */
-        .swipe-indicator {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 15px 25px;
-            border-radius: 15px;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-            opacity: 0;
-            z-index: 100;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        
-        .swipe-like {
-            right: 30px;
-            background: rgba(76, 217, 100, 0.9);
-            border: 4px solid rgba(255,255,255,0.3);
-        }
-        
-        .swipe-dislike {
-            left: 30px;
-            background: rgba(255, 107, 107, 0.9);
-            border: 4px solid rgba(255,255,255,0.3);
-        }
-        
-        /* КНОПКИ ВНИЗУ */
-        .action-buttons {
-            position: absolute;
-            bottom: 40px;
+        /* Кнопки действий */
+        .actions {
+            position: fixed;
+            bottom: 30px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 40px;
-            z-index: 10;
+            gap: 30px;
             padding: 0 20px;
         }
         
         .action-btn {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
-            font-size: 32px;
+            font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: all 0.3s;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
         
         .action-btn:active {
@@ -207,6 +187,7 @@
         .btn-dislike {
             background: white;
             color: #ff6b6b;
+            border: 2px solid #ff6b6b;
         }
         
         .btn-like {
@@ -214,90 +195,37 @@
             color: white;
         }
         
-        /* ЗАГОЛОВОК И СТАТУС */
-        .header {
+        /* Загрузка */
+        .loading {
             position: absolute;
-            top: 60px;
+            top: 0;
             left: 0;
             right: 0;
+            bottom: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 25px;
-            z-index: 20;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.9);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: white;
+            z-index: 1000;
         }
         
-        .stats {
-            background: rgba(255,255,255,0.9);
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
         
-        /* АДАПТИВНОСТЬ ДЛЯ РАЗНЫХ УСТРОЙСТВ */
-        @media (max-height: 700px) {
-            .card-photo {
-                height: 65vh;
-            }
-            
-            .card-name {
-                font-size: 28px;
-            }
-            
-            .card-age {
-                font-size: 22px;
-            }
-            
-            .card-bio {
-                font-size: 16px;
-            }
-            
-            .action-buttons {
-                bottom: 30px;
-            }
-            
-            .action-btn {
-                width: 65px;
-                height: 65px;
-                font-size: 28px;
-            }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
-        /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
-        @keyframes cardAppear {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        
-        .card {
-            animation: cardAppear 0.5s ease-out;
-        }
-        
-        /* ПУСТОЙ ЭКРАН КОГДА КАРТОЧКИ ЗАКОНЧИЛИСЬ */
-        .empty-state {
+        /* Нет пользователей */
+        .no-users {
             position: absolute;
             top: 0;
             left: 0;
@@ -309,41 +237,40 @@
             align-items: center;
             padding: 40px;
             text-align: center;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        .empty-icon {
+        .no-users-icon {
             font-size: 80px;
             margin-bottom: 20px;
+            color: #667eea;
+            opacity: 0.5;
         }
         
-        .empty-title {
-            font-size: 28px;
+        .no-users-title {
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            color: #333;
         }
         
-        .empty-text {
-            font-size: 18px;
-            opacity: 0.9;
+        .no-users-text {
+            color: #666;
             margin-bottom: 30px;
+            max-width: 300px;
             line-height: 1.5;
         }
         
-        .empty-btn {
-            background: white;
-            color: #667eea;
+        .refresh-btn {
+            background: #667eea;
+            color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 20px;
         }
         
-        /* ЭКРАН ДОСТУПА ЗАПРЕЩЕН */
+        /* Доступ запрещен */
         .access-denied {
             position: absolute;
             top: 0;
@@ -356,205 +283,184 @@
             align-items: center;
             padding: 40px;
             text-align: center;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
         }
         
         .access-icon {
             font-size: 80px;
             margin-bottom: 20px;
+            color: #ff6b6b;
         }
         
         .access-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            color: #333;
         }
         
         .access-text {
-            font-size: 18px;
-            opacity: 0.9;
+            color: #666;
             margin-bottom: 30px;
+            max-width: 300px;
             line-height: 1.5;
-            max-width: 400px;
         }
         
         .access-btn {
-            background: white;
-            color: #667eea;
+            background: #667eea;
+            color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
             cursor: pointer;
-            margin: 10px;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- Экраны будут рендериться динамически -->
-    <div id="app-container"></div>
+    <div class="container" id="container">
+        <!-- Контент загрузится динамически -->
+    </div>
     
     <script>
+        // ========== КОНФИГУРАЦИЯ ==========
+        const API_URL = 'https://your-api.com'; // Замените на ваш API
+        let currentUser = null;
+        let likesRemaining = 15;
+        let currentCardIndex = 0;
+        let cards = [];
+        
         // ========== ПРОВЕРКА ДОСТУПА ==========
         
-        // Инициализация Telegram
         const tg = Telegram.WebApp;
+        tg.expand();
         
         // Проверяем авторизацию
         if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-            renderAccessDenied('Требуется авторизация в Telegram');
-            tg.expand();
+            showAccessDenied('Требуется авторизация в Telegram');
             return;
         }
         
         // Проверяем статус фото
         const photoStatus = localStorage.getItem('photo_status');
         if (photoStatus !== 'approved') {
-            renderAccessDenied(
+            showAccessDenied(
                 photoStatus === 'pending' 
-                    ? 'Фото на модерации\nОжидайте 1-24 часа' 
-                    : 'Требуется подтверждение фото'
+                    ? 'Фото на модерации. Ожидайте подтверждения.' 
+                    : 'Загрузите и подтвердите фото для начала знакомств'
             );
-            tg.expand();
             return;
         }
         
-        // Проверяем возраст
-        const profile = JSON.parse(localStorage.getItem('match_profile') || '{}');
-        if (!profile.age || profile.age < 18) {
-            renderAccessDenied('Приложение доступно только с 18 лет');
-            tg.expand();
+        // Загружаем профиль
+        const userProfile = JSON.parse(localStorage.getItem('match_profile') || '{}');
+        if (!userProfile.age || userProfile.age < 18) {
+            showAccessDenied('Приложение доступно только с 18 лет');
             return;
         }
         
-        // ========== ОСНОВНОЙ КОД СВАЙПОВ ==========
+        // ========== ОСНОВНАЯ ЛОГИКА ==========
         
-        // Данные пользователей (демо)
-        const users = [
-            {
-                name: "Анна",
-                age: 25,
-                city: "Москва",
-                distance: "2 км",
-                bio: "Люблю путешествия, книги и кофе. Ищу интересного собеседника для прогулок по городу и совместных поездок. Обожаю искусство, театры и хорошую кухню.",
-                emoji: "👩",
-                tags: ["🎨 Искусство", "✈️ Путешествия", "📚 Книги", "☕ Кофе"]
-            },
-            {
-                name: "Максим",
-                age: 28,
-                city: "Санкт-Петербург",
-                distance: "5 км",
-                bio: "Спортсмен, программист. Люблю активный отдых, технологии и науку. Ищу спутницу для совместных занятий спортом и путешествий.",
-                emoji: "👨",
-                tags: ["🏃 Спорт", "💻 Технологии", "🧪 Наука", "🎮 Игры"]
-            },
-            {
-                name: "Екатерина",
-                age: 23,
-                city: "Казань",
-                distance: "1 км",
-                bio: "Студентка, фотограф. Обожаю искусство и природу. Мечтаю открыть свою фотостудию. Ищу интересного человека для совместного творчества.",
-                emoji: "👩‍🎨",
-                tags: ["📷 Фотография", "🎨 Искусство", "🌳 Природа", "🎵 Музыка"]
+        async function initApp() {
+            showLoading(true);
+            
+            try {
+                // 1. Получаем лайки пользователя
+                await fetchLikes();
+                
+                // 2. Загружаем пользователей для свайпов
+                await loadUsersForSwipes();
+                
+                // 3. Показываем интерфейс
+                renderInterface();
+                
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showError('Ошибка загрузки. Проверьте соединение.');
+            } finally {
+                showLoading(false);
             }
-        ];
-        
-        // Состояние приложения
-        let currentUserIndex = 0;
-        let likesRemaining = 15;
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        
-        // Рендер основного интерфейса
-        function renderMainInterface() {
-            document.getElementById('app-container').innerHTML = `
-                <div class="container">
-                    <!-- Шапка с кнопкой назад и статистикой -->
-                    <div class="header">
-                        <button class="back-btn" onclick="goBack()">←</button>
-                        <div class="stats">
-                            ❤️ <span id="likes-count">${likesRemaining}</span>/15
-                        </div>
-                    </div>
-                    
-                    <!-- Основная карточка для свайпа -->
-                    <div class="card" id="current-card">
-                        <div class="card-photo">
-                            <div class="photo-emoji" id="photo-emoji">👩</div>
-                            <div class="photo-gradient"></div>
-                        </div>
-                        
-                        <div class="card-info">
-                            <div class="name-age">
-                                <div class="card-name" id="card-name">Анна</div>
-                                <div class="card-age" id="card-age">25</div>
-                            </div>
-                            
-                            <div class="card-location">
-                                <span class="location-icon">📍</span>
-                                <span id="card-city">Москва</span>
-                                <span style="margin: 0 10px">•</span>
-                                <span id="card-distance">2 км от вас</span>
-                            </div>
-                            
-                            <div class="card-bio" id="card-bio">
-                                Загрузка...
-                            </div>
-                            
-                            <div class="card-tags" id="card-tags">
-                                <!-- Теги загрузятся динамически -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Индикаторы свайпа -->
-                    <div class="swipe-indicator swipe-like" id="swipe-like">LIKE</div>
-                    <div class="swipe-indicator swipe-dislike" id="swipe-dislike">NOPE</div>
-                    
-                    <!-- Кнопки действий -->
-                    <div class="action-buttons">
-                        <button class="action-btn btn-dislike" onclick="swipeLeft()">👎</button>
-                        <button class="action-btn btn-like" onclick="swipeRight()">❤️</button>
-                    </div>
-                    
-                    <!-- Состояние когда карточки закончились -->
-                    <div class="empty-state" id="empty-state" style="display: none;">
-                        <div class="empty-icon">🎉</div>
-                        <div class="empty-title">На сегодня все!</div>
-                        <div class="empty-text">
-                            Вы просмотрели всех пользователей в вашем районе.<br>
-                            Загляните завтра или измените радиус поиска в настройках.
-                        </div>
-                        <button class="empty-btn" onclick="goBack()">Вернуться на главную</button>
-                    </div>
-                </div>
-            `;
-            
-            // Загружаем первого пользователя
-            loadUser(currentUserIndex);
-            
-            // Инициализируем drag & drop
-            initDragAndDrop();
-            
-            // Настраиваем Telegram кнопку
-            tg.MainButton.setText('На главную');
-            tg.MainButton.onClick(goBack);
-            tg.MainButton.show();
         }
         
-        // Рендер экрана "Доступ запрещен"
-        function renderAccessDenied(reason) {
-            document.getElementById('app-container').innerHTML = `
+        async function fetchLikes() {
+            // В реальном приложении запрос к API
+            // Сейчас используем localStorage
+            const today = new Date().toISOString().split('T')[0];
+            const lastReset = localStorage.getItem('last_likes_reset');
+            
+            if (lastReset !== today) {
+                // Сбрасываем счетчик на новый день
+                likesRemaining = 15;
+                localStorage.setItem('last_likes_reset', today);
+                localStorage.setItem('likes_remaining', '15');
+            } else {
+                likesRemaining = parseInt(localStorage.getItem('likes_remaining') || '15');
+            }
+        }
+        
+        async function loadUsersForSwipes() {
+            // В реальном приложении запрос к API с геолокацией
+            // Сейчас используем демо-данные
+            
+            const userCity = userProfile.city || 'Москва';
+            
+            cards = [
+                {
+                    id: 1,
+                    name: "Анна",
+                    age: 25,
+                    city: userCity,
+                    distance: "2 км",
+                    bio: "Люблю активный образ жизни, путешествия и знакомства с новыми людьми.",
+                    interests: ["Спорт", "Путешествия", "Кофе", "Искусство"]
+                },
+                {
+                    id: 2,
+                    name: "Мария",
+                    age: 23,
+                    city: userCity,
+                    distance: "3 км",
+                    bio: "Студентка, увлекаюсь фотографией и изучением языков.",
+                    interests: ["Фотография", "Языки", "Книги", "Музыка"]
+                },
+                {
+                    id: 3,
+                    name: "Екатерина",
+                    age: 27,
+                    city: userCity,
+                    distance: "5 км",
+                    bio: "Работаю в IT, люблю технологии, спорт и хорошую кухню.",
+                    interests: ["Технологии", "Спорт", "Кулинария", "Кино"]
+                }
+            ];
+            
+            currentCardIndex = 0;
+        }
+        
+        // ========== РЕНДЕРИНГ ==========
+        
+        function showLoading(show) {
+            const container = document.getElementById('container');
+            if (show) {
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="loader"></div>
+                        <p>Ищем людей рядом...</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function showAccessDenied(message) {
+            const container = document.getElementById('container');
+            container.innerHTML = `
                 <div class="access-denied">
                     <div class="access-icon">🔒</div>
                     <div class="access-title">Доступ ограничен</div>
-                    <div class="access-text">${reason}</div>
+                    <div class="access-text">${message}</div>
                     
-                    <button class="access-btn" onclick="goToApp()">
+                    <button class="access-btn" onclick="goToMain()">
                         🏠 На главную
                     </button>
                     
@@ -563,191 +469,221 @@
                             📸 Загрузить фото
                         </button>
                     ` : ''}
-                    
-                    ${!profile.city || profile.city === 'Не указан' ? `
-                        <button class="access-btn" onclick="goToProfileEdit()" style="background: #5ac8fa; color: white;">
-                            ✏️ Заполнить профиль
-                        </button>
-                    ` : ''}
                 </div>
             `;
         }
         
-        // Загрузка пользователя
-        function loadUser(index) {
-            if (index >= users.length) {
-                // Показываем состояние "карточки закончились"
-                document.getElementById('current-card').style.display = 'none';
-                document.getElementById('empty-state').style.display = 'flex';
-                document.querySelector('.action-buttons').style.display = 'none';
+        function showError(message) {
+            const container = document.getElementById('container');
+            container.innerHTML = `
+                <div class="access-denied">
+                    <div class="access-icon">⚠️</div>
+                    <div class="access-title">Ошибка</div>
+                    <div class="access-text">${message}</div>
+                    
+                    <button class="access-btn" onclick="location.reload()">
+                        🔄 Обновить
+                    </button>
+                    <button class="access-btn" onclick="goToMain()" style="background: #667eea;">
+                        🏠 На главную
+                    </button>
+                </div>
+            `;
+        }
+        
+        function renderInterface() {
+            if (cards.length === 0) {
+                showNoUsers();
                 return;
             }
             
-            const user = users[index];
+            const currentCard = cards[currentCardIndex];
+            const container = document.getElementById('container');
             
-            // Обновляем данные карточки
-            document.getElementById('card-name').textContent = user.name;
-            document.getElementById('card-age').textContent = user.age;
-            document.getElementById('card-city').textContent = user.city;
-            document.getElementById('card-distance').textContent = user.distance + ' от вас';
-            document.getElementById('card-bio').textContent = user.bio;
-            document.getElementById('photo-emoji').textContent = user.emoji;
-            document.getElementById('likes-count').textContent = likesRemaining;
-            
-            // Обновляем теги
-            const tagsContainer = document.getElementById('card-tags');
-            tagsContainer.innerHTML = '';
-            user.tags.forEach(tag => {
-                const tagElement = document.createElement('div');
-                tagElement.className = 'tag';
-                tagElement.textContent = tag;
-                tagsContainer.appendChild(tagElement);
-            });
-            
-            // Сбрасываем позицию карточки
-            const card = document.getElementById('current-card');
-            card.style.transform = 'translateX(0) rotate(0deg)';
-            card.style.opacity = '1';
-            
-            // Скрываем индикаторы
-            document.getElementById('swipe-like').style.opacity = '0';
-            document.getElementById('swipe-dislike').style.opacity = '0';
+            container.innerHTML = `
+                <div class="header">
+                    <button class="back-btn" onclick="goToMain()">←</button>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span>❤️</span>
+                            <span id="likes-count">${likesRemaining}/15</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>📍</span>
+                            <span>${userProfile.city || 'Город не указан'}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-photo">
+                        <div class="photo-placeholder">👤</div>
+                        <div class="photo-gradient"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name-age">${currentCard.name}, ${currentCard.age}</div>
+                        <div class="user-location">
+                            📍 ${currentCard.city} • ${currentCard.distance} от вас
+                        </div>
+                        <div class="user-bio">${currentCard.bio}</div>
+                        <div class="user-interests">
+                            ${currentCard.interests.map(interest => 
+                                `<span class="interest-tag">${interest}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="action-btn btn-dislike" onclick="swipeLeft()" id="dislike-btn">
+                        👎
+                    </button>
+                    <button class="action-btn btn-like" onclick="swipeRight()" id="like-btn">
+                        ❤️
+                    </button>
+                </div>
+            `;
         }
         
-        // Свайп влево (дизлайк)
-        function swipeLeft() {
+        function showNoUsers() {
+            const container = document.getElementById('container');
+            container.innerHTML = `
+                <div class="no-users">
+                    <div class="no-users-icon">👥</div>
+                    <div class="no-users-title">Пока никого рядом</div>
+                    <div class="no-users-text">
+                        В вашем городе пока нет других пользователей.<br>
+                        Расскажите друзьям о приложении!
+                    </div>
+                    <button class="refresh-btn" onclick="refreshUsers()">
+                        🔄 Обновить
+                    </button>
+                    <button class="refresh-btn" onclick="goToMain()" style="background: #667eea; margin-top: 10px;">
+                        🏠 На главную
+                    </button>
+                </div>
+            `;
+        }
+        
+        // ========== БИЗНЕС-ЛОГИКА ==========
+        
+        async function swipeLeft() {
+            if (currentCardIndex >= cards.length - 1) {
+                showNoUsers();
+                return;
+            }
+            
+            // Анимация свайпа влево
+            animateSwipe('left');
+            
+            // Переходим к следующей карточке
+            currentCardIndex++;
+            setTimeout(() => {
+                renderInterface();
+            }, 300);
+        }
+        
+        async function swipeRight() {
             if (likesRemaining <= 0) {
                 tg.showAlert('Лайки на сегодня закончились!');
                 return;
             }
             
-            const card = document.getElementById('current-card');
-            const indicator = document.getElementById('swipe-dislike');
-            
-            // Анимация
-            indicator.style.opacity = '1';
-            card.style.transform = 'translateX(-120%) rotate(-30deg)';
-            card.style.opacity = '0';
-            
-            // Следующий пользователь
-            setTimeout(() => {
-                currentUserIndex++;
-                loadUser(currentUserIndex);
-            }, 300);
-        }
-        
-        // Свайп вправо (лайк)
-        function swipeRight() {
-            if (likesRemaining <= 0) {
-                tg.showAlert('Лайки на сегодня закончились! Загляните завтра!');
-                return;
-            }
-            
-            const card = document.getElementById('current-card');
-            const indicator = document.getElementById('swipe-like');
-            
-            // Анимация
-            indicator.style.opacity = '1';
-            card.style.transform = 'translateX(120%) rotate(30deg)';
-            card.style.opacity = '0';
+            const currentCard = cards[currentCardIndex];
             
             // Уменьшаем счетчик лайков
             likesRemaining--;
-            document.getElementById('likes-count').textContent = likesRemaining;
+            localStorage.setItem('likes_remaining', likesRemaining.toString());
+            
+            // Анимация свайпа вправо
+            animateSwipe('right');
+            
+            // Отправляем лайк на сервер
+            await sendLike(currentCard.id);
             
             // Показываем уведомление
-            const userName = users[currentUserIndex]?.name;
-            tg.showAlert(`Вы лайкнули ${userName}! ❤️\nОжидайте взаимного лайка!`);
+            tg.showAlert(`Вы лайкнули ${currentCard.name}! ❤️`);
             
-            // Проверка на мэтч (рандом для демо)
-            if (Math.random() > 0.6) {
-                setTimeout(() => {
-                    tg.showAlert('💑 УРА! Взаимный лайк с ' + userName + '!\nТеперь можете написать сообщение.');
-                }, 800);
-            }
-            
-            // Следующий пользователь
+            // Переходим к следующей карточке
+            currentCardIndex++;
             setTimeout(() => {
-                currentUserIndex++;
-                loadUser(currentUserIndex);
-                
-                // Если лайки закончились
-                if (likesRemaining <= 0) {
-                    setTimeout(() => {
-                        tg.showAlert('🎉 Вы использовали все лайки на сегодня!\nЗагляните завтра для новых знакомств.');
-                    }, 500);
+                if (currentCardIndex >= cards.length) {
+                    showNoUsers();
+                } else {
+                    renderInterface();
                 }
             }, 300);
         }
         
-        // Drag & Drop для свайпов
-        function initDragAndDrop() {
-            const card = document.getElementById('current-card');
+        async function sendLike(userId) {
+            // В реальном приложении отправляем на сервер
+            try {
+                // Пример запроса:
+                // await fetch(`${API_URL}/api/like`, {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Authorization': `Bearer ${tg.initData}`
+                //     },
+                //     body: JSON.stringify({
+                //         targetUserId: userId,
+                //         swiperId: tg.initDataUnsafe.user.id
+                //     })
+                // });
+                
+                console.log('Лайк отправлен пользователю:', userId);
+                
+                // Проверяем на мэтч
+                checkForMatch(userId);
+                
+            } catch (error) {
+                console.error('Ошибка отправки лайка:', error);
+            }
+        }
+        
+        async function checkForMatch(userId) {
+            // В реальном приложении проверяем на сервере
+            // Сейчас случайная вероятность 30%
+            if (Math.random() < 0.3) {
+                setTimeout(() => {
+                    const currentCard = cards.find(card => card.id === userId);
+                    if (currentCard) {
+                        tg.showAlert(`🎉 У вас взаимный лайк с ${currentCard.name}!`);
+                        // Сохраняем мэтч
+                        saveMatch(currentCard);
+                    }
+                }, 500);
+            }
+        }
+        
+        function saveMatch(user) {
+            const matches = JSON.parse(localStorage.getItem('matches') || '[]');
+            matches.push({
+                ...user,
+                matchedAt: new Date().toISOString()
+            });
+            localStorage.setItem('matches', JSON.stringify(matches));
+        }
+        
+        function animateSwipe(direction) {
+            const card = document.querySelector('.user-card');
             if (!card) return;
             
-            // Touch события
-            card.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                startX = e.touches[0].clientX;
-                currentX = startX;
-                card.style.transition = 'none';
-            });
-            
-            card.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                
-                currentX = e.touches[0].clientX;
-                const deltaX = currentX - startX;
-                const rotation = deltaX * 0.1;
-                
-                // Обновляем позицию карточки
-                card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
-                
-                // Показываем индикаторы
-                const likeIndicator = document.getElementById('swipe-like');
-                const dislikeIndicator = document.getElementById('swipe-dislike');
-                
-                if (deltaX > 50) {
-                    likeIndicator.style.opacity = Math.min(deltaX / 150, 0.9);
-                    dislikeIndicator.style.opacity = '0';
-                } else if (deltaX < -50) {
-                    dislikeIndicator.style.opacity = Math.min(-deltaX / 150, 0.9);
-                    likeIndicator.style.opacity = '0';
-                } else {
-                    likeIndicator.style.opacity = '0';
-                    dislikeIndicator.style.opacity = '0';
-                }
-            });
-            
-            card.addEventListener('touchend', () => {
-                if (!isDragging) return;
-                isDragging = false;
-                
-                const deltaX = currentX - startX;
-                card.style.transition = 'transform 0.3s, opacity 0.3s';
-                
-                // Определяем свайп
-                if (Math.abs(deltaX) > 100) {
-                    if (deltaX > 0) {
-                        swipeRight();
-                    } else {
-                        swipeLeft();
-                    }
-                } else {
-                    // Возвращаем на место
-                    card.style.transform = 'translateX(0) rotate(0deg)';
-                    document.getElementById('swipe-like').style.opacity = '0';
-                    document.getElementById('swipe-dislike').style.opacity = '0';
-                }
-            });
+            card.style.transition = 'transform 0.3s ease-out';
+            card.style.transform = direction === 'left' 
+                ? 'translateX(-100%) rotate(-20deg)' 
+                : 'translateX(100%) rotate(20deg)';
+            card.style.opacity = '0';
         }
         
-        // Навигация
-        function goBack() {
-            window.location.href = 'app.html';
+        function refreshUsers() {
+            currentCardIndex = 0;
+            initApp();
         }
         
-        function goToApp() {
+        // ========== НАВИГАЦИЯ ==========
+        
+        function goToMain() {
             window.location.href = 'app.html';
         }
         
@@ -755,23 +691,9 @@
             window.location.href = 'upload-photo.html';
         }
         
-        function goToProfileEdit() {
-            window.location.href = 'registration.html?edit=true';
-        }
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
         
-        // Инициализация приложения
-        document.addEventListener('DOMContentLoaded', function() {
-            tg.expand();
-            renderMainInterface();
-        });
-        
-        // Глобальный экспорт функций
-        window.swipeLeft = swipeLeft;
-        window.swipeRight = swipeRight;
-        window.goBack = goBack;
-        window.goToApp = goToApp;
-        window.goToUploadPhoto = goToUploadPhoto;
-        window.goToProfileEdit = goToProfileEdit;
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
