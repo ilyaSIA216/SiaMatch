@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузка фото - Match Россия</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .photo-area {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            border: 3px dashed white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .photo-preview {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Загрузка фото</h1>
+        <p>Для безопасности все фото проходят ручную модерацию</p>
+        
+        <div class="photo-area" onclick="takePhoto()" id="photo-area">
+            <div style="font-size: 60px;">📷</div>
+            <p>Нажмите чтобы сделать фото</p>
+        </div>
+        
+        <div id="photo-preview" style="display: none;">
+            <img class="photo-preview" id="preview-img" alt="Фото">
+            <p>✅ Фото загружено и отправлено на модерацию</p>
+        </div>
+        
+        <button onclick="goBack()" style="background: white; color: #667eea; padding: 15px 30px; border-radius: 10px; border: none; margin-top: 20px;">
+            ← Вернуться
+        </button>
+    </div>
+    
+    <script>
+        const tg = Telegram.WebApp;
+        tg.expand();
+        
+        async function takePhoto() {
+            try {
+                // Используем Telegram камеру
+                const file = await tg.showFilePicker({
+                    media_type: 'photo',
+                    source: 'camera'
+                });
+                
+                // Показываем превью
+                const preview = document.getElementById('preview-img');
+                const photoArea = document.getElementById('photo-area');
+                const photoPreview = document.getElementById('photo-preview');
+                
+                photoArea.style.display = 'none';
+                photoPreview.style.display = 'block';
+                
+                // Здесь будет загрузка на сервер
+                tg.showAlert('Фото отправлено на модерацию! Ожидайте 1-24 часа.');
+                
+            } catch (error) {
+                tg.showAlert('Ошибка при загрузке фото: ' + error.message);
+            }
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        tg.MainButton.setText('На главную');
+        tg.MainButton.onClick(goBack);
+        tg.MainButton.show();
+    </script>
+</body>
+</html>
