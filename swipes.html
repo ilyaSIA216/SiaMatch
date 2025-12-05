@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Знакомства - Match Россия</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .card {
+            position: absolute;
+            width: 90%;
+            max-width: 400px;
+            height: 70vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px;
+            color: white;
+        }
+        
+        .card-info {
+            padding: 20px;
+        }
+        
+        .card-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-age {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .card-city {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .card-bio {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .actions {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+        
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .dislike {
+            background: white;
+            color: #ff6b6b;
+        }
+        
+        .like {
+            background: #4cd964;
+            color: white;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        .swipe-left, .swipe-right {
+            position: absolute;
+            top: 50%;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            z-index: 5;
+        }
+        
+        .swipe-left {
+            left: 10px;
+            background: #ff6b6b;
+            transform: rotate(-10deg);
+        }
+        
+        .swipe-right {
+            right: 10px;
+            background: #4cd964;
+            transform: rotate(10deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="goBack()">←</button>
+        
+        <div class="stats">
+            ❤️ <span id="likes-count">15</span>/15
+        </div>
+        
+        <div class="card" id="current-card">
+            <div class="card-image">
+                👤
+            </div>
+            <div class="card-info">
+                <div class="card-name" id="card-name">Анна</div>
+                <div class="card-age" id="card-age">25 лет</div>
+                <div class="card-city" id="card-city">Москва</div>
+                <div class="card-bio" id="card-bio">
+                    Люблю путешествия, книги и кофе. Ищу интересного собеседника для прогулок по городу.
+                </div>
+            </div>
+        </div>
+        
+        <div class="swipe-left" id="swipe-left">NOPE</div>
+        <div class="swipe-right" id="swipe-right">LIKE</div>
+        
+        <div class="actions">
+            <button class="action-btn dislike" onclick="swipeLeft()">👎</button>
+            <button class="action-btn like" onclick="swipeRight()">❤️</button>
+        </div>
+    </div>
+    
+    <script>
+        // Инициализация Telegram
+        const tg = Telegram.WebApp;
+        tg.expand();
+        
+        // Данные для свайпов (позже заменим на API)
+        const mockUsers = [
+            {
+                name: "Анна",
+                age: 25,
+                city: "Москва",
+                bio: "Люблю путешествия, книги и кофе. Ищу интересного собеседника для прогулок по городу.",
+                emoji: "👩"
+            },
+            {
+                name: "Максим",
+                age: 28,
+                city: "Санкт-Петербург",
+                bio: "Спортсмен, программист. Люблю активный отдых и технологии.",
+                emoji: "👨"
+            },
+            {
+                name: "Екатерина",
+                age: 23,
+                city: "Казань",
+                bio: "Студентка, фотограф. Обожаю искусство и природу.",
+                emoji: "👩‍🎨"
+            },
+            {
+                name: "Дмитрий",
+                age: 30,
+                city: "Екатеринбург",
+                bio: "Бизнесмен, путешественник. Ищу спутницу для совместных приключений.",
+                emoji: "🧳"
+            }
+        ];
+        
+        let currentUserIndex = 0;
+        let likesRemaining = 15;
+        
+        // Загружаем первый профиль
+        function loadUserProfile(index) {
+            const user = mockUsers[index];
+            if (!user) {
+                // Если пользователей нет
+                document.getElementById('current-card').innerHTML = `
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>🎉 На сегодня все!</h2>
+                        <p>Вы просмотрели всех пользователей в вашем районе.</p>
+                        <p>Загляните завтра или измените радиус поиска.</p>
+                        <button onclick="goBack()" style="
+                            background: #667eea;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 10px;
+                            margin-top: 20px;
+                            cursor: pointer;
+                        ">На главную</button>
+                    </div>
+                `;
+                document.querySelector('.actions').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('card-name').textContent = user.name;
+            document.getElementById('card-age').textContent = user.age + ' лет';
+            document.getElementById('card-city').textContent = user.city;
+            document.getElementById('card-bio').textContent = user.bio;
+            document.querySelector('.card-image').innerHTML = user.emoji;
+            document.getElementById('likes-count').textContent = likesRemaining;
+        }
+        
+        // Функции свайпов
+        function swipeLeft() {
+            if (likesRemaining <= 0) {
+                tg.showAlert('Лайки на сегодня закончились!');
+                return;
+            }
+            
+            const card = document.getElementById('current-card');
+            const indicator = document.getElementById('swipe-left');
+            
+            // Анимация
+            indicator.style.opacity = '1';
+            card.style.transform = 'translate(-150%, -50%) rotate(-20deg)';
+            
+            // Следующий пользователь
+            setTimeout(() => {
+                currentUserIndex++;
+                loadUserProfile(currentUserIndex);
+                card.style.transform = 'translate(-50%, -50%)';
+                indicator.style.opacity = '0';
+            }, 300);
+        }
+        
+        function swipeRight() {
+            if (likesRemaining <= 0) {
+                tg.showAlert('Лайки на сегодня закончились! Загляните завтра!');
+                return;
+            }
+            
+            const card = document.getElementById('current-card');
+            const indicator = document.getElementById('swipe-right');
+            
+            // Анимация
+            indicator.style.opacity = '1';
+            card.style.transform = 'translate(50%, -50%) rotate(20deg)';
+            
+            // Уменьшаем счетчик лайков
+            likesRemaining--;
+            document.getElementById('likes-count').textContent = likesRemaining;
+            
+            // Показываем уведомление о лайке
+            const userName = mockUsers[currentUserIndex]?.name;
+            tg.showAlert(`Вы лайкнули ${userName}! ❤️`);
+            
+            // Следующий пользователь
+            setTimeout(() => {
+                currentUserIndex++;
+                loadUserProfile(currentUserIndex);
+                card.style.transform = 'translate(-50%, -50%)';
+                indicator.style.opacity = '0';
+                
+                // Проверка на мэтч (рандом для демо)
+                if (Math.random() > 0.7) {
+                    setTimeout(() => {
+                        tg.showAlert('💑 У вас взаимный лайк! Начинайте общение!');
+                    }, 500);
+                }
+                
+                // Если лайки закончились
+                if (likesRemaining <= 0) {
+                    tg.showAlert('🎉 Вы использовали все лайки на сегодня! Загляните завтра.');
+                }
+            }, 300);
+        }
+        
+        // Навигация назад
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // Drag & drop для карточек
+        let startX, startY, moveX, moveY;
+        const card = document.getElementById('current-card');
+        
+        card.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        
+        card.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
+            
+            moveX = e.touches[0].clientX - startX;
+            moveY = e.touches[0].clientY - startY;
+            
+            // Обновляем позицию карточки
+            card.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px)) rotate(${moveX * 0.1}deg)`;
+            
+            // Показываем индикатор
+            if (moveX > 50) {
+                document.getElementById('swipe-right').style.opacity = Math.min(moveX / 100, 1);
+                document.getElementById('swipe-left').style.opacity = 0;
+            } else if (moveX < -50) {
+                document.getElementById('swipe-left').style.opacity = Math.min(-moveX / 100, 1);
+                document.getElementById('swipe-right').style.opacity = 0;
+            }
+        });
+        
+        card.addEventListener('touchend', () => {
+            if (Math.abs(moveX) > 100) {
+                if (moveX > 0) {
+                    swipeRight();
+                } else {
+                    swipeLeft();
+                }
+            } else {
+                // Возвращаем на место
+                card.style.transform = 'translate(-50%, -50%)';
+                document.getElementById('swipe-left').style.opacity = 0;
+                document.getElementById('swipe-right').style.opacity = 0;
+            }
+            
+            startX = startY = moveX = moveY = null;
+        });
+        
+        // Загружаем первого пользователя
+        loadUserProfile(currentUserIndex);
+        
+        // Настраиваем кнопку Telegram
+        tg.MainButton.setText('Мой профиль');
+        tg.MainButton.onClick(() => {
+            window.location.href = 'index.html';
+        });
+        tg.MainButton.show();
+    </script>
+</body>
+</html>
