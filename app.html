@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Россия - Знакомства</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 60px;
+            margin: 10px 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .subtitle {
+            opacity: 0.8;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .user-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            border: 4px solid white;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .user-username {
+            opacity: 0.8;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            color: #ffc107;
+        }
+        
+        .status-approved {
+            background: rgba(76, 217, 100, 0.2);
+            border: 2px solid rgba(76, 217, 100, 0.5);
+            color: #4cd964;
+        }
+        
+        .status-none {
+            background: rgba(108, 117, 125, 0.2);
+            border: 2px solid rgba(108, 117, 125, 0.5);
+            color: #6c757d;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 18px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4cd964 0%, #5ac8fa 100%);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .action-buttons {
+            display: grid;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .requirements {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .requirements h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .requirement-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 12px;
+        }
+        
+        .requirement-check.checked {
+            background: #4cd964;
+            color: white;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .emoji {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Загрузка (показывается сначала) -->
+        <div class="loading" id="loading">
+            <div class="loader"></div>
+            <p>Загружаем ваш профиль...</p>
+        </div>
+        
+        <!-- Основной контент (скрыт пока) -->
+        <div id="main-content" style="display: none;">
+            <div class="logo" id="app-logo">❤️</div>
+            <h1 id="welcome-text">Добро пожаловать!</h1>
+            <p class="subtitle" id="subtitle-text">Знакомства по всей России с геолокацией</p>
+            
+            <!-- Карточка пользователя -->
+            <div class="user-card" id="user-card">
+                <div class="user-avatar" id="user-avatar">
+                    <!-- Аватар загрузится из Telegram -->
+                </div>
+                <div class="user-name" id="user-name">Загрузка...</div>
+                <div class="user-username" id="user-username"></div>
+                
+                <!-- Статус верификации -->
+                <div class="status-badge" id="verification-status">
+                    ⏳ Проверка профиля...
+                </div>
+            </div>
+            
+            <!-- Требования для доступа -->
+            <div class="requirements" id="requirements">
+                <h3><span class="emoji">📋</span> Требования для начала</h3>
+                <div class="requirement-item">
+                    <div class="requirement-check" id="req-telegram">1</div>
+                    <span>Авторизация через Telegram</span>
+                </div>
+                <div class="requirement-item">
+                    <div class="requirement-check" id="req-photo">2</div>
+                    <span>Фото профиля (верифицируется)</span>
+                </div>
+                <div class="requirement-item">
+                    <div class="requirement-check" id="req-age">3</div>
+                    <span>Возраст 18+</span>
+                </div>
+            </div>
+            
+            <!-- Кнопки действий -->
+            <div class="action-buttons" id="action-buttons">
+                <!-- Кнопки появятся в зависимости от статуса -->
+            </div>
+            
+            <!-- Информация о приложении -->
+            <div style="margin-top: 25px; font-size: 14px; opacity: 0.7;">
+                <p>🔒 Все фото проходят ручную модерацию</p>
+                <p>📍 Поиск по геолокации в вашем городе</p>
+                <p>❤️ 15 лайков в день бесплатно</p>
+            </div>
+        </div>
+        
+        <!-- Сообщение об ошибке (если не Telegram) -->
+        <div id="error-message" style="display: none; text-align: center;">
+            <div style="font-size: 80px; margin-bottom: 20px;">⚠️</div>
+            <h2>Требуется Telegram</h2>
+            <p>Это приложение работает только внутри Telegram</p>
+            <p>Откройте его через бота @SiaMatchBot</p>
+        </div>
+    </div>
+    
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        
+        // Глобальные переменные
+        let telegramUser = null;
+        let userProfile = null;
+        let photoStatus = 'none'; // 'none', 'pending', 'approved'
+        let userAge = null;
+        
+        // Основная функция инициализации
+        async function initApp() {
+            // Показываем загрузку
+            showLoading(true);
+            
+            // Проверяем, что находимся в Telegram
+            if (!tg || !tg.initDataUnsafe) {
+                showError('Требуется Telegram');
+                return;
+            }
+            
+            // Расширяем на весь экран
+            tg.expand();
+            
+            // Получаем данные пользователя Telegram
+            telegramUser = tg.initDataUnsafe.user;
+            if (!telegramUser) {
+                showError('Не удалось получить данные пользователя');
+                return;
+            }
+            
+            console.log('Telegram пользователь:', telegramUser);
+            
+            // Загружаем сохраненный профиль (если есть)
+            loadSavedProfile();
+            
+            // Определяем возраст (если есть дата рождения в Telegram)
+            determineAge();
+            
+            // Загружаем статус фото
+            loadPhotoStatus();
+            
+            // Создаем/обновляем профиль
+            await createOrUpdateProfile();
+            
+            // Обновляем интерфейс
+            updateUI();
+            
+            // Настраиваем кнопку Telegram
+            setupMainButton();
+            
+            // Скрываем загрузку
+            setTimeout(() => {
+                showLoading(false);
+            }, 1000);
+        }
+        
+        // Показать/скрыть загрузку
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+            document.getElementById('main-content').style.display = show ? 'none' : 'block';
+        }
+        
+        // Показать ошибку
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('error-message').querySelector('h2').textContent = message;
+        }
+        
+        // Загрузка сохраненного профиля
+        function loadSavedProfile() {
+            const savedProfile = localStorage.getItem('match_profile');
+            if (savedProfile) {
+                try {
+                    userProfile = JSON.parse(savedProfile);
+                    console.log('Загружен сохраненный профиль:', userProfile);
+                } catch (e) {
+                    console.error('Ошибка загрузки профиля:', e);
+                    userProfile = null;
+                }
+            }
+        }
+        
+        // Определение возраста
+        function determineAge() {
+            // Если в профиле Telegram есть дата рождения
+            if (telegramUser.birthday) {
+                const birthDate = new Date(telegramUser.birthday);
+                const today = new Date();
+                userAge = today.getFullYear() - birthDate.getFullYear();
+            }
+            // Или если есть в сохраненном профиле
+            else if (userProfile && userProfile.age) {
+                userAge = userProfile.age;
+            }
+            // Или рассчитываем минимальный возраст (18+)
+            else {
+                userAge = 18; // По умолчанию
+            }
+        }
+        
+        // Загрузка статуса фото
+        function loadPhotoStatus() {
+            const status = localStorage.getItem('photo_status');
+            photoStatus = status || 'none';
+            console.log('Статус фото:', photoStatus);
+        }
+        
+        // Создание или обновление профиля
+        async function createOrUpdateProfile() {
+            // Если профиля нет, создаем новый
+            if (!userProfile) {
+                userProfile = {
+                    id: telegramUser.id,
+                    telegramId: telegramUser.id,
+                    username: telegramUser.username,
+                    firstName: telegramUser.first_name,
+                    lastName: telegramUser.last_name || '',
+                    languageCode: telegramUser.language_code,
+                    isPremium: telegramUser.is_premium || false,
+                    photoUrl: null, // Фото из Telegram (если доступно)
+                    age: userAge,
+                    city: 'Не указан',
+                    gender: 'Не указан',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                // Пробуем получить фото из Telegram
+                if (telegramUser.photo_url) {
+                    userProfile.photoUrl = telegramUser.photo_url;
+                    // Если есть фото в Telegram, считаем его подтвержденным
+                    photoStatus = 'approved';
+                    localStorage.setItem('photo_status', 'approved');
+                }
+                
+                // Сохраняем профиль
+                saveProfile();
+            }
+            // Если профиль есть, обновляем данные из Telegram
+            else {
+                userProfile.updatedAt = new Date().toISOString();
+                saveProfile();
+            }
+        }
+        
+        // Сохранение профиля
+        function saveProfile() {
+            localStorage.setItem('match_profile', JSON.stringify(userProfile));
+            console.log('Профиль сохранен:', userProfile);
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            // Приветствие
+            document.getElementById('welcome-text').textContent = 
+                userProfile.firstName ? `Привет, ${userProfile.firstName}!` : 'Добро пожаловать!';
+            
+            // Аватар
+            const avatarElement = document.getElementById('user-avatar');
+            if (userProfile.photoUrl && photoStatus === 'approved') {
+                avatarElement.innerHTML = `<img src="${userProfile.photoUrl}" alt="Фото профиля">`;
+            } else if (userProfile.firstName) {
+                // Первая буква имени
+                const initial = userProfile.firstName.charAt(0).toUpperCase();
+                avatarElement.textContent = initial;
+                avatarElement.style.fontSize = '60px';
+                avatarElement.style.fontWeight = 'bold';
+            } else {
+                avatarElement.textContent = '👤';
+            }
+            
+            // Имя и username
+            document.getElementById('user-name').textContent = 
+                userProfile.firstName || 'Пользователь';
+            
+            if (userProfile.username) {
+                document.getElementById('user-username').textContent = `@${userProfile.username}`;
+            } else {
+                document.getElementById('user-username').style.display = 'none';
+            }
+            
+            // Статус верификации
+            const statusElement = document.getElementById('verification-status');
+            if (photoStatus === 'approved') {
+                statusElement.textContent = '✅ Профиль подтвержден';
+                statusElement.className = 'status-badge status-approved';
+            } else if (photoStatus === 'pending') {
+                statusElement.textContent = '⏳ Фото на модерации';
+                statusElement.className = 'status-badge status-pending';
+            } else {
+                statusElement.textContent = '📸 Требуется фото';
+                statusElement.className = 'status-badge status-none';
+            }
+            
+            // Обновляем требования
+            updateRequirements();
+            
+            // Обновляем кнопки действий
+            updateActionButtons();
+        }
+        
+        // Обновление требований
+        function updateRequirements() {
+            // 1. Telegram авторизация
+            const reqTelegram = document.getElementById('req-telegram');
+            reqTelegram.textContent = '✓';
+            reqTelegram.className = 'requirement-check checked';
+            
+            // 2. Фото
+            const reqPhoto = document.getElementById('req-photo');
+            if (photoStatus === 'approved') {
+                reqPhoto.textContent = '✓';
+                reqPhoto.className = 'requirement-check checked';
+            } else {
+                reqPhoto.textContent = '2';
+                reqPhoto.className = 'requirement-check';
+            }
+            
+            // 3. Возраст
+            const reqAge = document.getElementById('req-age');
+            if (userAge >= 18) {
+                reqAge.textContent = '✓';
+                reqAge.className = 'requirement-check checked';
+            } else {
+                reqAge.textContent = '3';
+                reqAge.className = 'requirement-check';
+                reqAge.style.background = '#ff6b6b';
+                reqAge.style.color = 'white';
+            }
+        }
+        
+        // Обновление кнопок действий
+        function updateActionButtons() {
+            const actionButtons = document.getElementById('action-buttons');
+            actionButtons.innerHTML = '';
+            
+            // Проверяем доступ к свайпам
+            const canSwipe = photoStatus === 'approved' && userAge >= 18;
+            
+            if (canSwipe) {
+                // Если все требования выполнены
+                actionButtons.innerHTML = `
+                    <button class="btn btn-primary" onclick="goToSwipes()">
+                        🔥 Начать знакомства
+                    </button>
+                    <button class="btn btn-secondary" onclick="goToProfileEdit()">
+                        ✏️ Редактировать профиль
+                    </button>
+                    <button class="btn btn-secondary" onclick="goToUploadPhoto()">
+                        📸 Добавить фото
+                    </button>
+                `;
+                
+                // Обновляем подзаголовок
+                document.getElementById('subtitle-text').textContent = 
+                    `Готов к знакомствам в ${userProfile.city || 'вашем городе'}`;
+                    
+            } else if (photoStatus === 'pending') {
+                // Если фото на модерации
+                actionButtons.innerHTML = `
+                    <div style="
+                        background: rgba(255, 193, 7, 0.1);
+                        border: 2px solid rgba(255, 193, 7, 0.3);
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    ">
+                        <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+                        <p style="margin-bottom: 10px; font-weight: 600;">Фото на модерации</p>
+                        <p style="font-size: 14px; opacity: 0.9;">
+                            Проверка занимает 1-24 часа.<br>
+                            Вы получите уведомление в Telegram.
+                        </p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="goToProfileEdit()">
+                        ✏️ Заполнить профиль
+                    </button>
+                `;
+                
+            } else if (photoStatus === 'none') {
+                // Если фото нет
+                actionButtons.innerHTML = `
+                    <button class="btn btn-primary" onclick="goToUploadPhoto()">
+                        📸 Загрузить фото для верификации
+                    </button>
+                    <button class="btn btn-secondary" onclick="goToProfileEdit()">
+                        ✏️ Сначала заполнить профиль
+                    </button>
+                `;
+                
+                // Предупреждение о необходимости фото
+                document.getElementById('subtitle-text').textContent = 
+                    'Загрузите фото для начала знакомств';
+                    
+            } else if (userAge < 18) {
+                // Если возраст меньше 18
+                actionButtons.innerHTML = `
+                    <div style="
+                        background: rgba(255, 107, 107, 0.1);
+                        border: 2px solid rgba(255, 107, 107, 0.3);
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    ">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🔞</div>
+                        <p style="margin-bottom: 10px; font-weight: 600;">Требуется возраст 18+</p>
+                        <p style="font-size: 14px; opacity: 0.9;">
+                            Приложение доступно только совершеннолетним.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Настройка главной кнопки Telegram
+        function setupMainButton() {
+            if (!tg || !tg.MainButton) return;
+            
+            // Скрываем кнопку, управляем через интерфейс
+            tg.MainButton.hide();
+        }
+        
+        // ========== НАВИГАЦИОННЫЕ ФУНКЦИИ ==========
+        
+        function goToSwipes() {
+            // Проверяем доступ
+            if (photoStatus !== 'approved') {
+                tg.showAlert('Сначала подтвердите фото профиля!');
+                goToUploadPhoto();
+                return;
+            }
+            
+            if (userAge < 18) {
+                tg.showAlert('Приложение доступно только с 18 лет');
+                return;
+            }
+            
+            // Проверяем, заполнен ли профиль
+            if (!userProfile.city || userProfile.city === 'Не указан') {
+                tg.showConfirm(
+                    'Заполните город для поиска знакомств',
+                    'Сначала указать город?',
+                    (confirmed) => {
+                        if (confirmed) {
+                            goToProfileEdit();
+                        }
+                    }
+                );
+                return;
+            }
+            
+            window.location.href = 'swipes.html';
+        }
+        
+        function goToUploadPhoto() {
+            window.location.href = 'upload-photo.html';
+        }
+        
+        function goToProfileEdit() {
+            window.location.href = 'registration.html?edit=true';
+        }
+        
+        // Запуск приложения при загрузке
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Глобальный экспорт функций
+        window.goToSwipes = goToSwipes;
+        window.goToUploadPhoto = goToUploadPhoto;
+        window.goToProfileEdit = goToProfileEdit;
+    </script>
+</body>
+</html>
