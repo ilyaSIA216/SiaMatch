@@ -212,27 +212,18 @@ function saveSelfie() {
     const userId = Date.now();
     userProfile.id = userId;
     userProfile.registrationDate = new Date().toISOString();
-    userProfile.bio = "Пользователь SiaMatch";
+    userProfile.bio = "Пользователь SiaMatch"; // Можно добавить поле для биографии позже
     
-    // Сохраняем в localStorage как текущего пользователя
+    // Сохраняем в localStorage
     saveUser(userProfile);
     
-    // Создаем копию данных для модерации
-    const userDataForModeration = {
-        name: userProfile.name,
-        age: userProfile.age,
-        city: userProfile.city,
-        mainPhoto: userProfile.mainPhoto,
-        selfie: userProfile.selfie,
-        bio: userProfile.bio,
-        id: userId, // Используем тот же ID
-        registrationDate: userProfile.registrationDate
-    };
+    // Отправляем на модерацию (функция вернет тот же userId)
+    const returnedUserId = submitForModeration(userProfile);
     
-    // Отправляем на модерацию (возвращает userId)
-    const returnedUserId = submitForModeration(userDataForModeration);
+    // На всякий случай убеждаемся, что они совпадают
+    console.log('UserId/returnedUserId:', userId, returnedUserId);
     
-    // Сохраняем ID пользователя для проверки статуса
+    // Храним именно userId, а не "applicationId"
     localStorage.setItem('sia_current_user_id', returnedUserId);
     
     // Переходим к шагу 6
@@ -246,7 +237,7 @@ function showModerationInfo() {
         const verificationScreen = document.querySelector('.verification-screen');
         if (!verificationScreen) return;
         
-        // Получаем ID пользователя
+        // Ищем заявку по userId
         const userId = Number(localStorage.getItem('sia_current_user_id'));
         const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
         const userApp = pendingUsers.find(u => u.id === userId);
@@ -337,7 +328,6 @@ function showModerationInfo() {
 
 // Проверка статуса заявки
 function checkApplicationStatus() {
-    // Получаем ID пользователя
     const userId = Number(localStorage.getItem('sia_current_user_id'));
     const status = checkUserStatus(userId);
     
