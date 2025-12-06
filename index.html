@@ -3,17 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiaMatch - Знакомства</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SiaMatch - Знакомства в Telegram</title>
+    <style>
+        /* ========== ОБЩИЕ СТИЛИ ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #4CAF50; /* Зеленый фон как в Тиндере */
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            min-height: 700px;
+            position: relative;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 40px 30px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* ========== ШАГ 0: ПРИВЕТСТВИЕ ========== */
+        #step-0 {
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 30px;
+        }
+        
+        .welcome-container {
+            width: 100%;
+        }
+        
+        .app-logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .app-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .welcome-text {
+            font-size: 20px;
+            margin: 30px 0;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.5;
+        }
+        
+        /* ========== КНОПКИ ========== */
+        .btn {
+            background: white;
+            color: #4CAF50;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin: 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 10;
+        }
+        
+        /* ========== ФОРМЫ ========== */
+        .step-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0 40px 0;
+        }
+        
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            background: #E0E0E0;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .step-dot.active {
+            background: #4CAF50;
+            transform: scale(1.2);
+        }
+        
+        h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #E0E0E0;
+            border-radius: 15px;
+            font-size: 18px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .form-note {
+            font-size: 14px;
+            color: #888;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        /* ========== ЗАГРУЗКА ФОТО ========== */
+        .photo-upload-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .photo-drop-area {
+            border: 3px dashed #E0E0E0;
+            border-radius: 20px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #FAFAFA;
+        }
+        
+        .photo-drop-area:hover {
+            border-color: #4CAF50;
+            background: #F9FFF9;
+        }
+        
+        .photo-icon {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .photo-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .photo-subtext {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .photo-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .photo-preview.show {
+            display: block;
+        }
+        
+        .file-input-hidden {
+            display: none;
+        }
+        
+        /* ========== ЭКРАН ПРОВЕРКИ ========== */
+        .verification-screen {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .verification-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            color: #4CAF50;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .verification-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .verification-text {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            margin-top: 30px;
+            gap: 8px;
+        }
+        
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse-dots 1.5s infinite;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse-dots {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        /* ========== УВЕДОМЛЕНИЯ ========== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideDown {
+            to { transform: translateX(-50%) translateY(0); }
+        }
+        
+        /* ========== ДАШБОРД ========== */
+        .dashboard-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn.active {
+            color: #4CAF50;
+            background: #E8F5E9;
+        }
+        
+        .nav-btn:hover {
+            background: #F5F5F5;
+        }
+        
+        .tab-pane {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ========== АДАПТИВНОСТЬ ========== */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                min-height: 600px;
+                border-radius: 20px;
+            }
+            
+            .step {
+                padding: 30px 20px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 16px 30px;
+                font-size: 18px;
+            }
+        }
+        
+        /* ========== УТИЛИТЫ ========== */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .full-width {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- Шаг 0: Приветствие -->
         <div id="step-0" class="step">
-            <div style="text-align: center; margin-top: 100px;">
-                <div style="font-size: 60px; margin-bottom: 20px;">💖</div>
-                <h1>🍀 SiaMatch</h1>
-                <p id="welcome-text" style="color: #666; margin: 30px 0;">Привет!</p>
+            <div class="welcome-container">
+                <div class="app-logo">💖</div>
+                <div class="app-title">🍀 SiaMatch</div>
+                <div class="welcome-text" id="welcome-text">Добро пожаловать в мир знакомств!</div>
                 <button class="btn" onclick="startOnboarding()">Начать знакомство</button>
             </div>
         </div>
@@ -22,160 +427,171 @@
         <div id="step-1" class="step hidden">
             <button class="back-btn" onclick="goToStep(0)">← Назад</button>
             
-            <div class="progress-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h2>Как вас зовут?</h2>
+                <p class="step-description">
+                    Введите ваше настоящее имя, которое будет отображаться в вашем профиле
+                </p>
+
+                <div class="input-group">
+                    <input type="text" id="name-input" placeholder="Например: Анна" maxlength="30">
+                    <p class="form-note">Можно использовать только буквы</p>
+                </div>
+
+                <button class="btn" onclick="saveName()">Далее</button>
             </div>
-            
-            <h2>Как вас зовут?</h2>
-            <p style="color: #666; margin: 15px 0 30px 0;">
-                Введите ваше настоящее имя
-            </p>
-            
-            <div class="input-group">
-                <input type="text" id="name-input" placeholder="Например: Анна" maxlength="30">
-                <p class="form-note">Будет отображаться в вашем профиле</p>
-            </div>
-            
-            <button class="btn" onclick="saveName()">Далее</button>
         </div>
-        
+
         <!-- Шаг 2: Возраст -->
         <div id="step-2" class="step hidden">
             <button class="back-btn" onclick="goToStep(1)">← Назад</button>
             
-            <div class="progress-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h2>Сколько вам лет?</h2>
+                <p class="step-description">
+                    Укажите ваш возраст. Это нужно для подбора подходящих знакомств
+                </p>
+
+                <div class="input-group">
+                    <select id="age-select">
+                        <option value="">Выберите возраст</option>
+                    </select>
+                    <p class="form-note">От 18 до 60 лет</p>
+                </div>
+
+                <button class="btn" onclick="saveAge()">Далее</button>
             </div>
-            
-            <h2>Сколько вам лет?</h2>
-            <p style="color: #666; margin: 15px 0 30px 0;">
-                От 18 до 60 лет
-            </p>
-            
-            <div class="input-group">
-                <select id="age-select">
-                    <option value="">Выберите возраст</option>
-                </select>
-            </div>
-            
-            <button class="btn" onclick="saveAge()">Далее</button>
         </div>
-        
+
         <!-- Шаг 3: Город -->
         <div id="step-3" class="step hidden">
             <button class="back-btn" onclick="goToStep(2)">← Назад</button>
             
-            <div class="progress-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-                <div class="step-dot"></div>
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h2>Из какого вы города?</h2>
+                <p class="step-description">
+                    Выберите ваш город из списка
+                </p>
+
+                <div class="input-group">
+                    <select id="city-select">
+                        <option value="">Выберите город</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="saveCity()">Далее</button>
             </div>
-            
-            <h2>Из какого вы города?</h2>
-            <p style="color: #666; margin: 15px 0 30px 0;">
-                Выберите ваш город из списка
-            </p>
-            
-            <div class="input-group">
-                <select id="city-select">
-                    <option value="">Выберите город</option>
-                </select>
-            </div>
-            
-            <button class="btn" onclick="saveCity()">Далее</button>
         </div>
-        
+
         <!-- Шаг 4: Основное фото -->
         <div id="step-4" class="step hidden">
             <button class="back-btn" onclick="goToStep(3)">← Назад</button>
             
-            <div class="progress-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h2>Добавьте ваше фото</h2>
+                <p class="step-description">
+                    Загрузите ваше лучшее фото. Оно будет отображаться в вашем профиле
+                </p>
+
+                <div class="photo-upload-container">
+                    <div class="photo-drop-area" onclick="document.getElementById('main-photo-input').click()">
+                        <div class="photo-icon">📸</div>
+                        <div class="photo-text">Нажмите чтобы загрузить фото</div>
+                        <div class="photo-subtext">Рекомендуемый размер: до 5MB</div>
+                    </div>
+                    
+                    <img id="main-photo-preview" class="photo-preview" alt="Предпросмотр фото">
+                    
+                    <input type="file" id="main-photo-input" class="file-input-hidden" 
+                           accept="image/*" onchange="previewMainPhoto(event)">
+                </div>
+
+                <button class="btn" onclick="saveMainPhoto()">Далее</button>
             </div>
-            
-            <h2>Добавьте ваше фото</h2>
-            <p style="color: #666; margin: 15px 0 30px 0;">
-                Загрузите ваше лучшее фото. Оно будет отображаться в вашем профиле
-            </p>
-            
-            <div class="photo-upload" onclick="document.getElementById('main-photo-input').click()">
-                <div style="font-size: 48px;">📸</div>
-                <div style="color: #666; margin: 10px 0;">Нажмите чтобы загрузить фото</div>
-                <div style="color: #888; font-size: 14px;">Рекомендуемый размер: до 5MB</div>
-            </div>
-            
-            <img id="main-photo-preview" class="photo-preview" alt="Предпросмотр фото" style="display: none;">
-            
-            <input type="file" id="main-photo-input" class="hidden" 
-                   accept="image/*" onchange="previewMainPhoto(event)">
-            
-            <button class="btn" onclick="saveMainPhoto()">Далее</button>
         </div>
-        
+
         <!-- Шаг 5: Селфи для подтверждения -->
         <div id="step-5" class="step hidden">
             <button class="back-btn" onclick="goToStep(4)">← Назад</button>
             
-            <div class="progress-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                </div>
+
+                <h2>Подтверждение личности</h2>
+                <p class="step-description">
+                    Сделайте селфи сейчас, чтобы подтвердить, что это действительно вы
+                </p>
+
+                <div class="photo-upload-container">
+                    <div class="photo-drop-area" onclick="document.getElementById('selfie-input').click()">
+                        <div class="photo-icon">🤳</div>
+                        <div class="photo-text">Сделайте селфи сейчас</div>
+                        <div class="photo-subtext">Это нужно для безопасности всех пользователей</div>
+                    </div>
+                    
+                    <img id="selfie-preview" class="photo-preview" alt="Предпросмотр селфи">
+                    
+                    <input type="file" id="selfie-input" class="file-input-hidden" 
+                           accept="image/*" onchange="previewSelfie(event)">
+                </div>
+
+                <button class="btn" onclick="saveSelfie()">Отправить на проверку</button>
             </div>
-            
-            <h2>Подтверждение личности</h2>
-            <p style="color: #666; margin: 15px 0 30px 0;">
-                Сделайте селфи сейчас, чтобы подтвердить, что это действительно вы
-            </p>
-            
-            <div class="photo-upload" onclick="document.getElementById('selfie-input').click()">
-                <div style="font-size: 48px;">🤳</div>
-                <div style="color: #666; margin: 10px 0;">Сделайте селфи сейчас</div>
-                <div style="color: #888; font-size: 14px;">Это нужно для безопасности всех пользователей</div>
-            </div>
-            
-            <img id="selfie-preview" class="photo-preview" alt="Предпросмотр селфи" style="display: none;">
-            
-            <input type="file" id="selfie-input" class="hidden" 
-                   accept="image/*" onchange="previewSelfie(event)">
-            
-            <button class="btn" onclick="saveSelfie()">Отправить на проверку</button>
         </div>
-        
+
         <!-- Шаг 6: Ожидание проверки -->
         <div id="step-6" class="step hidden">
-            <div style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 80px; margin-bottom: 30px;">⏳</div>
-                <h2>Данные на проверке</h2>
-                <p style="color: #666; margin: 20px 0; line-height: 1.6;">
+            <div class="verification-screen">
+                <div class="verification-icon">⏳</div>
+                <div class="verification-title">Данные на проверке</div>
+                <div class="verification-text">
                     Ваша анкета отправлена на модерацию.<br>
                     Пожалуйста, ожидайте подтверждения.
-                </p>
+                </div>
                 
                 <div class="loading-dots">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
-                
-                <button class="btn-secondary" onclick="goToStep(0)" style="margin-top: 40px;">
-                    ← Вернуться на главную
-                </button>
             </div>
         </div>
 
@@ -188,96 +604,68 @@
                 <button class="nav-btn" onclick="openAdminPanel()">👑</button>
             </div>
 
-            <div id="tab-content">
+            <div class="step-content">
                 <!-- Вкладка свайпов -->
                 <div id="tab-swipe" class="tab-pane">
-                    <div style="text-align: center; padding: 40px 20px;">
-                        <div style="font-size: 48px; margin-bottom: 20px;">👥</div>
+                    <div class="text-center" style="margin-top: 60px;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">👥</div>
                         <h2>Найти пару</h2>
-                        <p style="color: #666; margin: 20px 0;">Начните просматривать анкеты</p>
+                        <p class="step-description">
+                            Начните просматривать анкеты других пользователей
+                        </p>
                         <button class="btn" onclick="startSwiping()">Начать поиск</button>
                     </div>
                 </div>
 
                 <!-- Вкладка мэтчей -->
                 <div id="tab-matches" class="tab-pane hidden">
-                    <div style="padding: 20px;">
-                        <h3>Ваши мэтчи</h3>
-                        <div id="matches-list" class="user-list">
-                            <div style="text-align: center; padding: 40px; color: #666;">
-                                У вас пока нет мэтчей
-                            </div>
+                    <h2>Ваши мэтчи</h2>
+                    <div id="matches-list" style="flex: 1; margin-top: 20px;">
+                        <div class="text-center" style="padding: 40px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">💌</div>
+                            <p>У вас пока нет взаимных симпатий</p>
+                            <p class="form-note mt-20">Когда вы понравитесь кому-то, и это будет взаимно, он появится здесь</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Вкладка профиля -->
                 <div id="tab-profile" class="tab-pane hidden">
-                    <div style="padding: 20px;">
-                        <h3>Мой профиль</h3>
-                        <div id="profile-info">
-                            <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                                <p><strong>Имя:</strong> <span id="profile-name">-</span></p>
-                                <p><strong>Возраст:</strong> <span id="profile-age">-</span></p>
-                                <p><strong>Город:</strong> <span id="profile-city">-</span></p>
-                                <p><strong>Статус:</strong> <span style="color: #4caf50;">✓ Одобрено</span></p>
+                    <h2>Мой профиль</h2>
+                    <div id="profile-info" style="flex: 1; margin-top: 20px;">
+                        <div style="background: #F9F9F9; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div id="profile-avatar" style="width: 80px; height: 80px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; margin-right: 20px;">
+                                    ?
+                                </div>
+                                <div>
+                                    <h3 id="profile-name" style="margin-bottom: 5px;">-</h3>
+                                    <p id="profile-age-city" style="color: #666;">-</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                                <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #4CAF50;" id="profile-likes">0</div>
+                                    <div style="color: #666; font-size: 14px;">Лайков</div>
+                                </div>
+                                <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #4CAF50;" id="profile-matches">0</div>
+                                    <div style="color: #666; font-size: 14px;">Мэтчей</div>
+                                </div>
                             </div>
                         </div>
-                        <button class="btn-secondary" onclick="editProfile()">Редактировать профиль</button>
+                        
+                        <button class="btn-secondary full-width" onclick="editProfile()">✏️ Редактировать профиль</button>
+                        <button class="btn-secondary full-width mt-20" onclick="logout()">🚪 Выйти</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Стили для кнопки назад -->
-    <style>
-        .back-btn {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 10px 0;
-            margin-bottom: 20px;
-        }
-        
-        .back-btn:hover {
-            color: #333;
-        }
-        
-        .loading-dots {
-            display: inline-flex;
-            margin-top: 30px;
-            gap: 8px;
-        }
-        
-        .loading-dots span {
-            width: 12px;
-            height: 12px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .loading-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .loading-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
-    </style>
-
-    <script src="app.js"></script>
-    
     <script>
-        // Функции для index.html
+        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
         let userProfile = {
             telegramId: null,
             username: null,
@@ -286,7 +674,10 @@
             city: null,
             mainPhoto: null,
             selfiePhoto: null,
-            status: 'pending'
+            status: 'new',
+            likes: 0,
+            matches: 0,
+            createdAt: null
         };
 
         // Список городов России
@@ -298,6 +689,104 @@
             "Владивосток", "Махачкала", "Томск", "Оренбург", "Кемерово"
         ].sort((a, b) => a.localeCompare(b, 'ru'));
 
+        // ========== МОК TELEGRAM WEBAPP ==========
+        (function() {
+            if (!window.Telegram || !Telegram.WebApp) {
+                console.log('🔧 Режим разработки: Имитируем Telegram WebApp');
+                
+                const mockUsers = [
+                    { first_name: 'Анна', id: 123456789 },
+                    { first_name: 'Иван', id: 987654321 },
+                    { first_name: 'Мария', id: 456789123 },
+                    { first_name: 'Алексей', id: 321654987 }
+                ];
+                
+                const randomUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+                
+                window.Telegram = {
+                    WebApp: {
+                        initDataUnsafe: {
+                            user: randomUser
+                        },
+                        expand: () => console.log('[DEBUG] Telegram expanded'),
+                        ready: () => {
+                            console.log('[DEBUG] Telegram ready');
+                            document.getElementById('welcome-text').textContent = `Привет, ${randomUser.first_name}!`;
+                        },
+                        showAlert: (msg) => {
+                            console.log('[DEBUG] Alert:', msg);
+                            alert(msg);
+                        },
+                        showConfirm: (msg, callback) => {
+                            console.log('[DEBUG] Confirm:', msg);
+                            if (confirm(msg)) callback(true);
+                            else callback(false);
+                        },
+                        openLink: (url) => {
+                            console.log('[DEBUG] Opening link:', url);
+                            window.open(url, '_blank');
+                        }
+                    }
+                };
+            }
+            
+            window.tg = window.Telegram.WebApp;
+        })();
+
+        // ========== УТИЛИТЫ ==========
+        function showNotification(text, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = text;
+            notification.style.background = type === 'success' ? '#4CAF50' : 
+                                          type === 'error' ? '#f44336' : '#2196F3';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideDown 0.3s ease-out reverse forwards';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        function goToStep(stepNumber) {
+            console.log(`Переход к шагу ${stepNumber}`);
+            
+            // Скрываем все шаги
+            for (let i = 0; i <= 7; i++) {
+                const element = document.getElementById(`step-${i}`);
+                if (element) element.classList.add('hidden');
+            }
+            
+            // Показываем нужный шаг
+            const target = document.getElementById(`step-${stepNumber}`);
+            if (target) {
+                target.classList.remove('hidden');
+                
+                // Обновляем индикатор прогресса
+                updateProgressIndicator(stepNumber);
+                
+                // Если перешли на дашборд, обновляем профиль
+                if (stepNumber === 7) {
+                    updateProfileInfo();
+                }
+            }
+        }
+
+        function updateProgressIndicator(currentStep) {
+            if (currentStep < 1 || currentStep > 5) return;
+            
+            const indicators = document.querySelectorAll('.step-dot');
+            indicators.forEach((dot, index) => {
+                if (index < currentStep) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        // ========== ФУНКЦИИ РЕГИСТРАЦИИ ==========
         function startOnboarding() {
             console.log('Начало онбординга');
             goToStep(1);
@@ -322,6 +811,8 @@
                 option.textContent = `${age} лет`;
                 select.appendChild(option);
             }
+            
+            console.log(`Добавлено ${select.options.length - 1} возрастов`);
         }
 
         function populateCitySelect() {
@@ -339,33 +830,8 @@
                 option.textContent = city;
                 select.appendChild(option);
             });
-        }
-
-        function goToStep(stepNumber) {
-            console.log(`Переход к шагу ${stepNumber}`);
             
-            // Скрываем все шаги
-            for (let i = 0; i <= 7; i++) {
-                const element = document.getElementById(`step-${i}`);
-                if (element) element.classList.add('hidden');
-            }
-            
-            // Показываем нужный шаг
-            const target = document.getElementById(`step-${step}`);
-            if (target) target.classList.remove('hidden');
-        }
-
-        function updateProgressIndicator(currentStep) {
-            if (currentStep < 1 || currentStep > 5) return;
-            
-            const indicators = document.querySelectorAll('.step-dot');
-            indicators.forEach((dot, index) => {
-                if (index < currentStep) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
+            console.log(`Добавлено ${select.options.length - 1} городов`);
         }
 
         function saveName() {
@@ -373,13 +839,21 @@
             const name = nameInput.value.trim();
             
             if (!name) {
-                alert('Введите ваше имя');
+                showNotification('Введите ваше имя', 'error');
                 nameInput.focus();
                 return;
             }
             
             if (name.length < 2) {
-                alert('Имя должно быть минимум 2 символа');
+                showNotification('Имя должно быть минимум 2 символа', 'error');
+                nameInput.focus();
+                return;
+            }
+            
+            // Проверяем что только буквы
+            const nameRegex = /^[A-Za-zА-Яа-яЁё\s\-]+$/;
+            if (!nameRegex.test(name)) {
+                showNotification('Имя может содержать только буквы, пробелы и дефисы', 'error');
                 nameInput.focus();
                 return;
             }
@@ -394,7 +868,7 @@
             const age = parseInt(ageSelect.value);
             
             if (!age || age < 18 || age > 60) {
-                alert('Выберите возраст от 18 до 60 лет');
+                showNotification('Выберите возраст от 18 до 60 лет', 'error');
                 ageSelect.focus();
                 return;
             }
@@ -409,7 +883,7 @@
             const city = citySelect.value;
             
             if (!city) {
-                alert('Выберите ваш город');
+                showNotification('Выберите ваш город', 'error');
                 citySelect.focus();
                 return;
             }
@@ -423,17 +897,32 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) {
+                showNotification('Пожалуйста, загрузите изображение', 'error');
+                return;
+            }
+            
+            // Проверка размера (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('Фото должно быть меньше 5MB', 'error');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('main-photo-preview');
                 preview.src = e.target.result;
-                preview.style.display = 'block';
+                preview.classList.add('show');
                 
                 userProfile.mainPhoto = e.target.result;
                 console.log('Основное фото загружено');
                 
-                // Показываем уведомление
                 showNotification('Фото успешно загружено!');
+            };
+            
+            reader.onerror = function() {
+                showNotification('Ошибка загрузки файла', 'error');
             };
             
             reader.readAsDataURL(file);
@@ -443,50 +932,34 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) {
+                showNotification('Пожалуйста, загрузите изображение', 'error');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('selfie-preview');
                 preview.src = e.target.result;
-                preview.style.display = 'block';
+                preview.classList.add('show');
                 
                 userProfile.selfiePhoto = e.target.result;
                 console.log('Селфи загружено');
                 
-                // Показываем уведомление
                 showNotification('Селфи успешно загружено!');
+            };
+            
+            reader.onerror = function() {
+                showNotification('Ошибка загрузки файла', 'error');
             };
             
             reader.readAsDataURL(file);
         }
 
-        function showNotification(text) {
-            // Создаем временное уведомление
-            const notification = document.createElement('div');
-            notification.textContent = text;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #4caf50;
-                color: white;
-                padding: 12px 24px;
-                border-radius: 8px;
-                z-index: 1000;
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
-        }
-
         function saveMainPhoto() {
             if (!userProfile.mainPhoto) {
-                alert('Загрузите ваше фото');
+                showNotification('Загрузите ваше фото', 'error');
                 return;
             }
             
@@ -494,49 +967,78 @@
             goToStep(5);
         }
 
-        async function saveSelfie() {
+        function saveSelfie() {
             if (!userProfile.selfiePhoto) {
-                alert('Загрузите селфи для подтверждения');
+                showNotification('Загрузите селфи для подтверждения', 'error');
                 return;
             }
             
             // Подтверждение отправки
-            if (confirm('Отправить анкету на проверку? После отправки вы не сможете изменить данные.')) {
-                // Сохраняем профиль
-                userProfile.status = 'pending';
-                userProfile.registeredAt = new Date().toISOString();
-                
-                // Сохраняем в localStorage
-                localStorage.setItem('sia_user', JSON.stringify(userProfile));
-                
-                // Имитируем отправку на сервер
-                console.log('Отправка данных на сервер...');
-                
-                // Переходим к экрану ожидания
-                goToStep(6);
-                
-                // Имитируем обработку
-                setTimeout(() => {
-                    // В реальности здесь будет ответ от сервера
-                    // Пока просто сохраняем как одобренного для демо
-                    userProfile.status = 'approved';
-                    localStorage.setItem('sia_user', JSON.stringify(userProfile));
-                    
-                    // Обновляем профиль в дашборде
-                    updateProfileInfo();
-                    
-                    // Показываем дашборд
-                    goToStep(7);
-                    
-                    alert('🎉 Ваша анкета одобрена! Теперь вы можете начать знакомства.');
-                }, 3000);
-            }
+            tg.showConfirm(
+                'Отправить анкету на проверку?\n\nПосле отправки вы не сможете изменить данные в течение 24 часов.',
+                function(confirmed) {
+                    if (confirmed) {
+                        // Сохраняем профиль
+                        userProfile.status = 'pending';
+                        userProfile.createdAt = new Date().toISOString();
+                        userProfile.telegramId = tg.initDataUnsafe.user.id;
+                        userProfile.username = tg.initDataUnsafe.user.username || 'user_' + Date.now();
+                        
+                        // Сохраняем в localStorage
+                        localStorage.setItem('sia_user', JSON.stringify(userProfile));
+                        localStorage.setItem('sia_all_users', JSON.stringify([userProfile]));
+                        
+                        console.log('Анкета отправлена на проверку:', userProfile);
+                        
+                        // Переходим к экрану ожидания
+                        goToStep(6);
+                        
+                        // Имитируем проверку модерацией (3 секунды)
+                        setTimeout(() => {
+                            // Одобряем анкету
+                            userProfile.status = 'approved';
+                            userProfile.likes = Math.floor(Math.random() * 50);
+                            userProfile.matches = Math.floor(Math.random() * 10);
+                            localStorage.setItem('sia_user', JSON.stringify(userProfile));
+                            
+                            // Обновляем список всех пользователей
+                            const allUsers = JSON.parse(localStorage.getItem('sia_all_users') || '[]');
+                            const userIndex = allUsers.findIndex(u => u.telegramId === userProfile.telegramId);
+                            if (userIndex !== -1) {
+                                allUsers[userIndex] = userProfile;
+                            }
+                            localStorage.setItem('sia_all_users', JSON.stringify(allUsers));
+                            
+                            // Показываем дашборд
+                            goToStep(7);
+                            
+                            showNotification('🎉 Ваша анкета одобрена! Теперь вы можете начать знакомства.');
+                        }, 3000);
+                    }
+                }
+            );
         }
 
+        // ========== ФУНКЦИИ ДАШБОРДА ==========
         function updateProfileInfo() {
-            document.getElementById('profile-name').textContent = userProfile.firstName || '-';
-            document.getElementById('profile-age').textContent = userProfile.age || '-';
-            document.getElementById('profile-city').textContent = userProfile.city || '-';
+            if (!userProfile.firstName) return;
+            
+            // Обновляем аватар
+            const avatar = document.getElementById('profile-avatar');
+            avatar.textContent = userProfile.firstName.charAt(0).toUpperCase();
+            if (userProfile.mainPhoto) {
+                avatar.style.backgroundImage = `url(${userProfile.mainPhoto})`;
+                avatar.style.backgroundSize = 'cover';
+                avatar.style.backgroundPosition = 'center';
+                avatar.textContent = '';
+            }
+            
+            // Обновляем информацию
+            document.getElementById('profile-name').textContent = userProfile.firstName;
+            document.getElementById('profile-age-city').textContent = 
+                `${userProfile.age} лет, ${userProfile.city}`;
+            document.getElementById('profile-likes').textContent = userProfile.likes || 0;
+            document.getElementById('profile-matches').textContent = userProfile.matches || 0;
         }
 
         function showTab(tabName) {
@@ -554,54 +1056,206 @@
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             
             // Активируем кнопку
-            const btn = document.querySelector(`button[onclick*="${tabName}"]`);
+            const btn = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
             if (btn) btn.classList.add('active');
         }
 
         function startSwiping() {
-            alert('Функция поиска партнеров скоро будет доступна!');
+            showNotification('Функция поиска партнеров скоро будет доступна!', 'info');
+            
+            // Демо: добавляем тестовые лайки
+            userProfile.likes = (userProfile.likes || 0) + 3;
+            localStorage.setItem('sia_user', JSON.stringify(userProfile));
+            updateProfileInfo();
         }
 
         function editProfile() {
-            alert('Редактирование профиля скоро будет доступно!');
+            if (confirm('Редактирование профиля сбросит вашу верификацию. Продолжить?')) {
+                userProfile.status = 'new';
+                localStorage.setItem('sia_user', JSON.stringify(userProfile));
+                goToStep(0);
+            }
+        }
+
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                localStorage.removeItem('sia_user');
+                window.location.reload();
+            }
         }
 
         function openAdminPanel() {
-            window.open('admin.html', '_blank');
+            // Сохраняем текущего пользователя как админа
+            const adminData = {
+                isAdmin: true,
+                user: userProfile,
+                allUsers: JSON.parse(localStorage.getItem('sia_all_users') || '[]')
+            };
+            
+            // Открываем админку в новой вкладке
+            const adminWindow = window.open('', '_blank');
+            
+            // Создаем простую админку прямо здесь
+            const adminHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Админ-панель SiaMatch</title>
+                    <style>
+                        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+                        .header { background: #4CAF50; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+                        .user-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; }
+                        .user-avatar { width: 50px; height: 50px; background: #4CAF50; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+                        .search { width: 100%; padding: 10px; margin-bottom: 20px; border: 2px solid #4CAF50; border-radius: 5px; }
+                        .btn { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>👑 Админ-панель SiaMatch</h1>
+                        <p>Управление пользователями</p>
+                    </div>
+                    
+                    <input type="text" class="search" placeholder="Поиск по имени или городу..." onkeyup="searchUsers(this.value)">
+                    
+                    <div id="users-list">
+                        <p>Загрузка пользователей...</p>
+                    </div>
+                    
+                    <script>
+                        let allUsers = ${JSON.stringify(adminData.allUsers)};
+                        
+                        function renderUsers(users) {
+                            const container = document.getElementById('users-list');
+                            if (users.length === 0) {
+                                container.innerHTML = '<p>Пользователи не найдены</p>';
+                                return;
+                            }
+                            
+                            container.innerHTML = users.map(user => \`
+                                <div class="user-card">
+                                    <div class="user-avatar">\${user.firstName?.charAt(0) || '?'}</div>
+                                    <div style="flex: 1;">
+                                        <h3>\${user.firstName || 'Без имени'}, \${user.age || '?'}</h3>
+                                        <p>📍 \${user.city || 'Не указан'} • Статус: <span style="color: \${user.status === 'approved' ? '#4CAF50' : user.status === 'pending' ? '#FF9800' : '#F44336'}">
+                                            \${user.status === 'approved' ? 'Одобрен' : user.status === 'pending' ? 'На проверке' : 'Новый'}
+                                        </span></p>
+                                        <p style="font-size: 12px; color: #666;">ID: \${user.telegramId || 'Нет'}</p>
+                                    </div>
+                                    <button class="btn" onclick="openChat('\${user.telegramId}')">💬 Чат</button>
+                                </div>
+                            \`).join('');
+                        }
+                        
+                        function searchUsers(query) {
+                            if (!query) {
+                                renderUsers(allUsers);
+                                return;
+                            }
+                            const filtered = allUsers.filter(user => 
+                                (user.firstName?.toLowerCase().includes(query.toLowerCase())) ||
+                                (user.city?.toLowerCase().includes(query.toLowerCase()))
+                            );
+                            renderUsers(filtered);
+                        }
+                        
+                        function openChat(userId) {
+                            alert('Открытие чата с пользователем ID: ' + userId + '\\n\\nВ реальном приложении здесь открывался бы чат.');
+                        }
+                        
+                        // Первоначальная загрузка
+                        renderUsers(allUsers);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            adminWindow.document.write(adminHTML);
+            adminWindow.document.close();
         }
 
-        // Инициализация при загрузке
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
         document.addEventListener('DOMContentLoaded', function() {
-            // Проверяем, есть ли сохраненный пользователь
-            const savedUser = localStorage.getItem('sia_user');
-            if (savedUser) {
-                userProfile = JSON.parse(savedUser);
+            console.log('🚀 Приложение SiaMatch запущено');
+            
+            // Инициализируем Telegram
+            try {
+                tg.expand();
+                tg.ready();
                 
-                // Если пользователь одобрен, показываем дашборд
-                if (userProfile.status === 'approved') {
-                    updateProfileInfo();
-                    goToStep(7);
-                } 
-                // Если на проверке
-                else if (userProfile.status === 'pending') {
-                    goToStep(6);
+                // Приветствуем пользователя
+                const tgUser = tg.initDataUnsafe?.user;
+                if (tgUser?.first_name) {
+                    document.getElementById('welcome-text').textContent = `Привет, ${tgUser.first_name}!`;
+                    
+                    // Автозаполняем имя если поле пустое
+                    const nameInput = document.getElementById('name-input');
+                    if (nameInput && !nameInput.value) {
+                        nameInput.value = tgUser.first_name;
+                    }
                 }
+            } catch (error) {
+                console.log('Telegram WebApp не доступен, работаем в режиме разработки');
             }
             
-            // Приветствуем пользователя из Telegram
-            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-            if (tgUser?.first_name) {
-                document.getElementById('welcome-text').textContent = `Привет, ${tgUser.first_name}!`;
-                
-                // Автозаполняем имя
-                if (!userProfile.firstName) {
-                    document.getElementById('name-input').value = tgUser.first_name;
+            // Проверяем сохраненного пользователя
+            try {
+                const savedUser = localStorage.getItem('sia_user');
+                if (savedUser) {
+                    userProfile = JSON.parse(savedUser);
+                    console.log('Загружен сохраненный пользователь:', userProfile);
+                    
+                    if (userProfile.status === 'approved') {
+                        // Пользователь одобрен - показываем дашборд
+                        goToStep(7);
+                        showTab('profile');
+                    } else if (userProfile.status === 'pending') {
+                        // На проверке
+                        goToStep(6);
+                    } else {
+                        // Новая регистрация
+                        goToStep(0);
+                    }
                 }
-                
-                // Сохраняем Telegram ID
-                if (!userProfile.telegramId) {
-                    userProfile.telegramId = tgUser.id;
-                }
+            } catch (error) {
+                console.error('Ошибка загрузки пользователя:', error);
+            }
+            
+            // Создаем начальные данные если их нет
+            if (!localStorage.getItem('sia_all_users')) {
+                const testUsers = [
+                    {
+                        telegramId: 111111111,
+                        firstName: 'Анна',
+                        age: 24,
+                        city: 'Москва',
+                        status: 'approved',
+                        likes: 45,
+                        matches: 12,
+                        createdAt: '2024-01-15T10:30:00Z'
+                    },
+                    {
+                        telegramId: 222222222,
+                        firstName: 'Иван',
+                        age: 28,
+                        city: 'Санкт-Петербург',
+                        status: 'approved',
+                        likes: 32,
+                        matches: 8,
+                        createdAt: '2024-01-16T14:20:00Z'
+                    },
+                    {
+                        telegramId: 333333333,
+                        firstName: 'Мария',
+                        age: 22,
+                        city: 'Казань',
+                        status: 'pending',
+                        likes: 0,
+                        matches: 0,
+                        createdAt: '2024-01-17T09:15:00Z'
+                    }
+                ];
+                localStorage.setItem('sia_all_users', JSON.stringify(testUsers));
             }
         });
     </script>
