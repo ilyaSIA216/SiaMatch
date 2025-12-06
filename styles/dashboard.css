@@ -1,0 +1,346 @@
+/* ========== СТИЛИ ДЛЯ ДАШБОРДА (dashboard.html) ========== */
+
+/* Верхняя панель */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #4CAF50;
+    color: white;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: #4CAF50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Основной контент */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.tab-content {
+    height: 100%;
+    padding: 20px;
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ========== ВКЛАДКА СВАЙПОВ ========== */
+
+.swipe-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.profile-card {
+    width: 100%;
+    height: 500px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.profile-photo {
+    width: 100%;
+    height: 70%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: cover;
+    background-position: center;
+}
+
+.profile-info {
+    padding: 20px;
+}
+
+.profile-info h3 {
+    font-size: 24px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.profile-info p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.profile-bio {
+    color: #888;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.swipe-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.swipe-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swipe-btn:hover {
+    transform: scale(1.1);
+}
+
+.swipe-btn:active {
+    transform: scale(0.95);
+}
+
+.dislike {
+    background: #FF6B6B;
+    color: white;
+}
+
+.like {
+    background: #4CAF50;
+    color: white;
+}
+
+/* ========== ВКЛАДКА ЧАТОВ ========== */
+
+.chats-container {
+    height: 100%;
+}
+
+.chats-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.chats-list {
+    margin-top: 20px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.chat-item:hover {
+    background: #f0f0f0;
+}
+
+.chat-avatar {
+    width: 50px;
+    height: 50px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    margin-right: 15px;
+}
+
+.chat-info {
+    flex: 1;
+}
+
+.chat-name {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.chat-last-msg {
+    color: #666;
+    font-size: 14px;
+}
+
+.chat-time {
+    color: #888;
+    font-size: 12px;
+}
+
+/* ========== ВКЛАДКА ПРОФИЛЯ ========== */
+
+.profile-container {
+    height: 100%;
+}
+
+.profile-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.my-profile-card {
+    background: #f9f9f9;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.my-photo {
+    width: 100px;
+    height: 100px;
+    background: #4CAF50;
+    border-radius: 50%;
+    margin-right: 20px;
+    background-size: cover;
+    background-position: center;
+}
+
+.my-info h3 {
+    font-size: 24px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.my-info p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.action-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 15px;
+    border-radius: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    color: #333;
+}
+
+.action-btn:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.action-btn.logout {
+    background: #FFE5E5;
+    color: #FF6B6B;
+    margin-top: 20px;
+}
+
+.action-btn.logout:hover {
+    background: #FFD5D5;
+}
+
+/* ========== НИЖНЯЯ НАВИГАЦИЯ ========== */
+
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #ccc;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.nav-btn.active {
+    color: #4CAF50;
+    background: #E8F5E9;
+    transform: scale(1.1);
+}
+
+.nav-btn:hover {
+    color: #4CAF50;
+    background: #F5F5F5;
+}
+
+/* Анимации */
+@keyframes swipeRight {
+    0% { transform: translateX(0) rotate(0); opacity: 1; }
+    100% { transform: translateX(500px) rotate(20deg); opacity: 0; }
+}
+
+@keyframes swipeLeft {
+    0% { transform: translateX(0) rotate(0); opacity: 1; }
+    100% { transform: translateX(-500px) rotate(-20deg); opacity: 0; }
+}
+
+.swipe-right {
+    animation: swipeRight 0.5s forwards;
+}
+
+.swipe-left {
+    animation: swipeLeft 0.5s forwards;
+}
