@@ -1,66 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Админ-панель - Match</title>
-    <style>
-        body { font-family: Arial; padding: 20px; }
-        .user-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-        }
-        .approve-btn { background: #4cd964; color: white; }
-        .reject-btn { background: #ff6b6b; color: white; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель SiaMatch</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Модерация фото</h1>
-    <div id="pending-users">
-        <!-- Сюда JavaScript подгрузит пользователей -->
+    <div class="container">
+        <div class="admin-header">
+            <h1>👑 Админ-панель SiaMatch</h1>
+            <p>Управление пользователями и модерация</p>
+        </div>
+
+        <div class="admin-content">
+            <!-- Поиск -->
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Поиск по имени, ID или городу..." 
+                       oninput="searchUsers(this.value)">
+            </div>
+
+            <!-- Статистика -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #eef2ff; padding: 15px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;" id="total-users">0</div>
+                    <div style="color: #666; font-size: 14px;">Всего пользователей</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;" id="pending-users">0</div>
+                    <div style="color: #666; font-size: 14px;">На проверке</div>
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;" id="active-users">0</div>
+                    <div style="color: #666; font-size: 14px;">Активных</div>
+                </div>
+            </div>
+
+            <!-- Фильтры -->
+            <div style="margin-bottom: 20px;">
+                <select id="status-filter" onchange="filterUsers()" style="width: 100%;">
+                    <option value="all">Все статусы</option>
+                    <option value="pending">На проверке</option>
+                    <option value="approved">Одобрены</option>
+                    <option value="rejected">Отклонены</option>
+                    <option value="banned">Заблокированы</option>
+                </select>
+            </div>
+
+            <!-- Список пользователей -->
+            <h3>Пользователи</h3>
+            <div id="users-list" class="user-list">
+                <div class="loading">Загрузка пользователей</div>
+            </div>
+        </div>
     </div>
-    
-    <script>
-        // Простая авторизация
-        const password = prompt('Введите пароль админа:');
-        if (password !== 'admin123') {
-            document.body.innerHTML = '<h2>Доступ запрещен</h2>';
-        } else {
-            loadPendingUsers();
-        }
-        
-        async function loadPendingUsers() {
-            // Здесь будет запрос к API
-            const users = [
-                { id: 1, name: 'Иван', photo: 'url...' },
-                { id: 2, name: 'Мария', photo: 'url...' }
-            ];
-            
-            const container = document.getElementById('pending-users');
-            users.forEach(user => {
-                container.innerHTML += `
-                    <div class="user-card">
-                        <h3>${user.name}</h3>
-                        <img src="${user.photo}" width="100">
-                        <button class="approve-btn" onclick="approve(${user.id})">✅ Одобрить</button>
-                        <button class="reject-btn" onclick="reject(${user.id})">❌ Отклонить</button>
-                    </div>
-                `;
-            });
-        }
-        
-        function approve(userId) {
-            alert(`Пользователь ${userId} одобрен`);
-            // Отправить на сервер
-        }
-        
-        function reject(userId) {
-            const reason = prompt('Причина отказа:');
-            if (reason) {
-                alert(`Пользователь ${userId} отклонен: ${reason}`);
-                // Отправить на сервер
-            }
-        }
-    </script>
+
+    <!-- Модальное окно профиля -->
+    <div id="profile-modal" class="profile-modal hidden">
+        <div class="profile-content">
+            <button class="close-btn" onclick="closeProfile()">×</button>
+            <div id="profile-details">
+                <!-- Детали профиля будут здесь -->
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="openChatWithUser()">💬 Написать сообщение</button>
+                <button class="btn-secondary" onclick="changeUserStatus()" id="status-btn">Изменить статус</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
