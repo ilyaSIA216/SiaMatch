@@ -1,0 +1,235 @@
+/* ========== СТИЛИ ТОЛЬКО ДЛЯ РЕГИСТРАЦИИ (index.html) ========== */
+
+/* Шаг 0: Приветствие */
+#step-0 {
+    background: #4CAF50;
+    color: white;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 30px;
+}
+
+.welcome-container {
+    width: 100%;
+}
+
+.app-logo {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.app-title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.welcome-text {
+    font-size: 20px;
+    margin: 30px 0;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.5;
+}
+
+/* Контент шагов */
+.step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Прогресс регистрации */
+.progress-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0 40px 0;
+}
+
+.step-dot {
+    width: 12px;
+    height: 12px;
+    background: #E0E0E0;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.step-dot.active {
+    background: #4CAF50;
+    transform: scale(1.2);
+}
+
+h2 {
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+.step-description {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 40px;
+    line-height: 1.5;
+}
+
+.input-group {
+    margin-bottom: 30px;
+}
+
+.form-note {
+    font-size: 14px;
+    color: #888;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* Загрузка фото */
+.photo-upload-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.photo-drop-area {
+    border: 3px dashed #E0E0E0;
+    border-radius: 20px;
+    padding: 40px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #FAFAFA;
+}
+
+.photo-drop-area:hover {
+    border-color: #4CAF50;
+    background: #F9FFF9;
+}
+
+.photo-icon {
+    font-size: 48px;
+    color: #4CAF50;
+    margin-bottom: 15px;
+}
+
+.photo-text {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.photo-subtext {
+    color: #888;
+    font-size: 14px;
+}
+
+.photo-preview {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-top: 20px;
+    display: none;
+}
+
+.photo-preview.show {
+    display: block;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+/* Экран проверки */
+.verification-screen {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.verification-icon {
+    font-size: 80px;
+    margin-bottom: 30px;
+    color: #4CAF50;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.verification-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.verification-text {
+    color: #666;
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 300px;
+}
+
+.loading-dots {
+    display: inline-flex;
+    margin-top: 30px;
+    gap: 8px;
+}
+
+.loading-dots span {
+    width: 12px;
+    height: 12px;
+    background: #4CAF50;
+    border-radius: 50%;
+    animation: pulse-dots 1.5s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes pulse-dots {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        min-height: 600px;
+        border-radius: 20px;
+    }
+    
+    .step {
+        padding: 30px 20px;
+    }
+    
+    h2 {
+        font-size: 24px;
+    }
+    
+    .btn {
+        padding: 16px 30px;
+        font-size: 18px;
+    }
+}
