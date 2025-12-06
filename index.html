@@ -18,8 +18,166 @@
             </div>
         </div>
 
-        <!-- Шаги 1-6 (регистрация) остаются как есть из предыдущего кода -->
-        <!-- [ВСТАВЬТЕ СЮДА ШАГИ 1-6 ИЗ ПРЕДЫДУЩЕГО КОДА] -->
+        <!-- Шаг 1: Имя -->
+        <div id="step-1" class="step hidden">
+            <button class="back-btn" onclick="goToStep(0)">← Назад</button>
+            
+            <div class="progress-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+            
+            <h2>Как вас зовут?</h2>
+            <p style="color: #666; margin: 15px 0 30px 0;">
+                Введите ваше настоящее имя
+            </p>
+            
+            <div class="input-group">
+                <input type="text" id="name-input" placeholder="Например: Анна" maxlength="30">
+                <p class="form-note">Будет отображаться в вашем профиле</p>
+            </div>
+            
+            <button class="btn" onclick="saveName()">Далее</button>
+        </div>
+        
+        <!-- Шаг 2: Возраст -->
+        <div id="step-2" class="step hidden">
+            <button class="back-btn" onclick="goToStep(1)">← Назад</button>
+            
+            <div class="progress-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+            
+            <h2>Сколько вам лет?</h2>
+            <p style="color: #666; margin: 15px 0 30px 0;">
+                От 18 до 60 лет
+            </p>
+            
+            <div class="input-group">
+                <select id="age-select">
+                    <option value="">Выберите возраст</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="saveAge()">Далее</button>
+        </div>
+        
+        <!-- Шаг 3: Город -->
+        <div id="step-3" class="step hidden">
+            <button class="back-btn" onclick="goToStep(2)">← Назад</button>
+            
+            <div class="progress-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+            
+            <h2>Из какого вы города?</h2>
+            <p style="color: #666; margin: 15px 0 30px 0;">
+                Выберите ваш город из списка
+            </p>
+            
+            <div class="input-group">
+                <select id="city-select">
+                    <option value="">Выберите город</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="saveCity()">Далее</button>
+        </div>
+        
+        <!-- Шаг 4: Основное фото -->
+        <div id="step-4" class="step hidden">
+            <button class="back-btn" onclick="goToStep(3)">← Назад</button>
+            
+            <div class="progress-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+            </div>
+            
+            <h2>Добавьте ваше фото</h2>
+            <p style="color: #666; margin: 15px 0 30px 0;">
+                Загрузите ваше лучшее фото. Оно будет отображаться в вашем профиле
+            </p>
+            
+            <div class="photo-upload" onclick="document.getElementById('main-photo-input').click()">
+                <div style="font-size: 48px;">📸</div>
+                <div style="color: #666; margin: 10px 0;">Нажмите чтобы загрузить фото</div>
+                <div style="color: #888; font-size: 14px;">Рекомендуемый размер: до 5MB</div>
+            </div>
+            
+            <img id="main-photo-preview" class="photo-preview" alt="Предпросмотр фото" style="display: none;">
+            
+            <input type="file" id="main-photo-input" class="hidden" 
+                   accept="image/*" onchange="previewMainPhoto(event)">
+            
+            <button class="btn" onclick="saveMainPhoto()">Далее</button>
+        </div>
+        
+        <!-- Шаг 5: Селфи для подтверждения -->
+        <div id="step-5" class="step hidden">
+            <button class="back-btn" onclick="goToStep(4)">← Назад</button>
+            
+            <div class="progress-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+            </div>
+            
+            <h2>Подтверждение личности</h2>
+            <p style="color: #666; margin: 15px 0 30px 0;">
+                Сделайте селфи сейчас, чтобы подтвердить, что это действительно вы
+            </p>
+            
+            <div class="photo-upload" onclick="document.getElementById('selfie-input').click()">
+                <div style="font-size: 48px;">🤳</div>
+                <div style="color: #666; margin: 10px 0;">Сделайте селфи сейчас</div>
+                <div style="color: #888; font-size: 14px;">Это нужно для безопасности всех пользователей</div>
+            </div>
+            
+            <img id="selfie-preview" class="photo-preview" alt="Предпросмотр селфи" style="display: none;">
+            
+            <input type="file" id="selfie-input" class="hidden" 
+                   accept="image/*" onchange="previewSelfie(event)">
+            
+            <button class="btn" onclick="saveSelfie()">Отправить на проверку</button>
+        </div>
+        
+        <!-- Шаг 6: Ожидание проверки -->
+        <div id="step-6" class="step hidden">
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 80px; margin-bottom: 30px;">⏳</div>
+                <h2>Данные на проверке</h2>
+                <p style="color: #666; margin: 20px 0; line-height: 1.6;">
+                    Ваша анкета отправлена на модерацию.<br>
+                    Пожалуйста, ожидайте подтверждения.
+                </p>
+                
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <button class="btn-secondary" onclick="goToStep(0)" style="margin-top: 40px;">
+                    ← Вернуться на главную
+                </button>
+            </div>
+        </div>
 
         <!-- Шаг 7: Дашборд (после одобрения) -->
         <div id="step-7" class="step hidden">
@@ -27,7 +185,7 @@
                 <button class="nav-btn active" onclick="showTab('swipe')">👥</button>
                 <button class="nav-btn" onclick="showTab('matches')">💌</button>
                 <button class="nav-btn" onclick="showTab('profile')">👤</button>
-                <button class="nav-btn" onclick="showTab('settings')">⚙️</button>
+                <button class="nav-btn" onclick="openAdminPanel()">👑</button>
             </div>
 
             <div id="tab-content">
@@ -46,7 +204,9 @@
                     <div style="padding: 20px;">
                         <h3>Ваши мэтчи</h3>
                         <div id="matches-list" class="user-list">
-                            <!-- Список мэтчей будет здесь -->
+                            <div style="text-align: center; padding: 40px; color: #666;">
+                                У вас пока нет мэтчей
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,14 +215,395 @@
                 <div id="tab-profile" class="tab-pane hidden">
                     <div style="padding: 20px;">
                         <h3>Мой профиль</h3>
-                        <div id="profile-info"></div>
-                        <button class="btn-secondary" onclick="editProfile()">Редактировать</button>
+                        <div id="profile-info">
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                                <p><strong>Имя:</strong> <span id="profile-name">-</span></p>
+                                <p><strong>Возраст:</strong> <span id="profile-age">-</span></p>
+                                <p><strong>Город:</strong> <span id="profile-city">-</span></p>
+                                <p><strong>Статус:</strong> <span style="color: #4caf50;">✓ Одобрено</span></p>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" onclick="editProfile()">Редактировать профиль</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Стили для кнопки назад -->
+    <style>
+        .back-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            color: #333;
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            margin-top: 30px;
+            gap: 8px;
+        }
+        
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+    </style>
+
     <script src="app.js"></script>
+    
+    <script>
+        // Функции для index.html
+        let userProfile = {
+            telegramId: null,
+            username: null,
+            firstName: null,
+            age: null,
+            city: null,
+            mainPhoto: null,
+            selfiePhoto: null,
+            status: 'pending'
+        };
+
+        // Список городов России
+        const russianCities = [
+            "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Нижний Новгород",
+            "Казань", "Челябинск", "Омск", "Самара", "Ростов-на-Дону", "Уфа", "Красноярск",
+            "Воронеж", "Пермь", "Волгоград", "Краснодар", "Саратов", "Тюмень", "Тольятти",
+            "Ижевск", "Барнаул", "Ульяновск", "Иркутск", "Хабаровск", "Ярославль",
+            "Владивосток", "Махачкала", "Томск", "Оренбург", "Кемерово"
+        ].sort((a, b) => a.localeCompare(b, 'ru'));
+
+        function startOnboarding() {
+            console.log('Начало онбординга');
+            goToStep(1);
+            
+            // Заполняем выпадающие списки
+            populateAgeSelect();
+            populateCitySelect();
+        }
+
+        function populateAgeSelect() {
+            const select = document.getElementById('age-select');
+            
+            // Очищаем, оставляя первый option
+            while (select.options.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Добавляем возраста 18-60
+            for (let age = 18; age <= 60; age++) {
+                const option = document.createElement('option');
+                option.value = age;
+                option.textContent = `${age} лет`;
+                select.appendChild(option);
+            }
+        }
+
+        function populateCitySelect() {
+            const select = document.getElementById('city-select');
+            
+            // Очищаем, оставляя первый option
+            while (select.options.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Добавляем города
+            russianCities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                select.appendChild(option);
+            });
+        }
+
+        function goToStep(stepNumber) {
+            console.log(`Переход к шагу ${stepNumber}`);
+            
+            // Скрываем все шаги
+            for (let i = 0; i <= 7; i++) {
+                const element = document.getElementById(`step-${i}`);
+                if (element) element.classList.add('hidden');
+            }
+            
+            // Показываем нужный шаг
+            const target = document.getElementById(`step-${step}`);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function updateProgressIndicator(currentStep) {
+            if (currentStep < 1 || currentStep > 5) return;
+            
+            const indicators = document.querySelectorAll('.step-dot');
+            indicators.forEach((dot, index) => {
+                if (index < currentStep) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function saveName() {
+            const nameInput = document.getElementById('name-input');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Введите ваше имя');
+                nameInput.focus();
+                return;
+            }
+            
+            if (name.length < 2) {
+                alert('Имя должно быть минимум 2 символа');
+                nameInput.focus();
+                return;
+            }
+            
+            userProfile.firstName = name;
+            console.log('Имя сохранено:', userProfile.firstName);
+            goToStep(2);
+        }
+
+        function saveAge() {
+            const ageSelect = document.getElementById('age-select');
+            const age = parseInt(ageSelect.value);
+            
+            if (!age || age < 18 || age > 60) {
+                alert('Выберите возраст от 18 до 60 лет');
+                ageSelect.focus();
+                return;
+            }
+            
+            userProfile.age = age;
+            console.log('Возраст сохранен:', userProfile.age);
+            goToStep(3);
+        }
+
+        function saveCity() {
+            const citySelect = document.getElementById('city-select');
+            const city = citySelect.value;
+            
+            if (!city) {
+                alert('Выберите ваш город');
+                citySelect.focus();
+                return;
+            }
+            
+            userProfile.city = city;
+            console.log('Город сохранен:', userProfile.city);
+            goToStep(4);
+        }
+
+        function previewMainPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('main-photo-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                
+                userProfile.mainPhoto = e.target.result;
+                console.log('Основное фото загружено');
+                
+                // Показываем уведомление
+                showNotification('Фото успешно загружено!');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function previewSelfie(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('selfie-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                
+                userProfile.selfiePhoto = e.target.result;
+                console.log('Селфи загружено');
+                
+                // Показываем уведомление
+                showNotification('Селфи успешно загружено!');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function showNotification(text) {
+            // Создаем временное уведомление
+            const notification = document.createElement('div');
+            notification.textContent = text;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4caf50;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        function saveMainPhoto() {
+            if (!userProfile.mainPhoto) {
+                alert('Загрузите ваше фото');
+                return;
+            }
+            
+            console.log('Основное фото сохранено');
+            goToStep(5);
+        }
+
+        async function saveSelfie() {
+            if (!userProfile.selfiePhoto) {
+                alert('Загрузите селфи для подтверждения');
+                return;
+            }
+            
+            // Подтверждение отправки
+            if (confirm('Отправить анкету на проверку? После отправки вы не сможете изменить данные.')) {
+                // Сохраняем профиль
+                userProfile.status = 'pending';
+                userProfile.registeredAt = new Date().toISOString();
+                
+                // Сохраняем в localStorage
+                localStorage.setItem('sia_user', JSON.stringify(userProfile));
+                
+                // Имитируем отправку на сервер
+                console.log('Отправка данных на сервер...');
+                
+                // Переходим к экрану ожидания
+                goToStep(6);
+                
+                // Имитируем обработку
+                setTimeout(() => {
+                    // В реальности здесь будет ответ от сервера
+                    // Пока просто сохраняем как одобренного для демо
+                    userProfile.status = 'approved';
+                    localStorage.setItem('sia_user', JSON.stringify(userProfile));
+                    
+                    // Обновляем профиль в дашборде
+                    updateProfileInfo();
+                    
+                    // Показываем дашборд
+                    goToStep(7);
+                    
+                    alert('🎉 Ваша анкета одобрена! Теперь вы можете начать знакомства.');
+                }, 3000);
+            }
+        }
+
+        function updateProfileInfo() {
+            document.getElementById('profile-name').textContent = userProfile.firstName || '-';
+            document.getElementById('profile-age').textContent = userProfile.age || '-';
+            document.getElementById('profile-city').textContent = userProfile.city || '-';
+        }
+
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-pane').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Деактивируем все кнопки
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показываем нужную вкладку
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            // Активируем кнопку
+            const btn = document.querySelector(`button[onclick*="${tabName}"]`);
+            if (btn) btn.classList.add('active');
+        }
+
+        function startSwiping() {
+            alert('Функция поиска партнеров скоро будет доступна!');
+        }
+
+        function editProfile() {
+            alert('Редактирование профиля скоро будет доступно!');
+        }
+
+        function openAdminPanel() {
+            window.open('admin.html', '_blank');
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, есть ли сохраненный пользователь
+            const savedUser = localStorage.getItem('sia_user');
+            if (savedUser) {
+                userProfile = JSON.parse(savedUser);
+                
+                // Если пользователь одобрен, показываем дашборд
+                if (userProfile.status === 'approved') {
+                    updateProfileInfo();
+                    goToStep(7);
+                } 
+                // Если на проверке
+                else if (userProfile.status === 'pending') {
+                    goToStep(6);
+                }
+            }
+            
+            // Приветствуем пользователя из Telegram
+            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+            if (tgUser?.first_name) {
+                document.getElementById('welcome-text').textContent = `Привет, ${tgUser.first_name}!`;
+                
+                // Автозаполняем имя
+                if (!userProfile.firstName) {
+                    document.getElementById('name-input').value = tgUser.first_name;
+                }
+                
+                // Сохраняем Telegram ID
+                if (!userProfile.telegramId) {
+                    userProfile.telegramId = tgUser.id;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
