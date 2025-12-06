@@ -30,6 +30,7 @@
                     <div class="step-dot"></div>
                     <div class="step-dot"></div>
                     <div class="step-dot"></div>
+                    <div class="step-dot"></div>
                 </div>
 
                 <h2>Как вас зовут?</h2>
@@ -46,12 +47,47 @@
             </div>
         </div>
 
-        <!-- Шаг 2: Возраст -->
+        <!-- Шаг 2: Пол -->
         <div id="step-2" class="step hidden">
             <button class="back-btn" onclick="goToStep(1)">← Назад</button>
             
             <div class="step-content">
                 <div class="progress-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h2>Ваш пол</h2>
+                <p class="step-description">
+                    Выберите ваш пол для корректного подбора партнеров
+                </p>
+
+                <div class="gender-selection">
+                    <div class="gender-option" onclick="selectGender('male')">
+                        <div class="gender-icon">👨</div>
+                        <div class="gender-label">Мужчина</div>
+                    </div>
+                    <div class="gender-option" onclick="selectGender('female')">
+                        <div class="gender-icon">👩</div>
+                        <div class="gender-label">Женщина</div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveGender()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Шаг 3: Возраст -->
+        <div id="step-3" class="step hidden">
+            <button class="back-btn" onclick="goToStep(2)">← Назад</button>
+            
+            <div class="step-content">
+                <div class="progress-indicator">
+                    <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot"></div>
@@ -75,12 +111,13 @@
             </div>
         </div>
 
-        <!-- Шаг 3: Город -->
-        <div id="step-3" class="step hidden">
-            <button class="back-btn" onclick="goToStep(2)">← Назад</button>
+        <!-- Шаг 4: Город -->
+        <div id="step-4" class="step hidden">
+            <button class="back-btn" onclick="goToStep(3)">← Назад</button>
             
             <div class="step-content">
                 <div class="progress-indicator">
+                    <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
@@ -103,12 +140,13 @@
             </div>
         </div>
 
-        <!-- Шаг 4: Основное фото -->
-        <div id="step-4" class="step hidden">
-            <button class="back-btn" onclick="goToStep(3)">← Назад</button>
+        <!-- Шаг 5: Основное фото -->
+        <div id="step-5" class="step hidden">
+            <button class="back-btn" onclick="goToStep(4)">← Назад</button>
             
             <div class="step-content">
                 <div class="progress-indicator">
+                    <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
@@ -138,12 +176,13 @@
             </div>
         </div>
 
-        <!-- Шаг 5: Селфи для подтверждения -->
-        <div id="step-5" class="step hidden">
-            <button class="back-btn" onclick="goToStep(4)">← Назад</button>
+        <!-- Шаг 6: Селфи для подтверждения -->
+        <div id="step-6" class="step hidden">
+            <button class="back-btn" onclick="goToStep(5)">← Назад</button>
             
             <div class="step-content">
                 <div class="progress-indicator">
+                    <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
                     <div class="step-dot active"></div>
@@ -173,8 +212,8 @@
             </div>
         </div>
 
-        <!-- Шаг 6: Ожидание проверки -->
-        <div id="step-6" class="step hidden">
+        <!-- Шаг 7: Ожидание проверки -->
+        <div id="step-7" class="step hidden">
             <div class="verification-screen">
                 <div class="verification-icon">⏳</div>
                 <div class="verification-title">Данные на проверке</div>
