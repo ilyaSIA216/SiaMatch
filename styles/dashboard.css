@@ -6,13 +6,18 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
 }
 
 .logo {
     font-size: 24px;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-avatar {
@@ -26,12 +31,16 @@
     justify-content: center;
     font-weight: bold;
     font-size: 18px;
+    border: 2px solid white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 /* Основной контент */
 .main-content {
     flex: 1;
     overflow: hidden;
+    background: #f5f5f5;
+    border-radius: 0 0 15px 15px;
 }
 
 .tab-content {
@@ -42,6 +51,12 @@
 
 .tab-content.active {
     display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ========== ВКЛАДКА СВАЙПОВ ========== */
@@ -55,15 +70,77 @@
     padding: 20px 0;
 }
 
-.profile-card {
-    width: 100%;
-    height: 500px;
+/* Сообщение "нет пользователей" */
+.no-users-message {
+    text-align: center;
+    padding: 50px 20px;
     background: white;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 350px;
+    animation: fadeIn 0.5s ease;
+}
+
+.no-users-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    color: #4CAF50;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.no-users-message h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+.no-users-message p {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.no-users-message .btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.no-users-message .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+/* Карточка профиля */
+.profile-card {
+    width: 100%;
+    max-width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
     overflow: hidden;
     margin-bottom: 30px;
     position: relative;
+    transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
 .profile-photo {
@@ -72,27 +149,60 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     background-size: cover;
     background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .profile-info {
     padding: 20px;
+    position: relative;
 }
 
 .profile-info h3 {
     font-size: 24px;
     margin-bottom: 5px;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gender-badge {
+    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.gender-badge.female {
+    background: #fce4ec;
+    color: #c2185b;
 }
 
 .profile-info p {
     color: #666;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .profile-bio {
     color: #888;
     font-size: 14px;
     line-height: 1.5;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    max-height: 80px;
+    overflow-y: auto;
 }
 
 .swipe-buttons {
@@ -100,6 +210,8 @@
     justify-content: center;
     gap: 40px;
     margin-top: 20px;
+    width: 100%;
+    max-width: 350px;
 }
 
 .swipe-btn {
@@ -113,10 +225,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .swipe-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .swipe-btn:active {
@@ -126,26 +240,45 @@
 .dislike {
     background: #FF6B6B;
     color: white;
+    border: 3px solid #FF6B6B;
+}
+
+.dislike:hover {
+    background: white;
+    color: #FF6B6B;
 }
 
 .like {
     background: #4CAF50;
     color: white;
+    border: 3px solid #4CAF50;
+}
+
+.like:hover {
+    background: white;
+    color: #4CAF50;
 }
 
 /* ========== ВКЛАДКА ЧАТОВ ========== */
 
 .chats-container {
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .chats-container h2 {
     color: #333;
     margin-bottom: 20px;
     font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .chats-list {
+    flex: 1;
+    overflow-y: auto;
     margin-top: 20px;
 }
 
@@ -157,17 +290,29 @@
     border-radius: 15px;
     margin-bottom: 10px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s;
+    border: 2px solid transparent;
 }
 
 .chat-item:hover {
     background: #f0f0f0;
+    border-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.chat-item.unread {
+    background: #e8f5e9;
+    border-color: #4CAF50;
+}
+
+.chat-item.unread:hover {
+    background: #dcedc8;
 }
 
 .chat-avatar {
     width: 50px;
     height: 50px;
-    background: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -176,122 +321,215 @@
     font-weight: bold;
     font-size: 20px;
     margin-right: 15px;
+    flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 .chat-info {
     flex: 1;
+    min-width: 0;
 }
 
 .chat-name {
     font-weight: bold;
     color: #333;
     margin-bottom: 5px;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unread-badge {
+    background: #4CAF50;
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
 }
 
 .chat-last-msg {
     color: #666;
     font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chat-time {
     color: #888;
     font-size: 12px;
+    flex-shrink: 0;
+    margin-left: 10px;
 }
 
 /* ========== ВКЛАДКА ПРОФИЛЯ ========== */
 
 .profile-container {
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .profile-container h2 {
     color: #333;
     margin-bottom: 20px;
     font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .my-profile-card {
-    background: #f9f9f9;
+    background: linear-gradient(135deg, #f9f9f9, #f0f0f0);
     border-radius: 20px;
     padding: 25px;
     margin-bottom: 30px;
     display: flex;
     align-items: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 2px solid #e0e0e0;
+    animation: fadeIn 0.5s ease;
 }
 
 .my-photo {
     width: 100px;
     height: 100px;
-    background: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
     border-radius: 50%;
     margin-right: 20px;
     background-size: cover;
     background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    border: 3px solid white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+.my-info {
+    flex: 1;
 }
 
 .my-info h3 {
     font-size: 24px;
     margin-bottom: 5px;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.my-gender {
+    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
 }
 
 .my-info p {
     color: #666;
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .profile-stats {
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    margin-top: 15px;
 }
 
 .stat {
     text-align: center;
+    padding: 10px 15px;
+    background: white;
+    border-radius: 12px;
+    min-width: 80px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s;
+}
+
+.stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #4CAF50;
 }
 
 .stat-number {
     font-size: 24px;
     font-weight: bold;
     color: #4CAF50;
+    margin-bottom: 5px;
 }
 
 .stat-label {
     font-size: 12px;
     color: #888;
-    margin-top: 5px;
+    font-weight: 500;
 }
 
 .profile-actions {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
+    flex: 1;
 }
 
 .action-btn {
-    background: #f0f0f0;
-    border: none;
-    padding: 15px;
-    border-radius: 15px;
-    font-size: 16px;
+    background: white;
+    border: 2px solid #f0f0f0;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 15px;
     cursor: pointer;
     transition: all 0.3s;
     text-align: left;
     color: #333;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
 }
 
 .action-btn:hover {
-    background: #e0e0e0;
+    background: #f5f5f5;
     transform: translateY(-2px);
+    border-color: #4CAF50;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+}
+
+.action-btn i {
+    width: 20px;
+    color: #4CAF50;
+    font-size: 16px;
 }
 
 .action-btn.logout {
-    background: #FFE5E5;
-    color: #FF6B6B;
-    margin-top: 20px;
+    background: #FFEBEE;
+    border-color: #FFCDD2;
+    color: #f44336;
+    margin-top: 10px;
 }
 
 .action-btn.logout:hover {
-    background: #FFD5D5;
+    background: #FFCDD2;
+    border-color: #f44336;
+}
+
+.action-btn.logout i {
+    color: #f44336;
 }
 
 /* ========== НИЖНЯЯ НАВИГАЦИЯ ========== */
@@ -299,48 +537,204 @@
 .bottom-nav {
     display: flex;
     justify-content: space-around;
-    padding: 20px;
+    padding: 15px 20px;
     background: white;
-    border-top: 1px solid #eee;
+    border-top: 2px solid #f0f0f0;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
 }
 
 .nav-btn {
     background: none;
     border: none;
-    font-size: 28px;
+    font-size: 24px;
     color: #ccc;
     cursor: pointer;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 12px 20px;
+    border-radius: 12px;
     transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+}
+
+.nav-btn span {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 500;
 }
 
 .nav-btn.active {
     color: #4CAF50;
     background: #E8F5E9;
-    transform: scale(1.1);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.15);
 }
 
-.nav-btn:hover {
+.nav-btn.active span {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.nav-btn:hover:not(.active) {
     color: #4CAF50;
     background: #F5F5F5;
 }
 
-/* Анимации */
+.nav-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #f44336;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Анимации свайпов */
 @keyframes swipeRight {
-    0% { transform: translateX(0) rotate(0); opacity: 1; }
-    100% { transform: translateX(500px) rotate(20deg); opacity: 0; }
+    0% { 
+        transform: translateX(0) rotate(0) scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateX(100px) rotate(10deg) scale(0.95); 
+        opacity: 0.7; 
+    }
+    100% { 
+        transform: translateX(500px) rotate(20deg) scale(0.9); 
+        opacity: 0; 
+    }
 }
 
 @keyframes swipeLeft {
-    0% { transform: translateX(0) rotate(0); opacity: 1; }
-    100% { transform: translateX(-500px) rotate(-20deg); opacity: 0; }
+    0% { 
+        transform: translateX(0) rotate(0) scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateX(-100px) rotate(-10deg) scale(0.95); 
+        opacity: 0.7; 
+    }
+    100% { 
+        transform: translateX(-500px) rotate(-20deg) scale(0.9); 
+        opacity: 0; 
+    }
 }
 
 .swipe-right {
-    animation: swipeRight 0.5s forwards;
+    animation: swipeRight 0.5s ease-out forwards;
+    pointer-events: none;
 }
 
 .swipe-left {
-    animation: swipeLeft 0.5s forwards;
+    animation: swipeLeft 0.5s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Утилиты */
+.hidden {
+    display: none !important;
+}
+
+/* Полосы прокрутки */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .top-bar {
+        padding: 15px;
+        border-radius: 0;
+    }
+    
+    .main-content {
+        border-radius: 0;
+    }
+    
+    .tab-content {
+        padding: 15px;
+    }
+    
+    .profile-card {
+        height: 450px;
+        max-width: 100%;
+    }
+    
+    .profile-photo {
+        height: 65%;
+    }
+    
+    .swipe-buttons {
+        gap: 30px;
+    }
+    
+    .swipe-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .my-profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .my-photo {
+        margin-right: 0;
+        margin-bottom: 15px;
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
+    }
+    
+    .profile-stats {
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .stat {
+        min-width: 70px;
+        padding: 8px 12px;
+    }
+    
+    .stat-number {
+        font-size: 20px;
+    }
+    
+    .bottom-nav {
+        padding: 12px 15px;
+        border-radius: 0;
+    }
+    
+    .nav-btn {
+        padding: 10px 15px;
+        font-size: 20px;
+    }
+    
+    .nav-btn span {
+        font-size: 11px;
+    }
 }
