@@ -1,838 +1,419 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiaMatch - Знакомства</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .welcome-text {
-            font-size: 24px;
-            margin-bottom: 40px;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .app-name {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 40px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .start-btn {
-            background: white;
-            color: #00b09b;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 30px;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s;
-        }
-        
-        .start-btn:hover {
-            transform: translateY(-3px);
-        }
-        
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 20px;
-            border: 4px solid white;
-        }
-        
-        .steps-indicator {
-            display: flex;
-            gap: 10px;
-            margin: 30px 0;
-        }
-        
-        .step-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .step-dot.active {
-            background: white;
-            transform: scale(1.2);
-        }
-        
-        .step-container {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 30px;
-            margin-top: 20px;
-        }
-        
-        .step-title {
-            font-size: 24px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .input-field {
-            width: 100%;
-            padding: 18px;
-            border-radius: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 18px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-        
-        .input-field:focus {
-            border-color: white;
-        }
-        
-        .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        select.input-field option {
-            color: #333;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .nav-btn {
-            flex: 1;
-            padding: 16px;
-            border-radius: 15px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-next {
-            background: white;
-            color: #00b09b;
-        }
-        
-        .btn-prev {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        
-        .btn-submit {
-            background: white;
-            color: #00b09b;
-            width: 100%;
-            padding: 18px;
-            border-radius: 15px;
-            border: none;
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-        
-        .photo-upload {
-            text-align: center;
-            margin: 30px 0;
-        }
-        
-        .upload-area {
-            border: 3px dashed rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            padding: 40px 20px;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .upload-area:hover {
-            border-color: white;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .upload-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-        }
-        
-        .photo-preview {
-            width: 200px;
-            height: 200px;
-            border-radius: 20px;
-            object-fit: cover;
-            margin: 20px auto;
-            display: block;
-            border: 3px solid white;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 30px auto;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Стили для выпадающих списков */
-        .select-wrapper {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        
-        .select-wrapper select {
-            appearance: none;
-            padding-right: 40px;
-        }
-        
-        .select-arrow {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            font-size: 20px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Шаг 0: Главная страница -->
-    <div class="container" id="step-0">
-        <div class="user-avatar" id="user-avatar">
-            <!-- Загрузится из Telegram -->
-        </div>
-        
-        <div class="welcome-text" id="welcome-text">
-            Добро пожаловать!
-        </div>
-        
-        <div class="app-name">
-            🍀 SiaMatch
-        </div>
-        
-        <button class="start-btn" onclick="startOnboarding()">
-            Начать знакомство
-        </button>
-    </div>
+// ========== КОНСТАНТЫ И ПЕРЕМЕННЫЕ ==========
+const API_URL = 'https://laughing-space-fiesta-x57vjp5qgg4rc667v-3000.app.github.dev';
+
+// ========== МОК TELEGRAM ДЛЯ БРАУЗЕРА ==========
+if (!window.Telegram || !Telegram.WebApp) {
+    console.log('⚠️ Режим разработки: Имитируем Telegram WebApp');
     
-    <!-- Шаг 1: Имя -->
-    <div class="container hidden" id="step-1">
-        <div class="steps-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
+    window.Telegram = {
+        WebApp: {
+            initDataUnsafe: {
+                user: {
+                    id: 123456789,
+                    username: 'test_user',
+                    first_name: 'Иван',
+                    last_name: 'Тестовый'
+                }
+            },
+            expand: function() { console.log('[DEBUG] Telegram expanded') },
+            ready: function() { console.log('[DEBUG] Telegram ready') },
+            showAlert: function(msg) { 
+                console.log('[DEBUG] Alert:', msg);
+                alert(msg);
+            },
+            showConfirm: function(msg, callback) {
+                console.log('[DEBUG] Confirm:', msg);
+                if (confirm(msg + ' (OK=Да, Cancel=Нет)')) {
+                    callback(true);
+                } else {
+                    callback(false);
+                }
+            }
+        }
+    };
+}
+
+const tg = window.Telegram.WebApp;
+
+let userProfile = {
+    telegramId: null,
+    username: null,
+    firstName: null,
+    age: null,
+    city: null,
+    mainPhoto: null,
+    selfiePhoto: null
+};
+
+// ========== СПИСКИ ДАННЫХ ==========
+const russianCities = [
+    "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Нижний Новгород",
+    "Казань", "Челябинск", "Омск", "Самара", "Ростов-на-Дону", "Уфа", "Красноярск"
+].sort((a, b) => a.localeCompare(b, 'ru'));
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+async function initApp() {
+    console.log('🚀 Инициализация приложения...');
+    
+    try {
+        // 1. Инициализация Telegram
+        tg.expand();
+        tg.ready();
+        console.log('✅ Telegram инициализирован');
         
-        <div class="step-container">
-            <div class="step-title">Как вас зовут?</div>
-            
-            <input type="text" 
-                   class="input-field" 
-                   id="name-input" 
-                   placeholder="Введите ваше имя"
-                   maxlength="30">
-            
-            <div class="nav-buttons">
-                <button class="nav-btn btn-prev" onclick="goToStep(0)">
-                    Назад
-                </button>
-                <button class="nav-btn btn-next" onclick="saveName()">
-                    Далее
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 2: Возраст -->
-    <div class="container hidden" id="step-2">
-        <div class="steps-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
+        // 2. Получаем данные пользователя
+        const tgUser = tg.initDataUnsafe?.user;
+        console.log('👤 Данные пользователя Telegram:', tgUser);
         
-        <div class="step-container">
-            <div class="step-title">Сколько вам лет?</div>
+        if (!tgUser) {
+            console.warn('⚠️ Нет данных пользователя, используем тестовые');
+            userProfile.telegramId = 'test_' + Date.now();
+            userProfile.username = 'test_user';
+        } else {
+            userProfile.telegramId = tgUser.id;
+            userProfile.username = tgUser.username || '';
             
-            <div class="select-wrapper">
-                <select class="input-field" id="age-select">
-                    <option value="">Выберите возраст</option>
-                    <!-- Возрасты 18-60 загрузятся JavaScript -->
-                </select>
-                <div class="select-arrow">▼</div>
-            </div>
-            
-            <div class="nav-buttons">
-                <button class="nav-btn btn-prev" onclick="goToStep(1)">
-                    Назад
-                </button>
-                <button class="nav-btn btn-next" onclick="saveAge()">
-                    Далее
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 3: Город -->
-    <div class="container hidden" id="step-3">
-        <div class="steps-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
+            // Если есть имя в Telegram - используем его
+            if (tgUser.first_name) {
+                userProfile.firstName = tgUser.first_name;
+                document.getElementById('name-input').value = tgUser.first_name;
+            }
+        }
         
-        <div class="step-container">
-            <div class="step-title">В каком вы городе?</div>
-            
-            <div class="select-wrapper">
-                <select class="input-field" id="city-select">
-                    <option value="">Выберите город</option>
-                    <!-- Города загрузятся JavaScript -->
-                </select>
-                <div class="select-arrow">▼</div>
-            </div>
-            
-            <div class="nav-buttons">
-                <button class="nav-btn btn-prev" onclick="goToStep(2)">
-                    Назад
-                </button>
-                <button class="nav-btn btn-next" onclick="saveCity()">
-                    Далее
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 4: Основное фото -->
-    <div class="container hidden" id="step-4">
-        <div class="steps-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-        </div>
+        // 3. Отображаем приветствие
+        displayWelcome(tgUser);
         
-        <div class="step-container">
-            <div class="step-title">Добавьте ваше лучшее фото</div>
-            
-            <div class="photo-upload">
-                <div class="upload-area" onclick="document.getElementById('main-photo-input').click()">
-                    <div class="upload-icon">📷</div>
-                    <div>Нажмите для загрузки фото</div>
-                    <div style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
-                        JPEG, PNG до 5MB
-                    </div>
-                </div>
-                
-                <img id="main-photo-preview" class="photo-preview hidden">
-                
-                <input type="file" 
-                       id="main-photo-input" 
-                       accept="image/*" 
-                       class="hidden"
-                       onchange="previewMainPhoto(event)">
-            </div>
-            
-            <div class="nav-buttons">
-                <button class="nav-btn btn-prev" onclick="goToStep(3)">
-                    Назад
-                </button>
-                <button class="nav-btn btn-next" onclick="saveMainPhoto()">
-                    Далее
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 5: Селфи для подтверждения -->
-    <div class="container hidden" id="step-5">
-        <div class="steps-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-            <div class="step-dot active"></div>
-        </div>
+        // 4. Заполняем списки
+        populateAgeSelect();
+        populateCitySelect();
         
-        <div class="step-container">
-            <div class="step-title">Сделайте селфи для подтверждения</div>
-            
-            <div style="text-align: center; margin-bottom: 25px;">
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; margin: 20px 0;">
-                    <div style="font-size: 18px; margin-bottom: 10px;">📸 Требования к селфи:</div>
-                    <div style="text-align: left; font-size: 14px; opacity: 0.9;">
-                        • Лицо должно быть четко видно<br>
-                        • Без фильтров и масок<br>
-                        • Хорошее освещение<br>
-                        • Только вы в кадре
-                    </div>
-                </div>
-            </div>
-            
-            <div class="photo-upload">
-                <div class="upload-area" onclick="document.getElementById('selfie-input').click()">
-                    <div class="upload-icon">🤳</div>
-                    <div>Сделайте или загрузите селфи</div>
-                    <div style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
-                        Для подтверждения личности
-                    </div>
-                </div>
-                
-                <img id="selfie-preview" class="photo-preview hidden">
-                
-                <input type="file" 
-                       id="selfie-input" 
-                       accept="image/*" 
-                       capture="user"
-                       class="hidden"
-                       onchange="previewSelfie(event)">
-            </div>
-            
-            <div class="nav-buttons">
-                <button class="nav-btn btn-prev" onclick="goToStep(4)">
-                    Назад
-                </button>
-                <button class="nav-btn btn-next" onclick="saveSelfie()">
-                    Отправить на проверку
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 6: Загрузка данных -->
-    <div class="container hidden" id="step-6">
-        <div class="step-container">
-            <div class="loading">
-                <div class="loader"></div>
-                <div style="font-size: 20px; margin-top: 20px;">
-                    Отправляем данные...
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Шаг 7: Данные на проверке -->
-    <div class="container hidden" id="step-7">
-        <div class="step-container">
-            <div style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 80px; margin-bottom: 30px;">⏳</div>
-                
-                <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
-                    Данные на проверке
-                </div>
-                
-                <div style="font-size: 16px; line-height: 1.5; opacity: 0.9; margin-bottom: 40px;">
-                    Пожалуйста, ожидайте.<br>
-                    Модерация займет от 1 до 24 часов.<br>
-                    Мы пришлем уведомление в Telegram.
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: left;">
-                    <div style="font-weight: bold; margin-bottom: 10px;">Что проверяется:</div>
-                    <div>✅ Ваше фото</div>
-                    <div>✅ Селфи для подтверждения</div>
-                    <div>✅ Возраст 18+</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // ========== КОНСТАНТЫ И ПЕРЕМЕННЫЕ ==========
-        const API_URL = 'https://laughing-space-fiesta-x57vjp5qgg4rc667v-3000.app.github.dev';
-        const tg = window.Telegram.WebApp;
+        console.log('✅ Приложение готово к работе');
         
-        let userProfile = {
-            telegramId: null,
-            username: null,
-            firstName: null,
-            age: null,
-            city: null,
-            mainPhoto: null,
-            selfiePhoto: null
+    } catch (error) {
+        console.error('❌ Ошибка инициализации:', error);
+        alert('Ошибка загрузки приложения: ' + error.message);
+    }
+}
+
+function displayWelcome(tgUser) {
+    const welcomeText = document.getElementById('welcome-text');
+    const userAvatar = document.getElementById('user-avatar');
+    
+    // Приветствие с именем
+    if (tgUser && tgUser.first_name) {
+        welcomeText.textContent = `Привет, ${tgUser.first_name}!`;
+    } else {
+        welcomeText.textContent = 'Привет! Добро пожаловать в SiaMatch!';
+    }
+    
+    // Аватар
+    if (tgUser && tgUser.first_name) {
+        userAvatar.textContent = tgUser.first_name.charAt(0).toUpperCase();
+    } else {
+        userAvatar.textContent = '👤';
+    }
+}
+
+function populateAgeSelect() {
+    const select = document.getElementById('age-select');
+    console.log('Заполняем список возрастов...');
+    
+    // Очищаем
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+    
+    // Добавляем placeholder
+    const placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = "Выберите возраст";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    select.appendChild(placeholder);
+    
+    // Добавляем возраста 18-60
+    for (let age = 18; age <= 60; age++) {
+        const option = document.createElement('option');
+        option.value = age;
+        option.textContent = `${age} лет`;
+        select.appendChild(option);
+    }
+    
+    console.log(`✅ Добавлено ${select.options.length - 1} возрастов`);
+}
+
+function populateCitySelect() {
+    const select = document.getElementById('city-select');
+    console.log('Заполняем список городов...');
+    
+    // Очищаем
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+    
+    // Добавляем placeholder
+    const placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = "Выберите город";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    select.appendChild(placeholder);
+    
+    // Добавляем города
+    russianCities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        select.appendChild(option);
+    });
+    
+    console.log(`✅ Добавлено ${select.options.length - 1} городов`);
+}
+
+// ========== НАВИГАЦИЯ ==========
+function goToStep(stepNumber) {
+    console.log(`Переход к шагу ${stepNumber}`);
+    
+    // Скрываем все шаги
+    for (let i = 0; i <= 7; i++) {
+        document.getElementById(`step-${i}`).classList.add('hidden');
+    }
+    
+    // Показываем нужный шаг
+    document.getElementById(`step-${stepNumber}`).classList.remove('hidden');
+    
+    // Обновляем индикатор прогресса
+    updateProgressIndicator(stepNumber);
+}
+
+function updateProgressIndicator(currentStep) {
+    if (currentStep < 1 || currentStep > 5) return;
+    
+    const indicators = document.querySelectorAll('.step-dot');
+    indicators.forEach((dot, index) => {
+        if (index < currentStep) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+function startOnboarding() {
+    console.log('Начало онбординга');
+    goToStep(1);
+}
+
+// ========== СОХРАНЕНИЕ ДАННЫХ ==========
+function saveName() {
+    const name = document.getElementById('name-input').value.trim();
+    console.log('Сохраняем имя:', name);
+    
+    if (!name) {
+        alert('Введите ваше имя');
+        return;
+    }
+    
+    if (name.length < 2) {
+        alert('Имя должно быть минимум 2 символа');
+        return;
+    }
+    
+    userProfile.firstName = name;
+    goToStep(2);
+}
+
+function saveAge() {
+    const ageSelect = document.getElementById('age-select');
+    const age = parseInt(ageSelect.value);
+    
+    console.log('Выбран возраст:', age, 'Из элемента:', ageSelect);
+    
+    if (!age || age < 18 || age > 60) {
+        alert('Выберите возраст от 18 до 60 лет');
+        
+        // Покажем что доступно
+        console.log('Доступные опции:');
+        for (let i = 0; i < ageSelect.options.length; i++) {
+            console.log(`  ${i}: ${ageSelect.options[i].value} - ${ageSelect.options[i].text}`);
+        }
+        
+        return;
+    }
+    
+    userProfile.age = age;
+    console.log('Возраст сохранен:', userProfile.age);
+    goToStep(3);
+}
+
+function saveCity() {
+    const citySelect = document.getElementById('city-select');
+    const city = citySelect.value;
+    
+    console.log('Выбран город:', city, 'Из элемента:', citySelect);
+    
+    if (!city) {
+        alert('Выберите ваш город');
+        return;
+    }
+    
+    userProfile.city = city;
+    goToStep(4);
+}
+
+// ========== РАБОТА С ФОТО ==========
+function previewMainPhoto(event) {
+    const file = event.target.files[0];
+    console.log('Выбрано основное фото:', file);
+    
+    if (!file) return;
+    
+    // Проверка размера (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Фото должно быть меньше 5MB');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('main-photo-preview');
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        
+        // Сохраняем данные фото
+        userProfile.mainPhoto = e.target.result;
+        console.log('Основное фото загружено');
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function previewSelfie(event) {
+    const file = event.target.files[0];
+    console.log('Выбрано селфи:', file);
+    
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('selfie-preview');
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        
+        // Сохраняем данные фото
+        userProfile.selfiePhoto = e.target.result;
+        console.log('Селфи загружено');
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function saveMainPhoto() {
+    if (!userProfile.mainPhoto) {
+        alert('Загрузите ваше фото');
+        return;
+    }
+    
+    console.log('Основное фото сохранено');
+    goToStep(5);
+}
+
+async function saveSelfie() {
+    if (!userProfile.selfiePhoto) {
+        alert('Загрузите селфи для подтверждения');
+        return;
+    }
+    
+    console.log('Начинаем отправку данных...');
+    goToStep(6);
+    
+    try {
+        // Отправляем данные на сервер
+        await sendRegistrationData();
+        
+        // Сохраняем в localStorage
+        localStorage.setItem('sia_match_profile', JSON.stringify({
+            ...userProfile,
+            status: 'pending',
+            registeredAt: new Date().toISOString()
+        }));
+        
+        console.log('✅ Данные сохранены, переходим к ожиданию');
+        
+        // Переходим к экрану ожидания
+        setTimeout(() => {
+            goToStep(7);
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Ошибка отправки данных:', error);
+        alert('Ошибка отправки данных: ' + error.message + '\nПроверьте консоль (F12)');
+        goToStep(5);
+    }
+}
+
+// ========== ОТПРАВКА НА СЕРВЕР ==========
+async function sendRegistrationData() {
+    console.log('🚀 Отправка данных на сервер...');
+    
+    try {
+        const registrationData = {
+            telegramId: userProfile.telegramId || 'test_' + Date.now(),
+            username: userProfile.username || '',
+            firstName: userProfile.firstName,
+            age: userProfile.age,
+            city: userProfile.city,
+            gender: 'not_specified'
         };
         
-        // ========== СПИСКИ ДАННЫХ ==========
-        const russianCities = [
-            "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Нижний Новгород",
-            "Казань", "Челябинск", "Омск", "Самара", "Ростов-на-Дону", "Уфа", "Красноярск",
-            "Воронеж", "Пермь", "Волгоград", "Краснодар", "Саратов", "Тюмень", "Тольятти",
-            "Ижевск", "Барнаул", "Ульяновск", "Иркутск", "Хабаровск", "Ярославль",
-            "Владивосток", "Махачкала", "Томск", "Оренбург", "Кемерово", "Новокузнецк",
-            "Рязань", "Астрахань", "Набережные Челны", "Пенза", "Киров", "Липецк",
-            "Чебоксары", "Балашиха", "Калининград", "Тула", "Курск", "Севастополь",
-            "Сочи", "Магнитогорск", "Тверь", "Ставрополь", "Симферополь", "Иваново",
-            "Брянск", "Белгород", "Сургут", "Владимир", "Архангельск", "Калуга",
-            "Смоленск", "Якутск", "Саранск", "Чита", "Грозный", "Волжский", "Череповец",
-            "Владикавказ", "Мурманск", "Курган", "Стерлитамак", "Орёл", "Вологда",
-            "Салехард", "Чукотский АО", "Еврейская АО"
-        ].sort((a, b) => a.localeCompare(b, 'ru'));
+        console.log('📤 Данные для отправки:', registrationData);
+        console.log('🎯 URL:', `${API_URL}/api/register`);
         
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        async function initApp() {
-            try {
-                // 1. Инициализация Telegram
-                tg.expand();
-                tg.ready();
-                
-                // 2. Получаем данные пользователя
-                const tgUser = tg.initDataUnsafe?.user;
-                if (!tgUser) {
-                    alert('Ошибка: войдите через Telegram бота');
-                    return;
-                }
-                
-                // 3. Сохраняем данные Telegram
-                userProfile.telegramId = tgUser.id;
-                userProfile.username = tgUser.username || '';
-                
-                // 4. Если есть имя в Telegram - используем его
-                if (tgUser.first_name) {
-                    userProfile.firstName = tgUser.first_name;
-                    document.getElementById('name-input').value = tgUser.firstName;
-                }
-                
-                // 5. Отображаем приветствие
-                displayWelcome(tgUser);
-                
-                // 6. Заполняем списки
-                populateAgeSelect();
-                populateCitySelect();
-                
-                console.log('✅ Приложение инициализировано');
-                
-            } catch (error) {
-                console.error('❌ Ошибка инициализации:', error);
-                alert('Ошибка загрузки приложения');
-            }
+        const response = await fetch(`${API_URL}/api/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(registrationData)
+        });
+        
+        console.log('📥 Статус ответа:', response.status);
+        
+        const result = await response.json();
+        console.log('✅ Ответ сервера:', result);
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Ошибка сервера');
         }
         
-        function displayWelcome(tgUser) {
-            const welcomeText = document.getElementById('welcome-text');
-            const userAvatar = document.getElementById('user-avatar');
-            
-            // Приветствие с именем
-            if (tgUser.first_name) {
-                welcomeText.textContent = `Привет, ${tgUser.first_name}!`;
-            }
-            
-            // Аватар (первая буква имени или эмодзи)
-            if (tgUser.first_name) {
-                userAvatar.textContent = tgUser.first_name.charAt(0).toUpperCase();
-            } else {
-                userAvatar.textContent = '👤';
-            }
-        }
+        console.log('🎉 Регистрация успешна!');
+        return result;
         
-        function populateAgeSelect() {
-            const select = document.getElementById('age-select');
-            select.innerHTML = '<option value="">Выберите возраст</option>';
-            
-            for (let age = 18; age <= 60; age++) {
-                const option = document.createElement('option');
-                option.value = age;
-                option.textContent = `${age} лет`;
-                select.appendChild(option);
-            }
-        }
+    } catch (error) {
+        console.error('🔥 Ошибка отправки:', error);
         
-        function populateCitySelect() {
-            const select = document.getElementById('city-select');
-            select.innerHTML = '<option value="">Выберите город</option>';
-            
-            russianCities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                select.appendChild(option);
-            });
-        }
+        // Сохраняем локально на всякий случай
+        localStorage.setItem('sia_match_profile', JSON.stringify({
+            ...userProfile,
+            status: 'pending_offline',
+            registeredAt: new Date().toISOString(),
+            error: error.message
+        }));
         
-        // ========== НАВИГАЦИЯ ==========
-        function goToStep(stepNumber) {
-            // Скрываем все шаги
-            for (let i = 0; i <= 7; i++) {
-                document.getElementById(`step-${i}`).classList.add('hidden');
-            }
-            
-            // Показываем нужный шаг
-            document.getElementById(`step-${stepNumber}`).classList.remove('hidden');
-            
-            // Обновляем индикатор прогресса
-            updateProgressIndicator(stepNumber);
-        }
-        
-        function updateProgressIndicator(currentStep) {
-            if (currentStep < 1 || currentStep > 5) return;
-            
-            const indicators = document.querySelectorAll('.step-dot');
-            indicators.forEach((dot, index) => {
-                if (index < currentStep) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
-        }
-        
-        function startOnboarding() {
-            goToStep(1);
-        }
-        
-        // ========== СОХРАНЕНИЕ ДАННЫХ ==========
-        function saveName() {
-            const name = document.getElementById('name-input').value.trim();
-            
-            if (!name) {
-                tg.showAlert('Введите ваше имя');
-                return;
-            }
-            
-            if (name.length < 2) {
-                tg.showAlert('Имя должно быть минимум 2 символа');
-                return;
-            }
-            
-            userProfile.firstName = name;
-            goToStep(2);
-        }
-        
-        function saveAge() {
-            const age = parseInt(document.getElementById('age-select').value);
-            
-            if (!age || age < 18 || age > 60) {
-                tg.showAlert('Выберите возраст от 18 до 60 лет');
-                return;
-            }
-            
-            userProfile.age = age;
-            goToStep(3);
-        }
-        
-        function saveCity() {
-            const city = document.getElementById('city-select').value;
-            
-            if (!city) {
-                tg.showAlert('Выберите ваш город');
-                return;
-            }
-            
-            userProfile.city = city;
-            goToStep(4);
-        }
-        
-        // ========== РАБОТА С ФОТО ==========
-        function previewMainPhoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // Проверка размера (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                tg.showAlert('Фото должно быть меньше 5MB');
-                return;
-            }
-            
-            // Проверка типа
-            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-                tg.showAlert('Загрузите JPEG или PNG файл');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('main-photo-preview');
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
-                
-                // Сохраняем данные фото
-                userProfile.mainPhoto = e.target.result;
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        function previewSelfie(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // Проверка размера (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                tg.showAlert('Фото должно быть меньше 5MB');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('selfie-preview');
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
-                
-                // Сохраняем данные фото
-                userProfile.selfiePhoto = e.target.result;
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        function saveMainPhoto() {
-            if (!userProfile.mainPhoto) {
-                tg.showAlert('Загрузите ваше фото');
-                return;
-            }
-            
-            goToStep(5);
-        }
-        
-        async function saveSelfie() {
-            if (!userProfile.selfiePhoto) {
-                tg.showAlert('Загрузите селфи для подтверждения');
-                return;
-            }
-            
-            goToStep(6);
-            
-            try {
-                // Отправляем данные на сервер
-                await sendRegistrationData();
-                
-                // Сохраняем в localStorage
-                localStorage.setItem('sia_match_profile', JSON.stringify({
-                    ...userProfile,
-                    status: 'pending',
-                    registeredAt: new Date().toISOString()
-                }));
-                
-                // Переходим к экрану ожидания
-                setTimeout(() => {
-                    goToStep(7);
-                }, 2000);
-                
-            } catch (error) {
-                console.error('❌ Ошибка отправки данных:', error);
-                tg.showAlert('Ошибка отправки данных. Попробуйте снова.');
-                goToStep(5);
-            }
-        }
-        
-        // ========== ОТПРАВКА НА СЕРВЕР ==========
-        async function sendRegistrationData() {
-            try {
-                console.log('📤 Отправка данных на сервер...');
-                
-                // Подготовка данных для отправки
-                const registrationData = {
-                    telegramId: userProfile.telegramId,
-                    username: userProfile.username,
-                    firstName: userProfile.firstName,
-                    age: userProfile.age,
-                    city: userProfile.city,
-                    // В реальном приложении фото отправляются отдельно
-                    hasPhoto: !!userProfile.mainPhoto,
-                    hasSelfie: !!userProfile.selfiePhoto
-                };
-                
-                // Отправка на ваш бэкенд
-                const response = await fetch(`${API_URL}/api/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(registrationData)
-                });
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.message || 'Ошибка сервера');
-                }
-                
-                console.log('✅ Данные отправлены:', result);
-                return result;
-                
-            } catch (error) {
-                console.error('❌ Ошибка отправки:', error);
-                throw error;
-            }
-        }
-        
-        // ========== ЗАПУСК ==========
-        document.addEventListener('DOMContentLoaded', initApp);
-        
-        // Экспорт функций для глобального доступа
-        window.startOnboarding = startOnboarding;
-        window.goToStep = goToStep;
-        window.saveName = saveName;
-        window.saveAge = saveAge;
-        window.saveCity = saveCity;
-        window.saveMainPhoto = saveMainPhoto;
-        window.saveSelfie = saveSelfie;
-        window.previewMainPhoto = previewMainPhoto;
-        window.previewSelfie = previewSelfie;
-    </script>
-</body>
-</html>
+        throw error;
+    }
+}
+
+// ========== ЗАПУСК ==========
+document.addEventListener('DOMContentLoaded', initApp);
+
+// Экспорт функций для глобального доступа
+window.startOnboarding = startOnboarding;
+window.goToStep = goToStep;
+window.saveName = saveName;
+window.saveAge = saveAge;
+window.saveCity = saveCity;
+window.saveMainPhoto = saveMainPhoto;
+window.saveSelfie = saveSelfie;
+window.previewMainPhoto = previewMainPhoto;
+window.previewSelfie = previewSelfie;
