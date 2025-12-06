@@ -108,10 +108,98 @@ h2 {
     text-align: center;
 }
 
+/* ========== ВЫБОР ПОЛА ========== */
+.gender-selection {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0 30px 0;
+}
+
+.gender-option {
+    flex: 1;
+    padding: 25px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.gender-option:hover {
+    border-color: #4CAF50;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+}
+
+.gender-option.selected {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, #f0f7f0, #e8f5e9);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.15);
+}
+
+.gender-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+}
+
+.gender-option.selected .gender-icon {
+    transform: scale(1.1);
+}
+
+.gender-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.gender-option.selected .gender-label {
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+/* ========== ПОЛЯ ВВОДА ========== */
+input[type="text"],
+select {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #E0E0E0;
+    border-radius: 15px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #333;
+    background: white;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 20px center;
+    background-size: 15px;
+    padding-right: 50px;
+}
+
 /* Загрузка фото */
 .photo-upload-container {
     text-align: center;
-    margin: 15px 0;
+    margin: 15px 0 30px 0;
 }
 
 .photo-drop-area {
@@ -138,6 +226,7 @@ h2 {
     color: #666;
     font-size: 15px;
     margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .photo-subtext {
@@ -147,11 +236,13 @@ h2 {
 
 .photo-preview {
     width: 100%;
+    max-width: 250px;
     height: 180px;
     object-fit: cover;
     border-radius: 15px;
-    margin-top: 15px;
+    margin: 15px auto 0 auto;
     display: none;
+    border: 3px solid #E0E0E0;
 }
 
 .photo-preview.show {
@@ -160,6 +251,52 @@ h2 {
 
 .file-input-hidden {
     display: none;
+}
+
+/* Кнопки */
+.btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 16px 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 15px;
+    font-family: inherit;
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.back-btn {
+    background: transparent;
+    color: #666;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.back-btn:hover {
+    background: #f5f5f5;
+    color: #333;
 }
 
 /* Экран проверки */
@@ -195,6 +332,7 @@ h2 {
     font-size: 16px;
     line-height: 1.5;
     max-width: 280px;
+    margin: 0 auto 25px auto;
 }
 
 .loading-dots {
@@ -224,6 +362,63 @@ h2 {
     50% { opacity: 1; transform: scale(1.2); }
 }
 
+/* Информационные блоки */
+.info-box {
+    background: #f0f7f0;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-left: 4px solid #4CAF50;
+    font-size: 14px;
+    color: #2E7D32;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.info-box i {
+    color: #4CAF50;
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+/* Уведомления (из utils.js) */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    color: white;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.notification-success {
+    background: #4CAF50;
+}
+
+.notification-error {
+    background: #f44336;
+}
+
+.notification-info {
+    background: #2196F3;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
 /* Адаптивность */
 @media (max-width: 480px) {
     body {
@@ -233,14 +428,16 @@ h2 {
     .container {
         min-height: 100vh;
         border-radius: 0;
+        padding: 15px;
     }
     
     .step {
-        padding: 20px 15px;
+        padding: 20px 0;
     }
     
     .welcome-container {
         padding: 30px 15px;
+        border-radius: 20px;
     }
     
     h2 {
@@ -254,5 +451,30 @@ h2 {
     
     .step-content {
         padding: 25px 20px;
+        border-radius: 20px;
+    }
+    
+    .gender-selection {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .gender-option {
+        min-height: 100px;
+        padding: 20px 15px;
+    }
+    
+    .gender-icon {
+        font-size: 40px;
+    }
+    
+    .photo-preview {
+        max-width: 200px;
+        height: 150px;
+    }
+    
+    .verification-screen {
+        padding: 30px 20px;
+        border-radius: 20px;
     }
 }
