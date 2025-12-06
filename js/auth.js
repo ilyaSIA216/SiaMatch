@@ -203,15 +203,10 @@ function previewSelfie(event) {
 }
 
 function saveSelfie() {
-    console.log('saveSelfie вызвана');
-    
     if (!userProfile.selfie) {
-        console.log('Нет селфи');
         showNotification('Пожалуйста, загрузите селфи для подтверждения', 'error');
         return;
     }
-    
-    console.log('Данные пользователя перед сохранением:', userProfile);
     
     // Сохраняем пользователя
     const userId = Date.now();
@@ -219,11 +214,8 @@ function saveSelfie() {
     userProfile.registrationDate = new Date().toISOString();
     userProfile.bio = "Пользователь SiaMatch";
     
-    console.log('ID пользователя:', userId);
-    
     // Сохраняем в localStorage как текущего пользователя
     saveUser(userProfile);
-    console.log('Пользователь сохранен в localStorage как sia_current_user');
     
     // Создаем копию данных для модерации
     const userDataForModeration = {
@@ -237,27 +229,13 @@ function saveSelfie() {
         registrationDate: userProfile.registrationDate
     };
     
-    console.log('Данные для модерации:', userDataForModeration);
+    // Отправляем на модерацию (возвращает userId)
+    const returnedUserId = submitForModeration(userDataForModeration);
     
-    // Отправляем на модерацию
-    console.log('Вызываю submitForModeration...');
-    const applicationId = submitForModeration(userDataForModeration);
-    console.log('Получен ID заявки из submitForModeration:', applicationId);
-    
-    // Сохраняем ID заявки для проверки статуса
-    localStorage.setItem('sia_current_application_id', applicationId);
-    console.log('sia_current_application_id сохранен:', applicationId);
-    
-    // Проверяем сохраненные данные
-    const savedId = localStorage.getItem('sia_current_application_id');
-    console.log('Проверка сохраненного ID:', savedId);
-    
-    const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
-    console.log('Всего заявок в системе:', pendingUsers.length);
-    console.log('Все заявки:', pendingUsers);
+    // Сохраняем ID пользователя для проверки статуса
+    localStorage.setItem('sia_current_user_id', returnedUserId);
     
     // Переходим к шагу 6
-    console.log('Перехожу к шагу 6...');
     goToStep(6);
 }
 
@@ -268,20 +246,12 @@ function showModerationInfo() {
         const verificationScreen = document.querySelector('.verification-screen');
         if (!verificationScreen) return;
         
-        const applicationId = localStorage.getItem('sia_current_application_id');
-        console.log('showModerationInfo: ищу заявку с ID:', applicationId);
-        
+        // Получаем ID пользователя
+        const userId = Number(localStorage.getItem('sia_current_user_id'));
         const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
-        console.log('showModerationInfo: всего заявок:', pendingUsers.length);
+        const userApp = pendingUsers.find(u => u.id === userId);
         
-        const userApp = pendingUsers.find(u => u.id === Number(applicationId));
-        
-        if (!userApp) {
-            console.error('showModerationInfo: заявка не найдена!');
-            return;
-        }
-        
-        console.log('showModerationInfo: найдена заявка:', userApp);
+        if (!userApp) return;
         
         const infoDiv = document.createElement('div');
         infoDiv.style.marginTop = '30px';
@@ -367,11 +337,9 @@ function showModerationInfo() {
 
 // Проверка статуса заявки
 function checkApplicationStatus() {
-    const applicationId = localStorage.getItem('sia_current_application_id');
-    console.log('checkApplicationStatus: проверяю ID:', applicationId);
-    
-    const status = checkUserStatus(Number(applicationId));
-    console.log('checkApplicationStatus: статус:', status);
+    // Получаем ID пользователя
+    const userId = Number(localStorage.getItem('sia_current_user_id'));
+    const status = checkUserStatus(userId);
     
     if (status === 'approved') {
         showNotification('🎉 Ваша анкета одобрена! Перенаправляем...', 'success');
@@ -381,7 +349,7 @@ function checkApplicationStatus() {
     } else if (status === 'rejected') {
         // Получаем причину отклонения
         const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
-        const user = pendingUsers.find(u => u.id === Number(applicationId));
+        const user = pendingUsers.find(u => u.id === userId);
         const reason = user && user.rejectionReason ? `Причина: ${user.rejectionReason}` : '';
         
         const message = reason ? 
@@ -406,9 +374,9 @@ function checkApplicationStatus() {
 // Функция для демо-тестирования (одобрение без админа)
 function simulateApproval() {
     if (confirm('Включить тестовый режим? Ваша анкета будет автоматически одобрена.')) {
-        const applicationId = localStorage.getItem('sia_current_application_id');
+        const userId = Number(localStorage.getItem('sia_current_user_id'));
         const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
-        const userIndex = pendingUsers.findIndex(u => u.id === Number(applicationId));
+        const userIndex = pendingUsers.findIndex(u => u.id === userId);
         
         if (userIndex !== -1) {
             pendingUsers[userIndex].status = 'approved';
