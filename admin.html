@@ -728,6 +728,27 @@
                 
                 localStorage.setItem('sia_pending_users', JSON.stringify(pendingUsers));
                 
+                // Если пользователь одобрен - добавляем в активные пользователи
+                if (newStatus === 'approved') {
+                    const user = pendingUsers[userIndex];
+                    const activeUsers = JSON.parse(localStorage.getItem('sia_active_users') || '[]');
+                    
+                    // Проверяем, нет ли уже такого пользователя в активных
+                    const userExists = activeUsers.some(u => u.id === userId);
+                    
+                    if (!userExists) {
+                        activeUsers.push({
+                            id: user.id,
+                            name: user.name,
+                            age: user.age,
+                            city: user.city,
+                            photo: user.mainPhoto,
+                            bio: user.bio || 'Пользователь SiaMatch'
+                        });
+                        localStorage.setItem('sia_active_users', JSON.stringify(activeUsers));
+                    }
+                }
+                
                 // Добавляем уведомление для пользователя
                 addUserNotification(userId, newStatus, reason);
                 
