@@ -22,7 +22,7 @@ function startOnboarding() {
         welcomeText.textContent = 'Привет, друг! Добро пожаловать в мир знакомств!';
     }
     
-    // Переходим к шагу 1
+    // Переходим к шагу 1 (имя)
     goToStep(1);
 }
 
@@ -39,6 +39,9 @@ function goToStep(stepNumber) {
     const stepElement = document.getElementById(`step-${stepNumber}`);
     if (stepElement) {
         stepElement.classList.remove('hidden');
+        
+        // Обновляем индикатор прогресса
+        updateProgressIndicator(stepNumber);
     } else {
         console.error(`Шаг ${stepNumber} не найден!`);
         return;
@@ -46,23 +49,31 @@ function goToStep(stepNumber) {
     
     // Инициализируем шаг, если нужно
     switch(stepNumber) {
-        case 2:
-            initGenderSelect();
-            break;
-        case 3:
+        case 3: // Возраст
             initAgeSelect();
             break;
-        case 4:
+        case 4: // Город
             initCitySelect();
             break;
-        case 8:
-            // На шаге 8 сразу запускаем процесс модерации
+        case 7: // Модерация
             setTimeout(showModerationInfo, 500);
             break;
     }
     
     // Прокрутка вверх
     window.scrollTo(0, 0);
+}
+
+// Обновление индикатора прогресса
+function updateProgressIndicator(currentStep) {
+    const progressDots = document.querySelectorAll('.progress-indicator .step-dot');
+    progressDots.forEach((dot, index) => {
+        if (index < currentStep) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
 }
 
 // ========== ШАГ 1: ИМЯ ==========
@@ -90,54 +101,43 @@ function saveName() {
     
     userProfile.name = name;
     console.log('Имя сохранено:', name);
+    
+    // Переходим к выбору пола
     goToStep(2);
 }
 
 // ========== ШАГ 2: ВЫБОР ПОЛА ==========
 
-function initGenderSelect() {
-    console.log('Инициализация выбора пола');
-    const genderSelect = document.getElementById('gender-select');
-    if (!genderSelect) {
-        console.error('Элемент выбора пола не найден');
-        return;
+// Выбор пола при клике на опцию
+function selectGender(gender) {
+    console.log('Выбран пол:', gender);
+    
+    // Снимаем выделение со всех опций
+    document.querySelectorAll('.gender-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Выделяем выбранную опцию
+    if (gender === 'male') {
+        document.querySelector('.gender-option:nth-child(1)').classList.add('selected');
+    } else {
+        document.querySelector('.gender-option:nth-child(2)').classList.add('selected');
     }
     
-    // Убедимся, что есть нужные опции
-    if (genderSelect.options.length <= 1) {
-        console.log('Заполняю опции выбора пола');
-        // Добавляем опции если их нет
-        const maleOption = document.createElement('option');
-        maleOption.value = 'male';
-        maleOption.textContent = 'Мужской';
-        
-        const femaleOption = document.createElement('option');
-        femaleOption.value = 'female';
-        femaleOption.textContent = 'Женский';
-        
-        // Добавляем после первого option (пустой)
-        genderSelect.appendChild(maleOption);
-        genderSelect.appendChild(femaleOption);
-    }
+    userProfile.gender = gender;
 }
 
 function saveGender() {
     console.log('Сохранение пола');
-    const genderSelect = document.getElementById('gender-select');
-    if (!genderSelect) {
-        console.error('Поле выбора пола не найдено');
-        return;
-    }
     
-    const gender = genderSelect.value;
-    
-    if (!gender) {
+    if (!userProfile.gender) {
         showNotification('Пожалуйста, выберите ваш пол', 'error');
         return;
     }
     
-    userProfile.gender = gender;
-    console.log('Пол сохранен:', gender);
+    console.log('Пол сохранен:', userProfile.gender);
+    
+    // Переходим к возрасту
     goToStep(3);
 }
 
@@ -182,6 +182,8 @@ function saveAge() {
     
     userProfile.age = parseInt(age);
     console.log('Возраст сохранен:', age);
+    
+    // Переходим к городу
     goToStep(4);
 }
 
@@ -238,6 +240,8 @@ function saveCity() {
     
     userProfile.city = city;
     console.log('Город сохранен:', city);
+    
+    // Переходим к основному фото
     goToStep(5);
 }
 
@@ -266,7 +270,7 @@ function previewMainPhoto(event) {
         const preview = document.getElementById('main-photo-preview');
         if (preview) {
             preview.src = e.target.result;
-            preview.classList.add('show');
+            preview.style.display = 'block';
         }
         userProfile.mainPhoto = e.target.result;
         console.log('Основное фото загружено');
@@ -283,6 +287,8 @@ function saveMainPhoto() {
     }
     
     console.log('Основное фото сохранено');
+    
+    // Переходим к селфи
     goToStep(6);
 }
 
@@ -311,30 +317,13 @@ function previewSelfie(event) {
         const preview = document.getElementById('selfie-preview');
         if (preview) {
             preview.src = e.target.result;
-            preview.classList.add('show');
+            preview.style.display = 'block';
         }
         userProfile.selfie = e.target.result;
         console.log('Селфи загружено');
     };
     reader.readAsDataURL(file);
 }
-
-// ========== ШАГ 7: БИОГРАФИЯ (ОПЦИОНАЛЬНО) ==========
-
-function saveBio() {
-    console.log('Сохранение биографии');
-    const bioTextarea = document.getElementById('bio-textarea');
-    if (bioTextarea) {
-        userProfile.bio = bioTextarea.value.trim() || "Пользователь SiaMatch";
-    } else {
-        userProfile.bio = "Пользователь SiaMatch";
-    }
-    
-    console.log('Биография сохранена:', userProfile.bio);
-    goToStep(8);
-}
-
-// ========== ШАГ 8: ОТПРАВКА НА МОДЕРАЦИЮ ==========
 
 function saveSelfie() {
     console.log('=== Начинаем сохранение и отправку анкеты ===');
@@ -355,10 +344,7 @@ function saveSelfie() {
     const userId = Date.now();
     userProfile.id = userId;
     userProfile.registrationDate = new Date().toISOString();
-    
-    if (!userProfile.bio) {
-        userProfile.bio = "Пользователь SiaMatch";
-    }
+    userProfile.bio = "Пользователь SiaMatch";
     
     console.log('ID пользователя создан:', userId);
     console.log('Данные для сохранения:', userProfile);
@@ -380,7 +366,7 @@ function saveSelfie() {
         const returnedUserId = submitForModeration(userProfile);
         console.log('submitForModeration вернула ID:', returnedUserId);
         
-        // Храним именно userId
+        // Храним userId
         localStorage.setItem('sia_current_user_id', returnedUserId.toString());
         console.log('sia_current_user_id сохранен:', returnedUserId);
         
@@ -392,7 +378,7 @@ function saveSelfie() {
         showNotification('✅ Анкета успешно отправлена на модерацию!', 'success');
         
         // Переходим к шагу модерации
-        goToStep(8);
+        goToStep(7);
         
     } catch (error) {
         console.error('Ошибка при отправке на модерацию:', error);
@@ -400,7 +386,7 @@ function saveSelfie() {
     }
 }
 
-// ========== ШАГ 9: МОДЕРАЦИЯ ==========
+// ========== ШАГ 7: МОДЕРАЦИЯ ==========
 
 function showModerationInfo() {
     console.log('Показываем информацию о модерации');
@@ -428,6 +414,7 @@ function showModerationInfo() {
                 <div style="margin-top: 30px; padding: 20px; background: #f0f7f0; border-radius: 15px;">
                     <p>Ваша анкета отправлена на проверку администратору.</p>
                     <p>Обычно проверка занимает от 15 минут до 24 часов.</p>
+                    <button class="btn" onclick="checkApplicationStatus()" style="margin-top: 15px;">Проверить статус</button>
                 </div>
             `;
             return;
@@ -443,7 +430,6 @@ function showModerationInfo() {
         infoDiv.style.fontSize = '15px';
         infoDiv.style.color = '#2E7D32';
         infoDiv.style.textAlign = 'left';
-        infoDiv.style.boxShadow = '0 5px 15px rgba(76, 175, 80, 0.1)';
         
         infoDiv.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
@@ -465,7 +451,7 @@ function showModerationInfo() {
                 </div>
                 <div>
                     <div style="font-weight: 600; color: #555; margin-bottom: 3px;">Пол:</div>
-                    <div>${userApp.gender === 'male' ? 'Мужской' : 'Женский'}</div>
+                    <div>${userApp.gender === 'male' ? 'Мужчина' : 'Женщина'}</div>
                 </div>
                 <div>
                     <div style="font-weight: 600; color: #555; margin-bottom: 3px;">Возраст:</div>
@@ -509,16 +495,7 @@ function showModerationInfo() {
         checkBtn.textContent = 'Проверить статус сейчас';
         checkBtn.onclick = checkApplicationStatus;
         
-        const demoBtn = document.createElement('button');
-        demoBtn.className = 'btn';
-        demoBtn.style.background = '#2196F3';
-        demoBtn.style.color = 'white';
-        demoBtn.textContent = 'Тестовый режим (для демо)';
-        demoBtn.onclick = simulateApproval;
-        
         actionDiv.appendChild(checkBtn);
-        // Раскомментируйте для демо-тестирования:
-        actionDiv.appendChild(demoBtn);
         
         verificationScreen.appendChild(infoDiv);
         verificationScreen.appendChild(actionDiv);
@@ -573,44 +550,6 @@ function checkApplicationStatus() {
     }
 }
 
-// Функция для демо-тестирования (одобрение без админа)
-function simulateApproval() {
-    if (confirm('Включить тестовый режим? Ваша анкета будет автоматически одобрена.')) {
-        const userId = Number(localStorage.getItem('sia_current_user_id'));
-        const pendingUsers = JSON.parse(localStorage.getItem('sia_pending_users') || '[]');
-        const userIndex = pendingUsers.findIndex(u => u.id === userId);
-        
-        if (userIndex !== -1) {
-            pendingUsers[userIndex].status = 'approved';
-            pendingUsers[userIndex].moderatedAt = new Date().toISOString();
-            pendingUsers[userIndex].moderator = 'Тестовый режим';
-            
-            localStorage.setItem('sia_pending_users', JSON.stringify(pendingUsers));
-            
-            // Добавляем в активные пользователи
-            const user = pendingUsers[userIndex];
-            const activeUsers = JSON.parse(localStorage.getItem('sia_active_users') || '[]');
-            activeUsers.push({
-                id: user.id,
-                name: user.name,
-                age: user.age,
-                city: user.city,
-                photo: user.mainPhoto,
-                bio: user.bio || 'Пользователь SiaMatch',
-                gender: user.gender
-            });
-            localStorage.setItem('sia_active_users', JSON.stringify(activeUsers));
-            
-            showNotification('✅ Тестовое одобрение выполнено! Перенаправляем...', 'success');
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1500);
-        } else {
-            showNotification('⚠️ Заявка не найдена', 'error');
-        }
-    }
-}
-
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Auth.js инициализирован');
@@ -629,8 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Инициализируем выпадающие списки
-    initGenderSelect();
+    // Инициализируем выпадающие списки заранее
     initAgeSelect();
     initCitySelect();
 });
