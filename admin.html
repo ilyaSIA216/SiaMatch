@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiaMatch - Админ панель</title>
     <link rel="stylesheet" href="styles/common.css">
-    <link rel="stylesheet" href="styles/admin.css"> <!-- ДОБАВЬТЕ ЭТУ СТРОЧКУ -->
+    <link rel="stylesheet" href="styles/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* УДАЛИТЕ ВСЕ СТИЛИ ОТСЮДА - они теперь в admin.css */
         body {
             background: linear-gradient(135deg, #1a237e, #283593);
             margin: 0;
@@ -69,29 +68,28 @@
         function initAdminPanel() {
             if (!checkAdminAuth()) return;
             
-            // ЗАГРУЖАЕМ ДАННЫЕ С ПРОВЕРКОЙ ОШИБОК
+            // ЗАГРУЖАЕМ ДАННЫЕ С ВОССТАНОВЛЕНИЕМ
             let pendingUsers = [];
-            try {
-                const stored = localStorage.getItem('sia_pending_users');
-                console.log('🔄 Загружаем данные, длина:', stored?.length || 0);
-                
-                if (stored && stored !== 'undefined' && stored !== 'null' && stored.trim() !== '') {
-                    pendingUsers = JSON.parse(stored);
-                    console.log('✅ Успешно загружено заявок:', pendingUsers.length);
+            
+            // Используем новую функцию для загрузки
+            if (typeof loadPendingApplicationsWithFallback === 'function') {
+                pendingUsers = loadPendingApplicationsWithFallback();
+            } else {
+                // Старый способ как запасной
+                try {
+                    const stored = localStorage.getItem('sia_pending_users');
+                    console.log('Загружаем данные, длина:', stored?.length || 0);
                     
-                    // Отладочный вывод
-                    if (pendingUsers.length > 0) {
-                        console.log('📋 Список заявок:');
-                        pendingUsers.forEach((app, i) => {
-                            console.log(`${i+1}. ${app.name} (ID: ${app.id}), статус: ${app.status}`);
-                        });
+                    if (stored && stored !== 'undefined' && stored !== 'null' && stored.trim() !== '') {
+                        pendingUsers = JSON.parse(stored);
+                        console.log('Успешно загружено заявок:', pendingUsers.length);
+                    } else {
+                        console.log('Нет данных о заявках или undefined');
                     }
-                } else {
-                    console.log('📭 Нет данных о заявках');
+                } catch (error) {
+                    console.error('Ошибка при загрузке данных:', error);
+                    pendingUsers = [];
                 }
-            } catch (error) {
-                console.error('❌ Ошибка при загрузке данных:', error);
-                pendingUsers = [];
             }
             
             // Статистика
@@ -103,6 +101,7 @@
             };
             
             console.log('📊 Статистика:', stats);
+            console.log('📋 Все заявки:', pendingUsers.map(app => `${app.name} (${app.status})`));
             
             // Генерация HTML
             document.getElementById('admin-container').innerHTML = `
@@ -112,9 +111,15 @@
                     </div>
                     <div class="admin-info">
                         <div>Администратор</div>
-                        <button class="logout-btn" onclick="logoutAdmin()">
-                            <i class="fas fa-sign-out-alt"></i> Выйти
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" style="background: #2196F3; color: white; padding: 8px 15px;" 
+                                    onclick="if(typeof repairMobileData === 'function') { repairMobileData(); setTimeout(() => window.location.reload(), 1000); } else alert('Функция недоступна')">
+                                <i class="fas fa-sync-alt"></i> Восстановить
+                            </button>
+                            <button class="logout-btn" onclick="logoutAdmin()">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -193,8 +198,13 @@
             loadApplications('rejected');
             loadLogs();
             
-            // Скрываем загрузку
-            document.getElementById('loading').style.display = 'none';
+            // Скрываем загрузку (безопасно)
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            } else {
+                console.log('⚠️ Элемент loading не найден');
+            }
             
             // Если нет заявок, показываем сообщение
             if (stats.total === 0) {
@@ -262,6 +272,10 @@
             filteredUsers.forEach(user => {
                 const timeAgo = getTimeAgo(user.submittedAt);
                 
+                // Проверяем наличие фото
+                const hasMainPhoto = user.mainPhoto || user.hasMainPhoto;
+                const hasSelfie = user.selfie || user.hasSelfie;
+                
                 html += `
                     <div class="application-card ${status}" data-name="${user.name.toLowerCase()}" data-city="${user.city.toLowerCase()}">
                         <div class="application-header">
@@ -280,18 +294,26 @@
                             <div><i class="fas fa-calendar"></i> ${new Date(user.submittedAt).toLocaleDateString()}</div>
                         </div>
                         
-                        ${(user.mainPhoto || user.selfie) ? `
+                        <div class="application-bio">
+                            ${user.bio || 'Описание отсутствует'}
+                        </div>
+                        
+                        ${(hasMainPhoto || hasSelfie) ? `
                         <div class="application-photos">
-                            ${user.mainPhoto ? `
+                            ${hasMainPhoto ? `
                             <div class="photo-container">
-                                <img src="${user.mainPhoto}" alt="Основное фото" onclick="showPhotoModal('${user.mainPhoto}')">
+                                <img src="${user.mainPhoto || 'https://via.placeholder.com/150?text=Фото+есть+но+не+загружено'}" 
+                                     alt="Основное фото" 
+                                     onclick="showPhotoModal('${user.mainPhoto || ''}')">
                                 <div class="photo-label">Основное фото</div>
                             </div>
                             ` : ''}
                             
-                            ${user.selfie ? `
+                            ${hasSelfie ? `
                             <div class="photo-container">
-                                <img src="${user.selfie}" alt="Селфи" onclick="showPhotoModal('${user.selfie}')">
+                                <img src="${user.selfie || 'https://via.placeholder.com/150?text=Селфи+есть+но+не+загружено'}" 
+                                     alt="Селфи" 
+                                     onclick="showPhotoModal('${user.selfie || ''}')">
                                 <div class="photo-label">Селфи для проверки</div>
                             </div>
                             ` : ''}
@@ -447,6 +469,8 @@
                 details += `📅 Дата подачи: ${new Date(user.submittedAt).toLocaleString()}\n`;
                 details += `📊 Статус: ${getStatusText(user.status)}\n\n`;
                 
+                if (user.bio) details += `📝 Описание: ${user.bio}\n\n`;
+                
                 if (user.moderatedAt) {
                     details += `✅ Проверено: ${new Date(user.moderatedAt).toLocaleString()}\n`;
                     details += `👨‍💼 Модератор: ${user.moderator || 'Администратор'}\n`;
@@ -465,8 +489,12 @@
         }
         
         function showPhotoModal(photoUrl) {
-            document.getElementById('modal-image').src = photoUrl;
-            document.getElementById('photo-modal').style.display = 'flex';
+            if (photoUrl && photoUrl.includes('http')) {
+                document.getElementById('modal-image').src = photoUrl;
+                document.getElementById('photo-modal').style.display = 'flex';
+            } else {
+                alert('Фото недоступно для просмотра');
+            }
         }
         
         function closePhotoModal() {
@@ -483,19 +511,25 @@
         }
         
         function getTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
+            if (!dateString) return 'Неизвестно';
             
-            if (diffMins < 60) {
-                return `${diffMins} мин назад`;
-            } else if (diffHours < 24) {
-                return `${diffHours} ч назад`;
-            } else {
-                return `${diffDays} дн назад`;
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 60) {
+                    return `${diffMins} мин назад`;
+                } else if (diffHours < 24) {
+                    return `${diffHours} ч назад`;
+                } else {
+                    return `${diffDays} дн назад`;
+                }
+            } catch (e) {
+                return 'Неизвестно';
             }
         }
         
@@ -506,11 +540,15 @@
         }
         
         // Запускаем админ-панель при загрузке
-        document.addEventListener('DOMContentLoaded', initAdminPanel);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Даем время на загрузку utils.js
+            setTimeout(initAdminPanel, 100);
+        });
         
         // Закрытие модального окна по клику вне фото
-        document.getElementById('photo-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('photo-modal');
+            if (modal && e.target === modal) {
                 closePhotoModal();
             }
         });
