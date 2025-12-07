@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiaMatch - Тест мобильной отправки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            width: 100%;
+        }
+        .btn-blue { background: #2196F3; }
+        .btn-red { background: #f44336; }
+        
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ccc;
+            margin: 10px;
+            display: inline-block;
+            text-align: center;
+            line-height: 150px;
+            color: #888;
+            border-radius: 5px;
+        }
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 5px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Тест отправки с мобильного</h1>
+        
+        <div id="device-info"></div>
+        
+        <h3>1. Данные пользователя:</h3>
+        <input type="text" id="name" placeholder="Имя" value="Тест Мобильный">
+        <input type="number" id="age" placeholder="Возраст" value="25">
+        <select id="city">
+            <option value="Москва">Москва</option>
+            <option value="Санкт-Петербург">Санкт-Петербург</option>
+            <option value="Казань">Казань</option>
+        </select>
+        <select id="gender">
+            <option value="male">Мужчина</option>
+            <option value="female">Женщина</option>
+        </select>
+        <textarea id="bio" placeholder="О себе" rows="3">Тест с мобильного устройства</textarea>
+        
+        <h3>2. Фото (опционально):</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            <div class="photo-preview" id="mainPhotoPreview" onclick="document.getElementById('mainPhotoInput').click()">
+                📷 Основное фото
+            </div>
+            <div class="photo-preview" id="selfiePreview" onclick="document.getElementById('selfieInput').click()">
+                🤳 Селфи
+            </div>
+        </div>
+        
+        <input type="file" id="mainPhotoInput" accept="image/*" style="display: none" onchange="previewPhoto(this, 'mainPhotoPreview')">
+        <input type="file" id="selfieInput" accept="image/*" style="display: none" onchange="previewPhoto(this, 'selfiePreview')">
+        
+        <h3>3. Отправка:</h3>
+        <button class="btn" onclick="submitTest()">
+            📤 Отправить тестовую заявку
+        </button>
+        <button class="btn btn-blue" onclick="submitWithoutPhotos()">
+            📄 Без фото
+        </button>
+        <button class="btn btn-blue" onclick="checkStorage()">
+            💾 Проверить хранилище
+        </button>
+        <button class="btn btn-red" onclick="clearTestData()">
+            🗑️ Очистить тесты
+        </button>
+        
+        <h3>4. Результат:</h3>
+        <div class="log" id="result"></div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="admin.html" style="color: #2196F3; text-decoration: none;">
+                🔗 Открыть админ-панель
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Определяем устройство
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        document.getElementById('device-info').innerHTML = `
+            <div style="background: ${isMobile ? '#E8F5E9' : '#E3F2FD'}; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                📱 <strong>Устройство:</strong> ${isMobile ? 'Мобильное' : 'Компьютер'}
+                <br>🔍 <strong>User Agent:</strong> ${navigator.userAgent.substring(0, 50)}...
+            </div>
+        `;
+        
+        let mainPhotoBase64 = '';
+        let selfieBase64 = '';
+        
+        function previewPhoto(input, previewId) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                const preview = document.getElementById(previewId);
+                
+                if (previewId === 'mainPhotoPreview') {
+                    mainPhotoBase64 = base64;
+                } else {
+                    selfieBase64 = base64;
+                }
+                
+                preview.innerHTML = `<img src="${base64}" alt="Preview">`;
+                preview.style.borderColor = '#4CAF50';
+                
+                logResult(`✅ Фото загружено: ${(base64.length / 1024).toFixed(1)} KB`);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function submitTest() {
+            const userData = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value),
+                city: document.getElementById('city').value,
+                gender: document.getElementById('gender').value,
+                bio: document.getElementById('bio').value,
+                mainPhoto: mainPhotoBase64,
+                selfie: selfieBase64
+            };
+            
+            logResult('=== 📤 ОТПРАВКА ЗАЯВКИ ===');
+            logResult(`Имя: ${userData.name}`);
+            logResult(`Возраст: ${userData.age}`);
+            logResult(`Город: ${userData.city}`);
+            logResult(`ID: ${userData.id}`);
+            logResult(`Фото: ${userData.mainPhoto ? (userData.mainPhoto.length / 1024).toFixed(1) + ' KB' : 'нет'}`);
+            logResult(`Селфи: ${userData.selfie ? (userData.selfie.length / 1024).toFixed(1) + ' KB' : 'нет'}`);
+            
+            // Используем УПРОЩЕННУЮ функцию для теста
+            submitForModerationSimple(userData);
+        }
+        
+        function submitWithoutPhotos() {
+            const userData = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value),
+                city: document.getElementById('city').value,
+                gender: document.getElementById('gender').value,
+                bio: document.getElementById('bio').value
+            };
+            
+            logResult('=== 📤 ОТПРАВКА БЕЗ ФОТО ===');
+            submitForModerationSimple(userData);
+        }
+        
+        // УПРОЩЕННАЯ ФУНКЦИЯ ОТПРАВКИ ДЛЯ ТЕСТА
+        function submitForModerationSimple(userData) {
+            logResult('\n🔄 Сохранение заявки...');
+            
+            // Для мобильных - НЕ сохраняем фото
+            if (isMobile && (userData.mainPhoto || userData.selfie)) {
+                logResult('⚠️ На мобильном - фото не сохраняются в заявку');
+                delete userData.mainPhoto;
+                delete userData.selfie;
+            }
+            
+            // Создаем заявку
+            const application = {
+                id: userData.id,
+                name: userData.name || 'Тест',
+                age: userData.age || 25,
+                city: userData.city || 'Москва',
+                gender: userData.gender || 'male',
+                bio: userData.bio || 'Тест',
+                status: 'pending',
+                submittedAt: new Date().toISOString(),
+                applicationId: 'MOB-' + Date.now().toString().slice(-8),
+                hasMainPhoto: !!userData.mainPhoto,
+                hasSelfie: !!userData.selfie
+            };
+            
+            // Только для компьютера сохраняем фото URL (не base64)
+            if (!isMobile && userData.mainPhoto && userData.mainPhoto.startsWith('data:image')) {
+                // Для компьютера преобразуем base64 в Blob URL для уменьшения размера
+                application.mainPhoto = 'photo-uploaded';
+            }
+            if (!isMobile && userData.selfie && userData.selfie.startsWith('data:image')) {
+                application.selfie = 'selfie-uploaded';
+            }
+            
+            // Получаем существующие заявки
+            let applications = [];
+            try {
+                const stored = localStorage.getItem('sia_pending_users');
+                if (stored && stored !== 'undefined' && stored !== 'null') {
+                    applications = JSON.parse(stored);
+                }
+            } catch (e) {
+                logResult('❌ Ошибка чтения: ' + e.message);
+                applications = [];
+            }
+            
+            // Добавляем новую заявку
+            applications.push(application);
+            
+            // Сохраняем
+            try {
+                localStorage.setItem('sia_pending_users', JSON.stringify(applications));
+                logResult(`✅ Сохранено! Всего заявок: ${applications.length}`);
+                
+                // Проверяем сохранение
+                const verify = localStorage.getItem('sia_pending_users');
+                if (verify) {
+                    logResult(`✅ Проверка: ${JSON.parse(verify).length} заявок в хранилище`);
+                }
+                
+                // Сохраняем также текущего пользователя
+                localStorage.setItem('sia_current_user', JSON.stringify(userData));
+                localStorage.setItem('sia_current_user_id', userData.id.toString());
+                
+                logResult('🎉 Заявка успешно отправлена!');
+                
+            } catch (e) {
+                logResult(`❌ Ошибка сохранения: ${e.message}`);
+                
+                // Пробуем сохранить без фото
+                try {
+                    const simpleApp = { ...application };
+                    delete simpleApp.mainPhoto;
+                    delete simpleApp.selfie;
+                    
+                    const simpleApps = applications.map(app => ({
+                        id: app.id,
+                        name: app.name,
+                        age: app.age,
+                        city: app.city,
+                        gender: app.gender,
+                        status: app.status,
+                        submittedAt: app.submittedAt,
+                        applicationId: app.applicationId
+                    }));
+                    
+                    localStorage.setItem('sia_pending_users', JSON.stringify(simpleApps));
+                    logResult('⚠️ Сохранены упрощенные данные');
+                } catch (e2) {
+                    logResult('❌ Критическая ошибка!');
+                }
+            }
+        }
+        
+        function checkStorage() {
+            logResult('=== 💾 ПРОВЕРКА ХРАНИЛИЩА ===');
+            
+            const stored = localStorage.getItem('sia_pending_users');
+            if (!stored) {
+                logResult('📭 Нет данных о заявках');
+                return;
+            }
+            
+            try {
+                const apps = JSON.parse(stored);
+                logResult(`📊 Заявок: ${apps.length}`);
+                
+                apps.forEach((app, i) => {
+                    const hasPhoto = app.mainPhoto || app.hasMainPhoto;
+                    const hasSelfie = app.selfie || app.hasSelfie;
+                    logResult(`${i+1}. ${app.name}, ${app.city} - ${app.status} ${hasPhoto ? '📷' : ''}${hasSelfie ? '🤳' : ''}`);
+                });
+                
+                logResult(`📏 Размер данных: ${(stored.length / 1024).toFixed(1)} KB`);
+                
+            } catch (e) {
+                logResult(`❌ Ошибка парсинга: ${e.message}`);
+                logResult(`📏 Размер строки: ${stored.length} символов`);
+                logResult(`🔍 Начало данных: ${stored.substring(0, 100)}...`);
+            }
+        }
+        
+        function clearTestData() {
+            if (confirm('Очистить все тестовые данные?')) {
+                // Удаляем только заявки с ID больше 1000000000000 (новые тесты)
+                try {
+                    const stored = localStorage.getItem('sia_pending_users');
+                    if (stored) {
+                        const apps = JSON.parse(stored);
+                        const filtered = apps.filter(app => app.id < 1000000000000); // Оставляем старые
+                        
+                        localStorage.setItem('sia_pending_users', JSON.stringify(filtered));
+                        logResult(`✅ Очищено тестовых заявок: ${apps.length - filtered.length}`);
+                    }
+                } catch (e) {
+                    logResult('❌ Ошибка очистки');
+                }
+            }
+        }
+        
+        function logResult(message) {
+            const result = document.getElementById('result');
+            result.innerHTML = message + '\n' + result.innerHTML;
+            console.log(message);
+        }
+        
+        // Автопроверка при загрузке
+        window.addEventListener('load', () => {
+            checkStorage();
+        });
+    </script>
+</body>
+</html>
