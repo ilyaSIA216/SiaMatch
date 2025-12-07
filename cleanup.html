@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiaMatch - Очистка данных</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .storage-info {
+            background: #E3F2FD;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        .btn-warning {
+            background: #FF9800;
+            color: white;
+        }
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Очистка данных SiaMatch</h1>
+        
+        <div class="storage-info">
+            <h3>Текущее состояние:</h3>
+            <div id="storage-stats">Загрузка...</div>
+        </div>
+        
+        <h3>Очистка старых данных:</h3>
+        <button class="btn btn-warning" onclick="removeOldPhotos()">
+            🗑️ Удалить фото старше 1 дня
+        </button>
+        <button class="btn btn-warning" onclick="removeApprovedApplications()">
+            ✅ Удалить одобренные заявки
+        </button>
+        <button class="btn btn-warning" onclick="removeRejectedApplications()">
+            ❌ Удалить отклоненные заявки
+        </button>
+        
+        <h3>Экстремальная очистка:</h3>
+        <button class="btn btn-danger" onclick="removeAllPhotos()">
+            📸 Удалить ВСЕ фото
+        </button>
+        <button class="btn btn-danger" onclick="keepOnlyLastWeek()">
+            ⏰ Оставить только последнюю неделю
+        </button>
+        
+        <h3>Полная очистка:</h3>
+        <button class="btn btn-danger" onclick="clearAllButActive()">
+            🚀 Оставить только активных пользователей
+        </button>
+        <button class="btn btn-danger" onclick="clearEverything()">
+            💀 ОЧИСТИТЬ ВСЁ
+        </button>
+        
+        <button class="btn btn-success" onclick="backupData()" style="margin-top: 30px;">
+            💾 Сделать резервную копию
+        </button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('log');
+            logElement.innerHTML = message + '\n' + logElement.innerHTML;
+            console.log(message);
+        }
+        
+        function updateStats() {
+            let stats = '📊 Статистика:\n\n';
+            
+            // Заявки
+            try {
+                const stored = localStorage.getItem('sia_pending_users');
+                if (stored) {
+                    const apps = JSON.parse(stored);
+                    const sizeMB = (stored.length / 1024 / 1024).toFixed(2);
+                    
+                    const pending = apps.filter(a => a.status === 'pending').length;
+                    const approved = apps.filter(a => a.status === 'approved').length;
+                    const rejected = apps.filter(a => a.status === 'rejected').length;
+                    
+                    stats += `Заявки: ${apps.length} шт (${sizeMB} MB)\n`;
+                    stats += `  • На проверке: ${pending}\n`;
+                    stats += `  • Одобрено: ${approved}\n`;
+                    stats += `  • Отклонено: ${rejected}\n\n`;
+                    
+                    // Фото
+                    let photoCount = 0;
+                    let photoSize = 0;
+                    apps.forEach(app => {
+                        if (app.mainPhoto && app.mainPhoto.length > 100) {
+                            photoCount++;
+                            photoSize += app.mainPhoto.length;
+                        }
+                        if (app.selfie && app.selfie.length > 100) {
+                            photoCount++;
+                            photoSize += app.selfie.length;
+                        }
+                    });
+                    
+                    stats += `Фото: ${photoCount} шт (${(photoSize / 1024 / 1024).toFixed(2)} MB)\n`;
+                } else {
+                    stats += 'Заявок нет\n\n';
+                }
+            } catch (e) {
+                stats += 'Ошибка загрузки заявок\n\n';
+            }
+            
+            // Активные пользователи
+            try {
+                const active = localStorage.getItem('sia_active_users');
+                if (active) {
+                    const users = JSON.parse(active);
+                    stats += `Активные пользователи: ${users.length}\n`;
+                }
+            } catch (e) {
+                // игнорируем
+            }
+            
+            document.getElementById('storage-stats').innerHTML = stats.replace(/\n/g, '<br>');
+        }
+        
+        function removeOldPhotos() {
+            if (!confirm('Удалить фото из заявок старше 1 дня?')) return;
+            
+            try {
+                const stored = localStorage.getItem('sia_pending_users');
+                if (!stored) {
+                    log('Нет заявок');
+                    return;
+                }
+                
+                const apps = JSON.parse(stored);
+                const oneDayAgo = new Date();
+                oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+                
+                let removed = 0;
+                const cleaned = apps.map(app => {
+                    try {
+                        const appDate = new Date(app.submittedAt);
+                        if (appDate < oneDayAgo) {
+                            if (app.mainPhoto && app.mainPhoto.length > 100) {
+                                app.mainPhoto = '[удалено]';
+                                removed++;
+                            }
+                            if (app.selfie && app.selfie.length > 100) {
+                                app.selfie = '[удалено]';
+                                removed++;
+                            }
+                        }
+                    } catch (e) {
+                        // игнорируем ошибки даты
+                    }
+                    return app;
+                });
+                
+                localStorage.setItem('sia_pending_users', JSON.stringify(cleaned));
+                log(`✅ Удалено фото из ${removed} заявок`);
+                updateStats();
+                
+            } catch (e) {
+                log(`❌ Ошибка: ${e.message}`);
+            }
+        }
+        
+        function removeApprovedApplications() {
+            if (!confirm('Удалить все одобренные заявки?')) return;
+            
+            try {
+                const stored = localStorage.getItem('sia_pending_users');
+                if (!stored) {
+                    log('Нет заявок');
+                    return;
+                }
+                
+                const apps = JSON.parse(stored);
+                const pending = apps.filter(app => app.status !== 'approved');
+                
+                localStorage.setItem('sia_pending_users', JSON.stringify(pending));
+                log(`✅ Удалено одобренных заявок: ${apps.length - pending.length}`);
+                updateStats();
+                
+            } catch (e) {
+                log(`❌ Ошибка: ${e.message}`);
+            }
+        }
+        
+        function removeAllPhotos() {
+            if (!confirm('Удалить ВСЕ фото из всех заявок?')) return;
+            
+            try {
+                const stored = localStorage.getItem('sia_pending_users');
+                if (!stored) {
+                    log('Нет заявок');
+                    return;
+                }
+                
+                const apps = JSON.parse(stored);
+                let removed = 0;
+                
+                const cleaned = apps.map(app => {
+                    if (app.mainPhoto) {
+                        app.mainPhoto = '';
+                        removed++;
+                    }
+                    if (app.selfie) {
+                        app.selfie = '';
+                        removed++;
+                    }
+                    return app;
+                });
+                
+                localStorage.setItem('sia_pending_users', JSON.stringify(cleaned));
+                log(`✅ Удалено фото: ${removed}`);
+                updateStats();
+                
+            } catch (e) {
+                log(`❌ Ошибка: ${e.message}`);
+            }
+        }
+        
+        function backupData() {
+            try {
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    sia_pending_users: localStorage.getItem('sia_pending_users'),
+                    sia_active_users: localStorage.getItem('sia_active_users'),
+                    sia_current_user: localStorage.getItem('sia_current_user')
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `siamatch-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log('✅ Резервная копия создана');
+                
+            } catch (e) {
+                log(`❌ Ошибка создания резервной копии: ${e.message}`);
+            }
+        }
+        
+        function clearEverything() {
+            if (!confirm('💀 ТОЧНО ОЧИСТИТЬ ВСЕ ДАННЫЕ?\n\nЭто удалит ВСЕ заявки, пользователей и настройки!\n\nЭто действие нельзя отменить!')) return;
+            
+            localStorage.clear();
+            log('⚠️ ВСЕ ДАННЫЕ ОЧИЩЕНЫ');
+            updateStats();
+        }
+        
+        // Инициализация
+        window.addEventListener('load', () => {
+            updateStats();
+        });
+    </script>
+</body>
+</html>
