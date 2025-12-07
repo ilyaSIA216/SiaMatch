@@ -1,165 +1,20 @@
 // ========== УТИЛИТЫ ДЛЯ SiaMatch ==========
 
-// Мок Telegram WebApp
-window.Telegram = {
-    WebApp: {
-        initData: '',
-        initDataUnsafe: {
-            user: {
-                id: Math.floor(Math.random() * 1000000),
-                first_name: 'Тестовый',
-                last_name: 'Пользователь'
-            }
-        },
-        ready: function() {
-            console.log('Telegram WebApp ready');
-        },
-        expand: function() {
-            console.log('WebApp expanded');
-        },
-        close: function() {
-            console.log('Closing WebApp');
-        }
-    }
-};
-
-if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-}
-
-// ========== УТИЛИТЫ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ ==========
-
-function getCurrentUser() {
-    try {
-        const stored = localStorage.getItem('sia_current_user');
-        if (!stored || stored === 'undefined' || stored === 'null') {
-            return null;
-        }
-        const user = JSON.parse(stored);
-        return user;
-    } catch (e) {
-        console.error('Ошибка получения пользователя:', e);
-        return null;
-    }
-}
-
-function saveUser(userData) {
-    try {
-        // Сохраняем только основные данные
-        const simplifiedUser = {
-            id: userData.id,
-            name: userData.name,
-            age: userData.age,
-            city: userData.city,
-            gender: userData.gender,
-            bio: userData.bio || "Пользователь SiaMatch"
-        };
-        
-        localStorage.setItem('sia_current_user', JSON.stringify(simplifiedUser));
-        console.log('✅ Пользователь сохранен:', simplifiedUser.name);
-        return simplifiedUser;
-    } catch (e) {
-        console.error('❌ Ошибка сохранения пользователя:', e);
-        return null;
-    }
-}
-
-// Показ уведомления
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
-        color: white;
-        padding: 15px 25px;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-        max-width: 300px;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
-    
-    if (!document.querySelector('#notification-styles')) {
-        const style = document.createElement('style');
-        style.id = 'notification-styles';
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-}
-
-// ========== СПИСОК ГОРОДОВ РОССИИ ==========
-
-const russianCities = [
-    "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань",
-    "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону",
-    "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград",
-    "Краснодар", "Саратов", "Тюмень", "Тольятти", "Ижевск"
-].sort();
-
-// ========== АВТОПРОВЕРКА АВТОРИЗАЦИИ ==========
-
-function checkAuth() {
-    const currentUser = getCurrentUser();
-    const currentPath = window.location.pathname;
-    
-    if (currentPath.includes('dashboard.html') && !currentUser) {
-        window.location.href = 'index.html';
-        return false;
-    }
-    
-    if (currentPath.includes('index.html') && currentUser) {
-        const status = checkUserStatus(currentUser.id);
-        if (status === 'approved') {
-            window.location.href = 'dashboard.html';
-            return false;
-        }
-    }
-    
-    return true;
-}
-
-document.addEventListener('DOMContentLoaded', checkAuth);
-
-// ========== СИСТЕМА МОДЕРАЦИИ ==========
-
-// ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+// СИСТЕМА МОДЕРАЦИИ - ИСПРАВЛЕННАЯ ВЕРСИЯ ДЛЯ МОБИЛЬНЫХ
 function submitForModeration(userData) {
-    console.log('🚀 === ОТПРАВКА НА МОДЕРАЦИЮ (исправленная версия) ===');
+    console.log('🚀 === ОТПРАВКА НА МОДЕРАЦИЮ ===');
     
-    // Проверяем, на каком устройстве
+    // Определяем устройство
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    console.log(`📱 Устройство: ${isMobile ? 'Мобильное' : 'Десктоп'}`);
+    console.log(`📱 Устройство: ${isMobile ? 'Мобильное' : 'Компьютер'}`);
     
     // 1. Гарантируем ID
     if (!userData.id) {
         userData.id = Date.now();
-        console.log('📝 ID создан:', userData.id);
+        console.log('📝 Создан ID:', userData.id);
     }
     
-    // 2. Сохраняем текущего пользователя (упрощенная версия)
+    // 2. Сохраняем текущего пользователя (БЕЗ ФОТО)
     const simpleUserData = {
         id: userData.id,
         name: userData.name,
@@ -172,12 +27,12 @@ function submitForModeration(userData) {
     try {
         localStorage.setItem('sia_current_user', JSON.stringify(simpleUserData));
         localStorage.setItem('sia_current_user_id', userData.id.toString());
-        console.log('✅ Пользователь сохранен');
+        console.log('✅ Пользователь сохранен (без фото)');
     } catch (e) {
         console.error('❌ Ошибка сохранения пользователя:', e);
     }
     
-    // 3. Подготавливаем заявку
+    // 3. Подготавливаем заявку ДЛЯ МОДЕРАЦИИ
     const newApplication = {
         id: userData.id,
         name: userData.name || 'Неизвестно',
@@ -187,37 +42,45 @@ function submitForModeration(userData) {
         bio: userData.bio || "Пользователь SiaMatch",
         status: 'pending',
         submittedAt: new Date().toISOString(),
-        applicationId: 'APP-' + userData.id.toString().slice(-6) + '-' + Date.now().toString().slice(-4)
+        applicationId: 'APP-' + Date.now().toString().slice(-6)
     };
     
-    // Для мобильных НЕ сохраняем фото в заявке
-    if (!isMobile) {
-        if (userData.mainPhoto) newApplication.mainPhoto = userData.mainPhoto;
-        if (userData.selfie) newApplication.selfie = userData.selfie;
-    } else {
-        // Для мобильных отмечаем что фото были
-        if (userData.mainPhoto) newApplication.hasMainPhoto = true;
-        if (userData.selfie) newApplication.hasSelfie = true;
+    // 4. ДЛЯ МОБИЛЬНЫХ: НЕ сохраняем base64 фото в заявке, только флаги
+    if (isMobile) {
+        newApplication.hasMainPhoto = !!userData.mainPhoto;
+        newApplication.hasSelfie = !!userData.selfie;
+        console.log('📱 Для мобильного: сохранены только флаги фото');
+    } 
+    // ДЛЯ КОМПЬЮТЕРА: сохраняем URL фото (не base64)
+    else {
+        if (userData.mainPhoto) {
+            // Проверяем, не base64 ли это
+            if (userData.mainPhoto.startsWith('data:image')) {
+                console.log('💻 Для компьютера: base64 фото не сохраняется');
+                newApplication.hasMainPhoto = true;
+                newApplication.mainPhotoInfo = 'Фото загружено (base64)';
+            } else if (userData.mainPhoto.startsWith('http')) {
+                newApplication.mainPhoto = userData.mainPhoto;
+            }
+        }
+        if (userData.selfie) {
+            if (userData.selfie.startsWith('data:image')) {
+                newApplication.hasSelfie = true;
+                newApplication.selfieInfo = 'Селфи загружено (base64)';
+            } else if (userData.selfie.startsWith('http')) {
+                newApplication.selfie = userData.selfie;
+            }
+        }
     }
     
     console.log('📋 Заявка подготовлена:', newApplication);
     
-    // 4. Получаем существующие заявки
-    let pendingUsers = [];
-    try {
-        const stored = localStorage.getItem('sia_pending_users');
-        if (stored && stored !== 'undefined' && stored !== 'null') {
-            pendingUsers = JSON.parse(stored);
-            console.log('📊 Существующих заявок:', pendingUsers.length);
-        }
-    } catch (e) {
-        console.error('❌ Ошибка чтения заявок, создаем новый массив');
-        pendingUsers = [];
-    }
+    // 5. Получаем существующие заявки
+    let pendingUsers = getPendingApplicationsSafe();
+    console.log('📊 Существующих заявок:', pendingUsers.length);
     
-    // 5. Проверяем дубликаты
+    // 6. Проверяем дубликаты
     const existingIndex = pendingUsers.findIndex(u => u.id === userData.id);
-    
     if (existingIndex !== -1) {
         console.log('⚠️ Заявка уже существует, обновляем');
         pendingUsers[existingIndex] = newApplication;
@@ -226,173 +89,148 @@ function submitForModeration(userData) {
         pendingUsers.push(newApplication);
     }
     
-    // 6. Сохраняем заявки (специально для мобильных)
+    // 7. Сохраняем заявки (ОБЯЗАТЕЛЬНО с обработкой ошибок)
     try {
-        // Для мобильных сохраняем без фото и с ограничением размера
-        if (isMobile) {
-            const mobileSafeData = pendingUsers.map(app => ({
-                id: app.id,
-                name: app.name,
-                age: app.age,
-                city: app.city,
-                gender: app.gender,
-                bio: app.bio,
-                status: app.status,
-                submittedAt: app.submittedAt,
-                applicationId: app.applicationId,
-                hasMainPhoto: app.hasMainPhoto || app.mainPhoto,
-                hasSelfie: app.hasSelfie || app.selfie
-            }));
+        // ОГРАНИЧИВАЕМ размер данных
+        const applicationsToSave = pendingUsers.slice(-100); // только последние 100 заявок
+        
+        // Удаляем большие base64 данные перед сохранением
+        const cleanedApplications = applicationsToSave.map(app => {
+            const cleaned = { ...app };
             
-            // Ограничиваем количество заявок для мобильных (максимум 50)
-            const trimmedData = mobileSafeData.slice(-50);
+            // Удаляем большие base64 строки
+            if (cleaned.mainPhoto && cleaned.mainPhoto.length > 1000) {
+                cleaned.mainPhoto = '[ФОТО УДАЛЕНО ИЗ-ЗА РАЗМЕРА]';
+            }
+            if (cleaned.selfie && cleaned.selfie.length > 1000) {
+                cleaned.selfie = '[СЕЛФИ УДАЛЕНО ИЗ-ЗА РАЗМЕРА]';
+            }
             
-            localStorage.setItem('sia_pending_users', JSON.stringify(trimmedData));
-            console.log('📱 Сохранено для мобильных:', trimmedData.length, 'заявок');
-        } else {
-            // Для десктопа сохраняем все
-            localStorage.setItem('sia_pending_users', JSON.stringify(pendingUsers));
-            console.log('💻 Сохранено для десктопа:', pendingUsers.length, 'заявок');
-        }
+            return cleaned;
+        });
+        
+        localStorage.setItem('sia_pending_users', JSON.stringify(cleanedApplications));
+        console.log('✅ Заявки сохранены (очищены от больших фото):', cleanedApplications.length);
         
         // Проверяем сохранение
         const verify = localStorage.getItem('sia_pending_users');
         if (verify) {
-            const parsed = JSON.parse(verify);
-            console.log('✅ Проверка: сохранено', parsed.length, 'заявок');
-            
-            // Логируем последнюю заявку
-            if (parsed.length > 0) {
-                const last = parsed[parsed.length - 1];
-                console.log('📋 Последняя заявка:', {
-                    id: last.id,
-                    name: last.name,
-                    status: last.status
-                });
-            }
+            console.log('✅ Проверка: данные сохранены, размер:', (verify.length / 1024).toFixed(1), 'KB');
         }
         
     } catch (e) {
         console.error('❌ Ошибка сохранения заявок:', e);
         
-        // Экстренное сохранение - только последние 10 заявок
+        // АВАРИЙНОЕ СОХРАНЕНИЕ - только основные данные
         try {
-            const emergencyData = pendingUsers.slice(-10).map(app => ({
+            const emergencyData = pendingUsers.slice(-20).map(app => ({
                 id: app.id,
                 name: app.name,
                 age: app.age,
                 city: app.city,
+                gender: app.gender,
                 status: app.status,
+                submittedAt: app.submittedAt,
                 applicationId: app.applicationId
             }));
             
             localStorage.setItem('sia_pending_users_emergency', JSON.stringify(emergencyData));
-            console.log('⚠️ Экстренное сохранение:', emergencyData.length, 'заявок');
+            console.log('⚠️ Аварийное сохранение:', emergencyData.length, 'заявок');
         } catch (e2) {
-            console.error('❌ Критическая ошибка!');
+            console.error('❌ Критическая ошибка сохранения!');
         }
     }
     
-    // 7. Создаем уведомление для админа
+    // 8. Создаем уведомление для админа
     createAdminNotification(newApplication);
     
     console.log('🎉 === ОТПРАВКА ЗАВЕРШЕНА ===');
     return userData.id;
 }
 
-// Функция для загрузки заявок с восстановлением данных
-function loadPendingApplicationsWithFallback() {
-    console.log('🔄 Загрузка заявок с восстановлением...');
+// БЕЗОПАСНОЕ ПОЛУЧЕНИЕ ЗАЯВОК
+function getPendingApplicationsSafe() {
+    console.log('🔄 Безопасная загрузка заявок...');
     
-    let pendingUsers = [];
-    
-    // Пробуем основное хранилище
     try {
         const stored = localStorage.getItem('sia_pending_users');
-        if (stored && stored !== 'undefined' && stored !== 'null') {
-            pendingUsers = JSON.parse(stored);
-            console.log('✅ Основные данные:', pendingUsers.length, 'заявок');
+        if (!stored || stored === 'undefined' || stored === 'null') {
+            console.log('📭 Нет данных о заявках');
+            return [];
         }
-    } catch (e) {
-        console.log('❌ Ошибка чтения основных данных');
-    }
-    
-    // Если нет данных, пробуем экстренное хранилище
-    if (pendingUsers.length === 0) {
+        
+        // Проверяем размер данных
+        if (stored.length > 5000000) { // > 5MB
+            console.warn('⚠️ Данные слишком большие, пытаемся восстановить...');
+            return repairLargeData(stored);
+        }
+        
+        const data = JSON.parse(stored);
+        console.log(`✅ Загружено заявок: ${data.length}`);
+        return data;
+        
+    } catch (error) {
+        console.error('❌ Ошибка загрузки заявок:', error);
+        
+        // Пробуем загрузить аварийные данные
         try {
             const emergency = localStorage.getItem('sia_pending_users_emergency');
             if (emergency) {
-                pendingUsers = JSON.parse(emergency);
-                console.log('⚠️ Загружены экстренные данные:', pendingUsers.length, 'заявок');
+                console.log('⚠️ Загружаем аварийные данные');
+                return JSON.parse(emergency);
             }
-        } catch (e) {
-            console.log('❌ Ошибка чтения экстренных данных');
+        } catch (e2) {
+            console.log('❌ Не удалось загрузить аварийные данные');
         }
+        
+        return [];
     }
-    
-    return pendingUsers;
 }
 
-// Функция для восстановления мобильных данных
-function repairMobileData() {
-    console.log('🔧 Восстановление данных с мобильных устройств...');
-    
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    console.log(`📱 Устройство: ${isMobile ? 'Мобильное' : 'Десктоп'}`);
-    
-    // Проверяем все возможные хранилища
-    const storageKeys = [
-        'sia_pending_users',
-        'sia_pending_users_emergency',
-        'sia_current_user',
-        'sia_active_users'
-    ];
-    
-    let totalRecovered = 0;
-    
-    storageKeys.forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value) {
-            try {
-                const parsed = JSON.parse(value);
-                console.log(`✅ ${key}: ${Array.isArray(parsed) ? parsed.length + ' элементов' : 'данные есть'}`);
-                totalRecovered++;
-            } catch (e) {
-                console.log(`❌ ${key}: поврежденные данные`);
+// ВОССТАНОВЛЕНИЕ ПОВРЕЖДЕННЫХ ДАННЫХ
+function repairLargeData(storedData) {
+    try {
+        // Пробуем найти и извлечь JSON
+        const firstBracket = storedData.indexOf('[');
+        const lastBracket = storedData.lastIndexOf(']');
+        
+        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+            const jsonData = storedData.substring(firstBracket, lastBracket + 1);
+            const data = JSON.parse(jsonData);
+            
+            // Очищаем данные от больших base64
+            const cleanedData = data.map(app => {
+                const cleaned = { ...app };
                 
-                // Пробуем восстановить
-                try {
-                    // Удаляем поврежденные данные
-                    localStorage.removeItem(key);
-                    
-                    // Если это заявки, создаем новый массив
-                    if (key === 'sia_pending_users') {
-                        localStorage.setItem(key, '[]');
-                    }
-                    
-                    console.log(`🔄 ${key}: восстановлен`);
-                } catch (e2) {
-                    console.log(`❌ Не удалось восстановить ${key}`);
+                // Удаляем большие base64
+                if (cleaned.mainPhoto && cleaned.mainPhoto.length > 1000) {
+                    cleaned.mainPhoto = '';
+                    cleaned.hasMainPhoto = true;
                 }
-            }
-        } else {
-            console.log(`📭 ${key}: нет данных`);
+                if (cleaned.selfie && cleaned.selfie.length > 1000) {
+                    cleaned.selfie = '';
+                    cleaned.hasSelfie = true;
+                }
+                
+                return cleaned;
+            });
+            
+            // Сохраняем очищенные данные
+            localStorage.setItem('sia_pending_users', JSON.stringify(cleanedData));
+            
+            console.log(`✅ Данные восстановлены и очищены: ${cleanedData.length} заявок`);
+            return cleanedData;
         }
-    });
-    
-    console.log(`📊 Восстановлено: ${totalRecovered}/${storageKeys.length} хранилищ`);
-    
-    // Создаем тестовые данные если ничего нет
-    const mainData = localStorage.getItem('sia_pending_users');
-    if (!mainData || mainData === '[]' || mainData === 'null') {
-        console.log('📋 Создаем тестовые данные...');
-        createTestApplication();
+    } catch (e) {
+        console.error('❌ Не удалось восстановить данные:', e);
     }
     
-    return totalRecovered;
+    // Если не удалось восстановить, создаем новый массив
+    localStorage.setItem('sia_pending_users', '[]');
+    return [];
 }
 
-// Создание уведомления для администратора
+// СОЗДАНИЕ УВЕДОМЛЕНИЯ ДЛЯ АДМИНА
 function createAdminNotification(userData) {
     try {
         let notifications = [];
@@ -411,7 +249,9 @@ function createAdminNotification(userData) {
             city: userData.city,
             time: new Date().toLocaleString('ru-RU'),
             type: 'new_application',
-            read: false
+            read: false,
+            hasPhoto: userData.hasMainPhoto || userData.mainPhoto,
+            hasSelfie: userData.hasSelfie || userData.selfie
         };
         
         notifications.push(notification);
@@ -424,27 +264,151 @@ function createAdminNotification(userData) {
     }
 }
 
-// Проверка статуса пользователя
+// ФУНКЦИЯ ДЛЯ АДМИН-ПАНЕЛИ: ПОЛУЧИТЬ ВСЕ ЗАЯВКИ
+function getAllApplicationsForAdmin() {
+    console.log('👨‍💼 Загрузка данных для админ-панели...');
+    
+    const applications = getPendingApplicationsSafe();
+    
+    // Добавляем информацию о фото
+    const enrichedApplications = applications.map(app => {
+        const enriched = { ...app };
+        
+        // Проверяем наличие фото
+        if (!enriched.hasMainPhoto && enriched.mainPhoto) {
+            enriched.hasMainPhoto = !!enriched.mainPhoto;
+        }
+        if (!enriched.hasSelfie && enriched.selfie) {
+            enriched.hasSelfie = !!enriched.selfie;
+        }
+        
+        // Очищаем большие данные для отображения
+        if (enriched.mainPhoto && enriched.mainPhoto.length > 500) {
+            enriched.mainPhoto = '[ФОТО - ДАННЫЕ СЛИШКОМ БОЛЬШИЕ]';
+        }
+        if (enriched.selfie && enriched.selfie.length > 500) {
+            enriched.selfie = '[СЕЛФИ - ДАННЫЕ СЛИШКОМ БОЛЬШИЕ]';
+        }
+        
+        return enriched;
+    });
+    
+    console.log(`✅ Для админа: ${enrichedApplications.length} заявок`);
+    return enrichedApplications;
+}
+
+// ФУНКЦИЯ ДЛЯ СОХРАНЕНИЯ ФОТО ОТДЕЛЬНО
+function savePhotoSeparately(userId, photoType, base64Data) {
+    // Для мобильных - НЕ сохраняем большие base64
+    if (base64Data.length > 10000) { // > 10KB
+        console.log(`⚠️ ${photoType}: фото слишком большое, не сохраняем base64`);
+        return 'too_large';
+    }
+    
+    const photoKey = `sia_photo_${userId}_${photoType}`;
+    try {
+        localStorage.setItem(photoKey, base64Data);
+        console.log(`✅ ${photoType} сохранено отдельно: ${(base64Data.length / 1024).toFixed(1)} KB`);
+        return 'saved';
+    } catch (e) {
+        console.log(`❌ Не удалось сохранить ${photoType}`);
+        return 'error';
+    }
+}
+
+// ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ ФОТО ИЗ ОТДЕЛЬНОГО ХРАНИЛИЩА
+function loadPhoto(userId, photoType) {
+    const photoKey = `sia_photo_${userId}_${photoType}`;
+    try {
+        const photo = localStorage.getItem(photoKey);
+        if (photo && photo.length < 10000) { // Проверяем размер
+            return photo;
+        }
+    } catch (e) {
+        console.log(`❌ Не удалось загрузить ${photoType}`);
+    }
+    return null;
+}
+
+// ОЧИСТКА СТАРЫХ ФОТО
+function cleanupOldPhotos() {
+    console.log('🧹 Очистка старых фото...');
+    
+    let cleaned = 0;
+    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+    
+    // Очищаем по ключам
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('sia_photo_')) {
+            try {
+                // Пробуем получить ID из ключа
+                const parts = key.split('_');
+                if (parts.length >= 3) {
+                    const userId = parseInt(parts[2]);
+                    if (userId && userId < oneDayAgo) {
+                        localStorage.removeItem(key);
+                        cleaned++;
+                    }
+                }
+            } catch (e) {
+                // Игнорируем ошибки
+            }
+        }
+    }
+    
+    console.log(`✅ Очищено фото: ${cleaned}`);
+    return cleaned;
+}
+
+// СОЗДАНИЕ ТЕСТОВОЙ ЗАЯВКИ С МОБИЛЬНОГО
+function createMobileTest() {
+    const testUser = {
+        id: Date.now(),
+        name: "Мобильный Тест " + Math.floor(Math.random() * 1000),
+        age: 20 + Math.floor(Math.random() * 20),
+        city: ["Москва", "СПб", "Казань"][Math.floor(Math.random() * 3)],
+        gender: Math.random() > 0.5 ? "male" : "female",
+        bio: "Тест с мобильного " + new Date().toLocaleTimeString()
+    };
+    
+    console.log('📱 Создаем тестовую заявку с мобильного...');
+    const result = submitForModeration(testUser);
+    
+    if (result) {
+        console.log('✅ Тестовая заявка создана!');
+        alert('✅ Тестовая заявка создана! Проверьте админ-панель.');
+        return result;
+    } else {
+        console.error('❌ Ошибка создания тестовой заявки');
+        alert('❌ Ошибка создания тестовой заявки');
+        return null;
+    }
+}
+
+// ОСТАЛЬНЫЕ ФУНКЦИИ (без изменений)
+function getCurrentUser() {
+    try {
+        const stored = localStorage.getItem('sia_current_user');
+        if (!stored || stored === 'undefined' || stored === 'null') {
+            return null;
+        }
+        return JSON.parse(stored);
+    } catch (e) {
+        console.error('Ошибка получения пользователя:', e);
+        return null;
+    }
+}
+
 function checkUserStatus(userId) {
     if (!userId) return 'not_found';
     
     try {
-        const stored = localStorage.getItem('sia_pending_users');
-        if (stored && stored !== 'undefined') {
-            const pendingUsers = JSON.parse(stored);
-            const user = pendingUsers.find(u => u.id == userId);
-            
-            if (user) {
-                return user.status || 'pending';
-            }
-        }
+        const applications = getPendingApplicationsSafe();
+        const user = applications.find(u => u.id == userId);
         
-        // Проверяем активных пользователей
-        const activeUsers = JSON.parse(localStorage.getItem('sia_active_users') || '[]');
-        const activeUser = activeUsers.find(u => u.id == userId);
-        
-        if (activeUser) {
-            return 'approved';
+        if (user) {
+            return user.status || 'pending';
         }
         
         return 'not_found';
@@ -454,311 +418,16 @@ function checkUserStatus(userId) {
     }
 }
 
-// Проверка доступа для дашборда
-function checkDashboardAccess() {
-    const currentUser = getCurrentUser();
-    
-    if (!currentUser || !currentUser.id) {
-        return { allowed: false, reason: 'Пользователь не найден', code: 'no_user' };
-    }
-    
-    const status = checkUserStatus(currentUser.id);
-    
-    if (status === 'pending') {
-        return { 
-            allowed: false, 
-            reason: 'Ваша анкета находится на проверке', 
-            code: 'pending'
-        };
-    } else if (status === 'rejected') {
-        return { 
-            allowed: false, 
-            reason: 'Ваша анкета не прошла модерацию', 
-            code: 'rejected'
-        };
-    } else if (status === 'approved') {
-        return { 
-            allowed: true, 
-            reason: 'Доступ разрешен', 
-            code: 'approved',
-            user: currentUser
-        };
-    } else {
-        return { 
-            allowed: false, 
-            reason: 'Статус вашей анкеты неизвестен', 
-            code: 'unknown'
-        };
-    }
-}
-
-// Получение активных пользователей для свайпов
-function getActiveUsers(currentUserId) {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return [];
-    
-    let activeUsers = [];
-    try {
-        activeUsers = JSON.parse(localStorage.getItem('sia_active_users') || '[]');
-    } catch (e) {
-        activeUsers = [];
-    }
-    
-    // Если нет активных пользователей, создаем тестовых
-    if (activeUsers.length === 0) {
-        activeUsers = [
-            {
-                id: 1001,
-                name: "Анна",
-                age: 24,
-                city: "Москва",
-                gender: "female",
-                bio: "Люблю путешествия и кофе",
-                photo: "https://randomuser.me/api/portraits/women/1.jpg"
-            },
-            {
-                id: 1002,
-                name: "Мария",
-                age: 26,
-                city: "Санкт-Петербург",
-                gender: "female",
-                bio: "Фотограф, ищу интересного собеседника",
-                photo: "https://randomuser.me/api/portraits/women/2.jpg"
-            },
-            {
-                id: 1003,
-                name: "Екатерина",
-                age: 22,
-                city: "Казань",
-                gender: "female",
-                bio: "Студентка, увлекаюсь искусством",
-                photo: "https://randomuser.me/api/portraits/women/3.jpg"
-            },
-            {
-                id: 1004,
-                name: "Дмитрий",
-                age: 28,
-                city: "Новосибирск",
-                gender: "male",
-                bio: "Программист, люблю спорт",
-                photo: "https://randomuser.me/api/portraits/men/1.jpg"
-            },
-            {
-                id: 1005,
-                name: "Алексей",
-                age: 25,
-                city: "Екатеринбург",
-                gender: "male",
-                bio: "Дизайнер, увлекаюсь фотографией",
-                photo: "https://randomuser.me/api/portraits/men/2.jpg"
-            }
-        ];
-        
-        localStorage.setItem('sia_active_users', JSON.stringify(activeUsers));
-    }
-    
-    // Фильтруем по противоположному полу и исключаем текущего
-    return activeUsers.filter(user => {
-        const isOppositeGender = 
-            (currentUser.gender === 'male' && user.gender === 'female') ||
-            (currentUser.gender === 'female' && user.gender === 'male');
-        
-        return isOppositeGender && user.id !== currentUserId;
-    });
-}
-
-// ========== ФУНКЦИИ ДЛЯ ОТЛАДКИ ==========
-
-// Отладочная функция: показывает все данные в системе
-function debugSystem() {
-    console.log('=== 🔍 ДЕБАГ СИСТЕМЫ SiaMatch ===');
-    
-    console.log('\n📱 ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ:');
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-        console.log('✅', currentUser);
-    } else {
-        console.log('❌ Нет текущего пользователя');
-    }
-    
-    console.log('\n📋 ЗАЯВКИ НА МОДЕРАЦИЮ:');
-    try {
-        const stored = localStorage.getItem('sia_pending_users');
-        if (stored && stored !== 'undefined' && stored !== 'null') {
-            const apps = JSON.parse(stored);
-            console.log(`📊 Всего заявок: ${apps.length}`);
-            
-            if (apps.length > 0) {
-                apps.forEach((app, i) => {
-                    console.log(`${i+1}. ${app.name} (${app.age} лет) - ${app.status}`);
-                });
-            } else {
-                console.log('📭 Нет заявок');
-            }
-        } else {
-            console.log('📭 Нет данных о заявках');
-        }
-    } catch (e) {
-        console.error('❌ Ошибка чтения заявок:', e);
-    }
-    
-    console.log('\n👥 АКТИВНЫЕ ПОЛЬЗОВАТЕЛИ:');
-    try {
-        const activeUsers = JSON.parse(localStorage.getItem('sia_active_users') || '[]');
-        console.log(`👥 Активных пользователей: ${activeUsers.length}`);
-    } catch (e) {
-        console.log('⚠️ Нет активных пользователей');
-    }
-    
-    console.log('\n💾 LOCALSTORAGE КЛЮЧИ:');
-    ['sia_current_user', 'sia_current_user_id', 'sia_pending_users', 'sia_active_users', 'sia_admin_notifications'].forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value) {
-            console.log(`✅ ${key}: есть (${value.length} символов)`);
-        } else {
-            console.log(`❌ ${key}: нет`);
-        }
-    });
-    
-    console.log('=== 🔍 ДЕБАГ ЗАВЕРШЕН ===');
-}
-
-// Создание тестовой заявки
-function createTestApplication() {
-    const testUser = {
-        id: Date.now(),
-        name: "Тестовый Пользователь",
-        age: 25,
-        city: "Москва",
-        gender: "male",
-        bio: "Это тестовый пользователь для отладки",
-        mainPhoto: "",
-        selfie: ""
-    };
-    
-    console.log('🧪 Создаем тестовую заявку...');
-    const result = submitForModeration(testUser);
-    
-    if (result) {
-        console.log('✅ Тестовая заявка создана!');
-        showNotification('✅ Тестовая заявка создана! Проверьте админ-панель.', 'success');
-        
-        // Обновляем страницу через секунду
-        setTimeout(() => {
-            if (window.location.pathname.includes('admin.html')) {
-                window.location.reload();
-            }
-        }, 1000);
-    } else {
-        console.error('❌ Ошибка создания тестовой заявки');
-        showNotification('❌ Ошибка создания тестовой заявки', 'error');
-    }
-}
-
-// Восстановление данных админ-панели
-function repairAdminData() {
-    console.log('🔧 Восстановление данных админ-панели...');
-    
-    let pendingUsers = [];
-    try {
-        const stored = localStorage.getItem('sia_pending_users');
-        if (stored && stored !== 'undefined') {
-            pendingUsers = JSON.parse(stored);
-        }
-    } catch (e) {
-        console.log('❌ Ошибка чтения, очищаем данные');
-        localStorage.removeItem('sia_pending_users');
-        pendingUsers = [];
-    }
-    
-    // Исправляем структуру данных
-    const repairedUsers = pendingUsers.map(user => {
-        return {
-            id: user.id || Date.now(),
-            name: user.name || 'Неизвестно',
-            age: user.age || 18,
-            city: user.city || 'Не указан',
-            gender: user.gender || 'unknown',
-            status: user.status || 'pending',
-            submittedAt: user.submittedAt || new Date().toISOString(),
-            applicationId: user.applicationId || 'APP-' + Date.now().toString().slice(-6),
-            bio: user.bio || 'Пользователь SiaMatch'
-        };
-    });
-    
-    try {
-        localStorage.setItem('sia_pending_users', JSON.stringify(repairedUsers));
-        console.log(`✅ Данные восстановлены: ${repairedUsers.length} заявок`);
-        showNotification(`✅ Данные восстановлены: ${repairedUsers.length} заявок`, 'success');
-        return repairedUsers;
-    } catch (e) {
-        console.log('❌ Не удалось восстановить данные');
-        showNotification('❌ Не удалось восстановить данные', 'error');
-        return [];
-    }
-}
-
-// Очистка всех данных
-function clearAllData() {
-    if (confirm('⚠️ Вы уверены, что хотите очистить ВСЕ данные? Это действие нельзя отменить.')) {
-        localStorage.removeItem('sia_current_user');
-        localStorage.removeItem('sia_current_user_id');
-        localStorage.removeItem('sia_pending_users');
-        localStorage.removeItem('sia_active_users');
-        localStorage.removeItem('sia_admin_notifications');
-        
-        console.log('🧹 Все данные очищены');
-        showNotification('✅ Все данные очищены', 'success');
-        
-        // Если мы в админ-панели, обновляем
-        if (window.location.pathname.includes('admin.html')) {
-            setTimeout(() => window.location.reload(), 1500);
-        }
-    }
-}
-
-// Проверка состояния localStorage
-function checkStorage() {
-    console.log('=== 📊 ПРОВЕРКА LOCALSTORAGE ===');
-    
-    const keys = ['sia_current_user', 'sia_current_user_id', 'sia_pending_users', 'sia_active_users'];
-    let totalSize = 0;
-    
-    keys.forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value) {
-            const size = value.length;
-            totalSize += size;
-            console.log(`${key}: ${size} символов (${Math.round(size / 1024)} KB)`);
-        } else {
-            console.log(`${key}: ❌ не найден`);
-        }
-    });
-    
-    console.log(`Общий размер: ${totalSize} символов (${Math.round(totalSize / 1024)} KB)`);
-    console.log('=== 📊 ПРОВЕРКА ЗАВЕРШЕНА ===');
-    
-    return totalSize;
-}
-
-// Экспортируем все функции для отладки
-window.debugSystem = debugSystem;
-window.createTestApplication = createTestApplication;
-window.repairAdminData = repairAdminData;
-window.clearAllData = clearAllData;
-window.checkStorage = checkStorage;
-window.checkUserStatus = checkUserStatus;
-window.getCurrentUser = getCurrentUser;
+// ЭКСПОРТ ДЛЯ ОТЛАДКИ
 window.submitForModeration = submitForModeration;
-window.getActiveUsers = getActiveUsers;
-window.loadPendingApplicationsWithFallback = loadPendingApplicationsWithFallback;
-window.repairMobileData = repairMobileData;
+window.getAllApplicationsForAdmin = getAllApplicationsForAdmin;
+window.getPendingApplicationsSafe = getPendingApplicationsSafe;
+window.createMobileTest = createMobileTest;
+window.cleanupOldPhotos = cleanupOldPhotos;
+window.loadPhoto = loadPhoto;
 
-console.log("✅ Utils.js загружен успешно!");
-console.log("ℹ️ Доступные команды для отладки:");
-console.log("  - debugSystem() - показать все данные");
-console.log("  - createTestApplication() - создать тестовую заявку");
-console.log("  - repairAdminData() - восстановить данные");
-console.log("  - repairMobileData() - восстановить мобильные данные");
-console.log("  - clearAllData() - очистить все данные");
-console.log("  - checkStorage() - проверить состояние localStorage");
+console.log("✅ Utils.js загружен (исправленная версия для мобильных)");
+console.log("📱 Доступные команды:");
+console.log("  - createMobileTest() - создать тестовую заявку");
+console.log("  - getAllApplicationsForAdmin() - получить заявки для админа");
+console.log("  - cleanupOldPhotos() - очистить старые фото");
