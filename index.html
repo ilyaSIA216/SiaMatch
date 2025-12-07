@@ -6,6 +6,9 @@
     <title>SiaMatch - Регистрация</title>
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/auth.css">
+    
+    <!-- QRCode библиотека -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -35,12 +38,11 @@
 
                 <h2>Как вас зовут?</h2>
                 <p class="step-description">
-                    Введите ваше настоящее имя, которое будет отображаться в вашем профиле
+                    Введите ваше настоящее имя
                 </p>
 
                 <div class="input-group">
                     <input type="text" id="name-input" placeholder="Например: Анна" maxlength="30">
-                    <p class="form-note">Можно использовать только буквы</p>
                 </div>
 
                 <button class="btn" onclick="saveName()">Далее</button>
@@ -63,7 +65,7 @@
 
                 <h2>Ваш пол</h2>
                 <p class="step-description">
-                    Выберите ваш пол для корректного подбора партнеров
+                    Выберите ваш пол
                 </p>
 
                 <div class="gender-selection">
@@ -97,14 +99,13 @@
 
                 <h2>Сколько вам лет?</h2>
                 <p class="step-description">
-                    Укажите ваш возраст. Это нужно для подбора подходящих знакомств
+                    Укажите ваш возраст
                 </p>
 
                 <div class="input-group">
                     <select id="age-select">
                         <option value="">Выберите возраст</option>
                     </select>
-                    <p class="form-note">От 18 до 60 лет</p>
                 </div>
 
                 <button class="btn" onclick="saveAge()">Далее</button>
@@ -156,14 +157,13 @@
 
                 <h2>Добавьте ваше фото</h2>
                 <p class="step-description">
-                    Загрузите ваше лучшее фото. Оно будет отображаться в вашем профиле
+                    Загрузите ваше лучшее фото
                 </p>
 
                 <div class="photo-upload-container">
                     <div class="photo-drop-area" onclick="document.getElementById('main-photo-input').click()">
                         <div class="photo-icon">📸</div>
                         <div class="photo-text">Нажмите чтобы загрузить фото</div>
-                        <div class="photo-subtext">Рекомендуемый размер: до 5MB</div>
                     </div>
                     
                     <img id="main-photo-preview" class="photo-preview" alt="Предпросмотр фото">
@@ -199,7 +199,6 @@
                     <div class="photo-drop-area" onclick="document.getElementById('selfie-input').click()">
                         <div class="photo-icon">🤳</div>
                         <div class="photo-text">Сделайте селфи сейчас</div>
-                        <div class="photo-subtext">Это нужно для безопасности всех пользователей</div>
                     </div>
                     
                     <img id="selfie-preview" class="photo-preview" alt="Предпросмотр селфи">
@@ -231,12 +230,10 @@
         </div>
     </div>
 
-    <!-- СУЩЕСТВУЮЩИЕ СКРИПТЫ -->
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <!-- ДОБАВЬТЕ ЭТИ ДВА НОВЫХ ФАЙЛА -->
-    <script src="js/photo-utils.js"></script>
-    <script src="js/mobile-form.js"></script>
+    <!-- Скрипты в правильном порядке -->
+    <script src="js/device-check.js"></script> <!-- Проверка устройства -->
+    <script src="js/utils.js"></script> <!-- Основные утилиты -->
+    <script src="js/photo-utils.js"></script> <!-- Работа с фото -->
+    <script src="js/auth.js"></script> <!-- Логика регистрации -->
 </body>
 </html>
