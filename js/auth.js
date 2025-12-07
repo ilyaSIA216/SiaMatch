@@ -12,6 +12,45 @@ let userProfile = {
     interests: []
 };
 
+// Функция для показа уведомлений
+function showNotification(message, type = 'info') {
+    console.log(`🔔 Уведомление (${type}): ${message}`);
+    
+    // Простая реализация через alert
+    alert(message);
+    
+    // Альтернативный вариант с красивыми уведомлениями
+    /*
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        font-size: 14px;
+    `;
+    
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+    */
+}
+
+// Экспортируем функцию
+window.showNotification = showNotification;
+
 // Начало регистрации
 function startOnboarding() {
     console.log('Начинаем онбординг');
@@ -279,10 +318,10 @@ function previewMainPhoto(event) {
 }
 
 function saveMainPhoto() {
-    console.log('Сохранение основного фото');
+    console.log('💾 Сохранение основного фото');
     
     if (!userProfile.mainPhoto) {
-        showNotification('Пожалуйста, загрузите ваше фото', 'error');
+        showNotification('⚠️ Пожалуйста, загрузите ваше фото');
         return;
     }
     
@@ -330,7 +369,7 @@ function saveSelfie() {
     console.log('Данные пользователя перед отправкой:', userProfile);
     
     if (!userProfile.selfie) {
-        showNotification('Пожалуйста, загрузите селфи для подтверждения', 'error');
+        showNotification('⚠️ Пожалуйста, загрузите селфи для подтверждения');
         return;
     }
     
