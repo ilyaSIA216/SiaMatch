@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Адаптация под Telegram
       if (tg) {
-        tg.MainButton.setText('🍀 SiaMatch').show();
+        // УДАЛЕНО: tg.MainButton.setText('🍀 SiaMatch').show();
         window.addEventListener('resize', () => {
           document.body.style.height = window.innerHeight + 'px';
         });
@@ -63,15 +63,31 @@ document.addEventListener('DOMContentLoaded', function() {
   const chatsList = document.getElementById("chats-list");
   const chatsEmpty = document.getElementById("chats-empty");
 
-  // 🚀 TELEGRAM MAINBUTTON для iOS сохранения
-  if (tg && saveProfileBtn) {
-    tg.MainButton.setText('🍀 Сохранить профиль');
-    tg.MainButton.onClick(() => {
-      saveProfileBtn.click();
+  // 🚀 MainButton ДИНАМИЧЕСКИЙ ПЕРЕКЛЮЧАТЕЛЬ
+  function updateMainButton() {
+    if (tg) {
       tg.MainButton.hide();
-    });
-    tg.MainButton.show();
+      
+      // Онбординг активен?
+      const isOnboardingVisible = !onboardingScreen.classList.contains('hidden') && 
+                                  onboardingScreen.style.display !== 'none';
+      
+      if (isOnboardingVisible) {
+        tg.MainButton.setText('🍀 Сохранить профиль');
+        tg.MainButton.onClick(() => {
+          saveProfileBtn.click();
+        });
+        tg.MainButton.show();
+      } else {
+        tg.MainButton.setText('🍀 SiaMatch');
+        tg.MainButton.onClick(null); // Очищаем предыдущий обработчик
+        tg.MainButton.show();
+      }
+    }
   }
+
+  // Инициализация
+  updateMainButton();
   
   // Паддинг для карточки онбординга
   const onboardingCard = document.querySelector('#onboarding-screen #card');
@@ -257,6 +273,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
+    
+    // Обновляем MainButton при смене табов
+    updateMainButton();
   }
 
   // ДИАГНОСТИКА кнопок ПОСЛЕ объявления setActiveTab()
@@ -302,6 +321,9 @@ document.addEventListener('DOMContentLoaded', function() {
     tabBar.classList.remove("hidden");
     setActiveTab("feed");
     alert("Профиль сохранён! Добро пожаловать 🍀");
+    
+    // Переключить на SiaMatch после сохранения
+    updateMainButton();
   });
 
   // === РЕДАКТИРОВАНИЕ ПРОФИЛЯ ===
@@ -358,7 +380,8 @@ document.addEventListener('DOMContentLoaded', function() {
     onboardingScreen.style.display = "none";
     tabBar.classList.remove("hidden");
     
-    // ✅ УБРАНО setActiveTab("feed") — табы работают по кнопкам!
+    // Обновляем MainButton
+    updateMainButton();
   })();
 
   // 🚀 СУПЕР КЛАВИАТУРА iOS
