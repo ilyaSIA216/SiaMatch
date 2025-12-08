@@ -75,6 +75,13 @@ try {
 if (user) {
   const name = user.first_name || user.username || "друг";
   usernameElem.textContent = `Привет, ${name}!`;
+  
+  // Telegram фото автоматически
+  if (user && user.photo_url) {
+    profileData = profileData || {};
+    profileData.telegram_photo_url = user.photo_url;
+    saveProfile(profileData);
+  }
 } else {
   usernameElem.textContent = "Информация о пользователе недоступна.";
 }
@@ -189,7 +196,7 @@ function showCurrentCandidate() {
   }
 
   const c = filtered[currentIndex];
-  candidatePhoto.src = c.photo;
+  candidatePhoto.src = c.custom_photo_url || c.telegram_photo_url || 'default-avatar.png';
   candidateName.textContent = c.name;
   candidateAge.textContent = c.age;
   candidateCity.textContent = c.city;
@@ -348,6 +355,15 @@ updateProfileBtn.addEventListener("click", () => {
     document.getElementById("profile-use-geolocation").checked = profileData.use_geolocation;
   }
 
+  // Показываем фото из профиля если есть
+  if (profileData.custom_photo_url) {
+    const preview = document.getElementById('photo-preview');
+    if (preview) {
+      preview.src = profileData.custom_photo_url;
+      preview.style.display = 'block';
+    }
+  }
+
   onboardingScreen.style.display = "none";
   tabBar.classList.remove("hidden");
   setActiveTab("feed");
@@ -363,5 +379,26 @@ document.getElementById("profile-use-geolocation").addEventListener("change", (e
 document.addEventListener('click', (e) => {
   if (!e.target.closest('input, textarea, select')) {
     document.activeElement?.blur();
+  }
+});
+
+// Загрузка фото
+document.getElementById('profile-photo').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file && file.size > 5 * 1024 * 1024) {
+    alert('Фото слишком большое (макс 5MB)');
+    return;
+  }
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      profileData = profileData || {};
+      profileData.custom_photo_url = ev.target.result;
+      document.getElementById('photo-preview').src = ev.target.result;
+      document.getElementById('photo-preview').style.display = 'block';
+      saveProfile(profileData);
+      alert('Фото загружено! 📸');
+    };
+    reader.readAsDataURL(file);
   }
 });
