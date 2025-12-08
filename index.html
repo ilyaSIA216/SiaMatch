@@ -4,19 +4,19 @@
   <meta charset="utf-8" />
   <title>SiaMatch - Dating</title>
 
-  <!-- Обязательный meta для Mini App -->
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
   />
 
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     :root {
-      --tg-theme-bg-color: #ffffff;
-      --tg-theme-text-color: #000000;
+      --tg-theme-bg-color: #f4fff7;
+      --tg-theme-text-color: #063b1f;
+      --siamatch-green: #16a34a;
+      --siamatch-green-dark: #15803d;
     }
 
     * {
@@ -27,7 +27,7 @@
       margin: 0;
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background-color: var(--tg-theme-bg-color);
+      background: radial-gradient(circle at top, #d9f99d 0, #f4fff7 45%, #ecfdf3 100%);
       color: var(--tg-theme-text-color);
       display: flex;
       flex-direction: column;
@@ -37,62 +37,75 @@
       text-align: center;
     }
 
-    h1 {
-      font-size: 26px;
+    .logo {
+      font-size: 40px;
       margin-bottom: 8px;
+    }
+
+    .app-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--siamatch-green-dark);
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 4px 0 8px;
     }
 
     #username {
       font-size: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
 
-    #mainButton {
-      background-color: #0088cc;
-      color: #ffffff;
-      border: none;
-      padding: 14px 32px;
-      font-size: 17px;
+    #card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.9);
       border-radius: 24px;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.2s ease;
-      margin-top: 24px;
-    }
-
-    #mainButton:active {
-      background-color: #006a9c;
+      padding: 20px 18px 24px;
+      box-shadow: 0 10px 25px rgba(22, 163, 74, 0.18);
+      backdrop-filter: blur(8px);
     }
 
     #profile-form {
       display: none;
       width: 100%;
-      max-width: 400px;
       text-align: left;
-      margin-top: 16px;
+      margin-top: 10px;
     }
 
     #profile-form h2 {
       font-size: 20px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       text-align: center;
+      color: var(--siamatch-green-dark);
     }
 
     label {
       display: block;
       font-size: 14px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     input[type="number"],
     select,
     textarea {
       width: 100%;
-      padding: 10px;
+      padding: 9px 10px;
       font-size: 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: 10px;
+      border: 1px solid #bbf7d0;
       outline: none;
+      background-color: #f0fdf4;
+    }
+
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--siamatch-green);
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.35);
     }
 
     textarea {
@@ -100,7 +113,7 @@
     }
 
     .field {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .hint {
@@ -108,60 +121,81 @@
       opacity: 0.7;
       margin-top: 2px;
     }
+
+    #mainButton {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #ffffff;
+      border: none;
+      padding: 13px 32px;
+      font-size: 17px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+      margin-top: 18px;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    #mainButton:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35);
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
   </style>
 </head>
 <body>
-  <h1>Welcome to SiaMatch</h1>
-  <div id="username">Loading user info...</div>
+  <div id="card">
+    <div class="logo">🍀</div>
+    <div class="app-name">SiaMatch</div>
 
-  <!-- Форма профиля -->
-  <div id="profile-form">
-    <h2>Ваш профиль</h2>
+    <h1>Welcome to SiaMatch</h1>
+    <div id="username">Loading user info...</div>
 
-    <div class="field">
-      <label for="age">Возраст</label>
-      <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
-      <div class="hint">Только пользователи 18+</div>
+    <div id="profile-form">
+      <h2>Ваш профиль 🍀</h2>
+
+      <div class="field">
+        <label for="age">Возраст</label>
+        <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
+        <div class="hint">Только пользователи 18+</div>
+      </div>
+
+      <div class="field">
+        <label for="gender">Пол</label>
+        <select id="gender">
+          <option value="male">Мужской</option>
+          <option value="female">Женский</option>
+          <option value="other">Другое</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="bio">О себе</label>
+        <textarea
+          id="bio"
+          rows="3"
+          maxlength="300"
+          placeholder="Коротко о себе и кого хотите встретить 🍀"
+        ></textarea>
+        <div class="hint">Минимум 10 символов, максимум 300</div>
+      </div>
     </div>
 
-    <div class="field">
-      <label for="gender">Пол</label>
-      <select id="gender">
-        <option value="male">Мужской</option>
-        <option value="female">Женский</option>
-        <option value="other">Другое</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="bio">О себе</label>
-      <textarea
-        id="bio"
-        rows="3"
-        maxlength="300"
-        placeholder="Коротко расскажите о себе и кого вы ищете"
-      ></textarea>
-      <div class="hint">Минимум 10 символов, максимум 300</div>
-    </div>
+    <button id="mainButton">Продолжить 🍀</button>
   </div>
 
-  <button id="mainButton">Продолжить</button>
-
   <script>
-    // Инициализация Mini App
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
 
-    // Применяем тему из Telegram (тёмная/светлая и т.п.)
     const theme = Telegram.WebApp.themeParams || {};
-    document.documentElement.style.setProperty(
-      "--tg-theme-bg-color",
-      theme.bg_color || "#ffffff"
-    );
-    document.documentElement.style.setProperty(
-      "--tg-theme-text-color",
-      theme.text_color || "#000000"
-    );
+    if (theme.bg_color) {
+      document.documentElement.style.setProperty("--tg-theme-bg-color", theme.bg_color);
+    }
+    if (theme.text_color) {
+      document.documentElement.style.setProperty("--tg-theme-text-color", theme.text_color);
+    }
 
     const user = Telegram.WebApp.initDataUnsafe
       ? Telegram.WebApp.initDataUnsafe.user
@@ -171,7 +205,6 @@
     const profileForm = document.getElementById("profile-form");
     const mainBtn = document.getElementById("mainButton");
 
-    // Показ имени пользователя
     if (user) {
       const name = user.first_name || user.username || "друг";
       usernameElem.textContent = `Привет, ${name}!`;
@@ -179,10 +212,9 @@
       usernameElem.textContent = "Информация о пользователе недоступна.";
     }
 
-    // Первый клик по кнопке — открываем форму
     mainBtn.onclick = () => {
       profileForm.style.display = "block";
-      mainBtn.textContent = "Сохранить профиль";
+      mainBtn.textContent = "Сохранить профиль 🍀";
       mainBtn.onclick = saveProfile;
     };
 
@@ -211,9 +243,7 @@
       };
 
       console.log("Profile data:", profileData);
-
-      // Здесь позже будет запрос на бэкенд, пока просто сообщение
-      alert("Профиль сохранён! В следующем шаге подключим сервер и matching.");
+      alert("Профиль сохранён! В следующем шаге добавим поиск и мэтчи 🍀");
     }
   </script>
 </body>
