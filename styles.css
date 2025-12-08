@@ -29,7 +29,7 @@ body {
   max-width: 420px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 24px;
-  padding: 20px 18px 100px; /* Увеличено до 100px для клавиатуры */
+  padding: 20px 18px 100px;
   box-shadow: 0 10px 25px rgba(22, 163, 74, 0.18);
   backdrop-filter: blur(8px);
 }
@@ -350,4 +350,46 @@ textarea {
 .screen h1, 
 .screen #username {
   display: none;
+}
+
+/* Полная высота экранов */
+.screen {
+  min-height: calc(100vh - 140px); /* vh - табы - хедер */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Центрирование контента на пустых экранах */
+#screen-chats, #screen-feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+#chats-empty {
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+#feed-status {
+  margin-top: 20px;
+  max-width: 300px;
+}
+
+/* Карточка кандидата на всю ширину */
+#candidate-card {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 20px;
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-height: 600px) {
+  .screen {
+    min-height: calc(100vh - 100px);
+    padding: 10px;
+  }
 }
