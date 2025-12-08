@@ -121,6 +121,14 @@
           <textarea id="profile-bio" rows="3" maxlength="300"></textarea>
         </div>
 
+        <!-- ДОБАВЛЕНО: Поле для загрузки фото профиля -->
+        <div class="field">
+          <label>Фото профиля 📸</label>
+          <input type="file" id="profile-photo" accept="image/*" />
+          <div class="hint">Выберите фото (до 5MB) или используйте Telegram аватарку</div>
+          <img id="photo-preview" style="width:80px;height:80px;border-radius:50%;margin-top:8px;display:none;border:2px solid var(--siamatch-green)" />
+        </div>
+
         <!-- ФИЛЬТРЫ -->
         <div class="field">
           <label class="checkbox-field">
