@@ -418,3 +418,13 @@ body { padding: 0 !important; margin: 0 !important; }
 }
 
 #card { max-width: none !important; }
+
+/* ДОБАВЛЕННЫЕ СТИЛИ ДЛЯ ФОТО ПРОФИЛЯ */
+#photo-preview {
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+}
+
+#profile-photo {
+  background: #f0fdf4;
+}
