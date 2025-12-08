@@ -234,7 +234,10 @@ btnDislike.addEventListener("click", () => {
 
 // === ТАБЫ ===
 function setActiveTab(tab) {
-  console.log("setActiveTab called with:", tab);
+  console.log("🔄 setActiveTab:", tab);
+  
+  // ✅ СБРОСИТЬ currentIndex при переключении
+  if (tab === "feed") currentIndex = 0;
   
   // ✅ 1. УБРАТЬ hidden КЛАССЫ СО ВСЕХ
   screenChats.classList.remove("hidden");
@@ -363,7 +366,8 @@ updateProfileBtn.addEventListener("click", () => {
 
   onboardingScreen.style.display = "none";
   tabBar.classList.remove("hidden");
-  setActiveTab("feed");
+  
+  // ✅ УБРАНО setActiveTab("feed") — табы работают по кнопкам!
 })();
 
 // === СЛУШАТЕЛЬ ЧЕКБОКСА ГЕОЛОКАЦИИ ===
