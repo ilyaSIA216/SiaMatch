@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Telegram WebApp ПОЛНЫЙ ЭКРАН
       if (tg) {
         tg.expand();                    // ← Полноэкранный режим
-        tg.requestViewport();          // ← Telegram viewport
+        // ФИКС A: безопасный вызов requestViewport
+        if (typeof tg.requestViewport === 'function') tg.requestViewport();
         document.body.style.padding = '0';
         document.body.style.margin = '0';
         document.body.style.alignItems = 'stretch';  // ← КРИТИЧНО!
@@ -344,11 +345,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // ✅ УБРАНО setActiveTab("feed") — табы работают по кнопкам!
   })();
 
-  // Скрытие клавиатуры при клике вне input
+  // ФИКС B: Клавиатура iOS - ЗАМЕНЁН ВЕСЬ БЛОК
   document.addEventListener('click', (e) => {
     if (!e.target.closest('input, textarea, select')) {
       document.activeElement?.blur();
+      if (tg) tg.HapticFeedback?.selectionChanged();
     }
+  }, true); // capture phase iOS
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.activeElement?.blur();
   });
 
   // Безопасные addEventListener
