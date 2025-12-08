@@ -345,13 +345,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // ✅ УБРАНО setActiveTab("feed") — табы работают по кнопкам!
   })();
 
-  // ФИКС B: Клавиатура iOS - ЗАМЕНЁН ВЕСЬ БЛОК
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('input, textarea, select')) {
-      document.activeElement?.blur();
-      if (tg) tg.HapticFeedback?.selectionChanged();
-    }
-  }, true); // capture phase iOS
+  // 🚀 СУПЕР КЛАВИАТУРА iOS
+  ['click', 'touchend'].forEach(event => {
+    document.addEventListener(event, (e) => {
+      if (!e.target.closest('input, textarea, select, .primary')) {
+        e.preventDefault();
+        document.activeElement?.blur();
+        if (tg) tg.HapticFeedback?.selectionChanged();
+        setTimeout(() => window.scrollTo(0, 0), 100); // iOS scroll fix
+      }
+    }, true);
+  });
+
+  // iOS resize fix
+  window.addEventListener('resize', () => {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') document.activeElement?.blur();
