@@ -386,30 +386,11 @@ textarea {
 /* 🚀 ТЕЛЕГРАМ FULLSCREEN + СИЛОВОЙ ФИКС */
 body { padding: 0 !important; margin: 0 !important; }
 
-#screen-chats:not(.hidden) {
-  width: 100vw !important;
-  max-width: 900px !important;
-  position: relative !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  padding: 40px 20px !important;
-  margin: 0 !important;
-  min-height: 400px;
-  box-sizing: border-box !important;
-}
-
-#screen-feed:not(.hidden) {
-  max-width: 396px !important;
-  width: 396px !important;
-  margin: 0 auto !important;
-  padding: 20px 8px !important;
-  min-height: 420px;
-}
-
-#screen-profile:not(.hidden) {
-  padding: 20px !important;
-  min-height: 450px !important;
-}
+/* УДАЛЕННЫЕ БЛОКИ:
+#screen-chats:not(.hidden) { ... }
+#screen-feed:not(.hidden) { ... }
+#screen-profile:not(.hidden) { ... }
+*/
 
 #candidate-card {
   max-width: 396px !important;
@@ -427,4 +408,21 @@ body { padding: 0 !important; margin: 0 !important; }
 
 #profile-photo {
   background: #f0fdf4;
+}
+
+/* 🚀 ФИНАЛЬНЫЙ ТАБ ФИКС */
+#tab-bar { z-index: 9999 !important; }
+.tab-btn { z-index: 9999 !important; }
+
+.screen {
+  visibility: hidden !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.screen.active {
+  visibility: visible !important;
+  position: relative !important;
 }
