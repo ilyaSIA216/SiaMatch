@@ -36,8 +36,6 @@ const feedStatus = document.getElementById("feed-status");
 const profileAge = document.getElementById("profile-age");
 const profileGender = document.getElementById("profile-gender");
 const profileCity = document.getElementById("profile-city");
-const profileLatitude = document.getElementById("profile-latitude");
-const profileLongitude = document.getElementById("profile-longitude");
 const profileBio = document.getElementById("profile-bio");
 const profileMinAge = document.getElementById("profile-min-age");
 const profileMaxAge = document.getElementById("profile-max-age");
@@ -95,7 +93,7 @@ const candidates = [
 
 let currentIndex = 0;
 let likedIds = [];
-let userLocation = null;  // ← НОВОЕ
+let userLocation = null;
 let profileData = null;
 
 // === ФИЛЬТРАЦИЯ КАНДИДАТОВ ===
@@ -181,11 +179,8 @@ function showCurrentCandidate() {
   candidateCity.textContent = c.city;
   
   // Расстояние
-  if (profileData.latitude && profileData.longitude && c.latitude && c.longitude) {
-    const dist = calculateDistance(
-      profileData.latitude, profileData.longitude, 
-      c.latitude, c.longitude
-    );
+  if (profileData.use_geolocation && userLocation && c.latitude && c.longitude) {
+    const dist = calculateDistance(userLocation.lat, userLocation.lon, c.latitude, c.longitude);
     candidateDistance.textContent = `${Math.round(dist)} км`;
   } else {
     candidateDistance.textContent = "";
@@ -216,9 +211,26 @@ btnDislike.addEventListener("click", () => {
 
 // === ТАБЫ ===
 function setActiveTab(tab) {
-  screenChats.classList.add("hidden");
-  screenFeed.classList.add("hidden");
-  screenProfile.classList.add("hidden");
+  // Скрыть все экраны
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  
+  // Показать логотип только на онбординге
+  const logo = document.querySelector('.logo');
+  const appName = document.querySelector('.app-name');
+  const h1 = document.querySelector('h1');
+  const username = document.getElementById('username');
+  
+  if (tab === 'onboarding') {
+    logo.style.display = 'block';
+    appName.style.display = 'block';
+    h1.style.display = 'block';
+    username.style.display = 'block';
+  } else {
+    logo.style.display = 'none';
+    appName.style.display = 'none';
+    h1.style.display = 'none';
+    username.style.display = 'none';
+  }
 
   tabButtons.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.tab === tab);
@@ -241,8 +253,6 @@ saveProfileBtn.addEventListener("click", () => {
   const ageValue = Number(document.getElementById("age").value);
   const gender = document.getElementById("gender").value;
   const city = document.getElementById("city").value;
-  const latitude = parseFloat(document.getElementById("latitude").value) || null;
-  const longitude = parseFloat(document.getElementById("longitude").value) || null;
   const bio = document.getElementById("bio").value.trim();
 
   if (!ageValue || ageValue < 18 || ageValue > 99) return alert("Возраст 18-99");
@@ -254,7 +264,7 @@ saveProfileBtn.addEventListener("click", () => {
     tg_id: user ? user.id : null,
     first_name: user ? user.first_name : null,
     username: user ? user.username : null,
-    age: ageValue, gender, city, latitude, longitude, bio,
+    age: ageValue, gender, city, bio,
     min_age_filter: 18, max_age_filter: 35, max_distance_km: 50,
     use_geolocation: false
   };
@@ -265,8 +275,6 @@ saveProfileBtn.addEventListener("click", () => {
   profileAge.value = ageValue;
   profileGender.value = gender;
   profileCity.value = city;
-  if (latitude) profileLatitude.value = latitude;
-  if (longitude) profileLongitude.value = longitude;
   profileBio.value = bio;
   profileMinAge.value = 18;
   profileMaxAge.value = 35;
@@ -285,15 +293,13 @@ updateProfileBtn.addEventListener("click", () => {
   profileData.age = Number(profileAge.value);
   profileData.gender = profileGender.value;
   profileData.city = profileCity.value;
-  profileData.latitude = parseFloat(profileLatitude.value) || null;
-  profileData.longitude = parseFloat(profileLongitude.value) || null;
   profileData.bio = profileBio.value.trim();
   profileData.min_age_filter = Number(profileMinAge.value);
   profileData.max_age_filter = Number(profileMaxAge.value);
   profileData.max_distance_km = Number(profileMaxDistance.value);
-  profileData.use_geolocation = document.getElementById("profile-use-geolocation").checked;  // ← ДОБАВИТЬ
+  profileData.use_geolocation = document.getElementById("profile-use-geolocation").checked;
 
-  if (profileData.use_geolocation && !userLocation) requestUserLocation();  // ← ДОБАВИТЬ
+  if (profileData.use_geolocation && !userLocation) requestUserLocation();
 
   saveProfile(profileData);
   alert("Профиль обновлён! Фильтры применены ✏️");
@@ -308,16 +314,12 @@ updateProfileBtn.addEventListener("click", () => {
   document.getElementById("age").value = profileData.age || "";
   document.getElementById("gender").value = profileData.gender || "";
   document.getElementById("city").value = profileData.city || "";
-  if (profileData.latitude) document.getElementById("latitude").value = profileData.latitude;
-  if (profileData.longitude) document.getElementById("longitude").value = profileData.longitude;
   document.getElementById("bio").value = profileData.bio || "";
 
   // Заполняем профиль
   profileAge.value = profileData.age || "";
   profileGender.value = profileData.gender || "";
   profileCity.value = profileData.city || "";
-  if (profileData.latitude) profileLatitude.value = profileData.latitude;
-  if (profileData.longitude) profileLongitude.value = profileData.longitude;
   profileBio.value = profileData.bio || "";
   profileMinAge.value = profileData.min_age_filter || 18;
   profileMaxAge.value = profileData.max_age_filter || 35;
@@ -335,4 +337,11 @@ updateProfileBtn.addEventListener("click", () => {
 document.getElementById("profile-use-geolocation").addEventListener("change", (e) => {
   profileData.use_geolocation = e.target.checked;
   if (e.target.checked && !userLocation) requestUserLocation();
+});
+
+// Скрытие клавиатуры при клике вне input
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('input, textarea, select')) {
+    document.activeElement?.blur();
+  }
 });
