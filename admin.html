@@ -83,8 +83,10 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
     }
+
+    /* Кнопки */
+
     .primary {
-      width: 100%;
       border: none;
       margin-top: 6px;
       padding: 10px 16px;
@@ -99,6 +101,10 @@
       transform: translateY(1px);
       box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
     }
+    #login-btn {
+      width: 100%;
+    }
+
     .error {
       margin-top: 6px;
       font-size: 12px;
@@ -144,17 +150,24 @@
       font-size: 12px;
       cursor: pointer;
     }
+
     #search-row {
       display: flex;
       gap: 8px;
       margin-bottom: 10px;
+      align-items: center;
     }
     #search-input {
       flex: 1;
     }
     #search-btn {
+      width: auto;
+      padding: 8px 14px;
+      font-size: 14px;
+      margin-top: 0;
       white-space: nowrap;
     }
+
     #results-info {
       font-size: 12px;
       color: var(--muted);
@@ -257,7 +270,6 @@
   </div>
 
   <script>
-    // Простой "хардкод" пароля на фронте (временно, до реального бэкенда)
     const ADMIN_PASSWORD = "s21i06a95";
 
     const loginCard = document.getElementById("login-card");
@@ -272,139 +284,4 @@
     const resultsInfo = document.getElementById("results-info");
     const usersList = document.getElementById("users-list");
 
-    // Псевдо‑данные пользователей для демонстрации (потом заменишь на запросы к API)
-    const demoUsers = [
-      {
-        id: 1,
-        name: "Алина",
-        age: 24,
-        gender: "female",
-        username: "alina_example",
-        city: "Москва",
-        blocked: false
-      },
-      {
-        id: 2,
-        name: "Дмитрий",
-        age: 28,
-        gender: "male",
-        username: "dmitry_228",
-        city: "Санкт-Петербург",
-        blocked: false
-      }
-    ];
-
-    function renderUsers(list, query) {
-      usersList.innerHTML = "";
-      if (!list.length) {
-        resultsInfo.textContent = query
-          ? `По запросу «${query}» ничего не найдено.`
-          : "Результатов нет.";
-        return;
-      }
-      resultsInfo.textContent = `Найдено анкет: ${list.length}`;
-      list.forEach((u) => {
-        const li = document.createElement("li");
-        li.className = "user-item";
-
-        const main = document.createElement("div");
-        main.className = "user-main";
-        main.innerHTML = `
-          <span class="user-name">${u.name}, ${u.age}</span>
-          <span class="user-meta">@${u.username || "—"} · ID: ${u.id} · ${u.city}</span>
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "user-actions";
-
-        const openBtn = document.createElement("button");
-        openBtn.className = "link-btn";
-        openBtn.textContent = "Открыть в Telegram";
-        openBtn.onclick = () => {
-          if (u.username) {
-            window.open("https://t.me/" + u.username, "_blank");
-          } else {
-            alert("У пользователя нет username.");
-          }
-        };
-
-        const blockBtn = document.createElement("button");
-        blockBtn.className = "block-btn";
-        blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
-        blockBtn.onclick = () => {
-          u.blocked = !u.blocked;
-          blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
-          alert(
-            u.blocked
-              ? "Анкета заблокирована (демо, без бэкенда)."
-              : "Анкета разблокирована (демо)."
-          );
-        };
-
-        actions.appendChild(openBtn);
-        actions.appendChild(blockBtn);
-
-        li.appendChild(main);
-        li.appendChild(actions);
-        usersList.appendChild(li);
-      });
-    }
-
-    function doSearch() {
-      const q = searchInput.value.trim().toLowerCase();
-      if (!q) {
-        renderUsers([], "");
-        return;
-      }
-      const filtered = demoUsers.filter((u) => {
-        return (
-          String(u.id) === q ||
-          (u.username && u.username.toLowerCase().includes(q)) ||
-          (u.name && u.name.toLowerCase().includes(q))
-        );
-      });
-      renderUsers(filtered, q);
-    }
-
-    // Логин
-    loginBtn.onclick = () => {
-      const value = passwordInput.value;
-      if (value === ADMIN_PASSWORD) {
-        loginError.textContent = "";
-        loginCard.classList.add("hidden");
-        adminCard.classList.remove("hidden");
-        // опционально запомним, что админ залогинен (простая сессия в localStorage)
-        localStorage.setItem("siamatch_admin_logged_in", "1");
-      } else {
-        loginError.textContent = "Неверный пароль.";
-      }
-    };
-
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") loginBtn.click();
-    });
-
-    // Логаут
-    logoutBtn.onclick = () => {
-      localStorage.removeItem("siamatch_admin_logged_in");
-      adminCard.classList.add("hidden");
-      loginCard.classList.remove("hidden");
-      passwordInput.value = "";
-    };
-
-    // Поиск
-    searchBtn.onclick = doSearch;
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") doSearch();
-    });
-
-    // Авто‑логин по localStorage (примитивно)
-    (function init() {
-      if (localStorage.getItem("siamatch_admin_logged_in") === "1") {
-        loginCard.classList.add("hidden");
-        adminCard.classList.remove("hidden");
-      }
-    })();
-  </script>
-</body>
-</html>
+    const demo
