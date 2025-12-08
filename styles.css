@@ -329,3 +329,82 @@ textarea {
   font-weight: 500;
   margin: 4px 0;
 }
+/* Фильтры профиля */
+.age-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.age-range input {
+  width: 60px !important;
+  padding: 6px 8px;
+}
+
+.age-range span {
+  color: var(--siamatch-green-dark);
+  font-weight: 500;
+}
+
+/* Чекбокс геолокации */
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--siamatch-green);
+}
+
+#distance-value {
+  color: var(--siamatch-green);
+  font-weight: 500;
+}
+
+/* Таб-бар */
+#tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  z-index: 100;
+}
+
+.tab-btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+/* Расстояние в карточке */
+#candidate-distance {
+  font-size: 13px;
+  color: var(--siamatch-green);
+  font-weight: 500;
+  margin: 4px 0;
+}
