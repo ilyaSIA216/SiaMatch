@@ -138,12 +138,7 @@ textarea {
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
 }
 
-/* ✅ КНОПКА СКРЫВАЕТСЯ при вводе! */
-.primary.hide-on-input {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translateX(-50%) translateY(-20px) !important;
-}
+/* УДАЛЕНЫ стили скрытия кнопки при вводе */
 
 /* Кнопка основная (старый стиль для совместимости) */
 #mainButton {
@@ -451,4 +446,33 @@ body {
 
 #onboarding-screen #card {
   padding-bottom: 160px !important;
+}
+
+/* 🚀 ФИНАЛЬНЫЙ iOS ФИКС — FLEX онбординг */
+#onboarding-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+#onboarding-screen #card {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding-bottom: 200px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#saveProfileBtn {
+  order: -1 !important;
+  margin: 20px auto 40px !important;
+  width: 95% !important;
+}
+
+body {
+  height: 100vh !important;
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
 }
