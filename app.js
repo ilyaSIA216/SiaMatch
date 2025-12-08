@@ -1,6 +1,6 @@
-// ===== SiaMatch app.js: онбординг + фильтры + 3 вкладки =====
-
-let tg = null;
+document.addEventListener('DOMContentLoaded', function() {
+  // ===== Весь твой код отсюда =====
+  let tg = null;
 try {
   if (window.Telegram && Telegram.WebApp) {
     tg = Telegram.WebApp;
@@ -77,8 +77,8 @@ if (user) {
   usernameElem.textContent = `Привет, ${name}!`;
   
   // Telegram фото автоматически
-  if (user && user.photo_url) {
-    profileData = profileData || {};
+  if (user?.photo_url) {
+    profileData = loadProfile() || {};  // ← loadProfile() вместо null
     profileData.telegram_photo_url = user.photo_url;
     saveProfile(profileData);
   }
@@ -234,44 +234,42 @@ btnDislike.addEventListener("click", () => {
 
 // === ТАБЫ ===
 function setActiveTab(tab) {
-  console.log("🔄 setActiveTab:", tab);
+  console.log("🔥 TAB:", tab);
   
-  // ✅ СБРОСИТЬ currentIndex при переключении
   if (tab === "feed") currentIndex = 0;
   
-  // ✅ 1. УБРАТЬ hidden КЛАССЫ СО ВСЕХ
-  screenChats.classList.remove("hidden");
-  screenFeed.classList.remove("hidden");
-  screenProfile.classList.remove("hidden");
-  
-  // ✅ 2. display: none ВСЕМ
-  screenChats.style.display = 'none';
-  screenFeed.style.display = 'none';
-  screenProfile.style.display = 'none';
-  
-  // ✅ 3. СКРЫТЬ ХЕДЕР
-  document.querySelector('.logo').style.display = 'none';
-  document.querySelector('.app-name').style.display = 'none';
-  document.querySelector('h1').style.display = 'none';
-  document.getElementById('username').style.display = 'none';
-
-  // ✅ 4. АКТИВНАЯ КНОПКА
-  tabButtons.forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.tab === tab);
+  // visibility вместо display (Telegram фикс!)
+  [screenChats, screenFeed, screenProfile].forEach(screen => {
+    screen.style.visibility = 'hidden';
+    screen.style.position = 'absolute';
+    screen.style.top = '0';
+    screen.style.left = '0';
+    screen.style.width = '100%';
   });
-
-  // ✅ 5. ПОКАЗАТЬ ТОЛЬКО ОДИН
+  
+  // Показать нужный
   if (tab === "chats") {
-    screenChats.style.display = 'block';
+    screenChats.style.visibility = 'visible';
+    screenChats.style.position = 'relative';
   } else if (tab === "feed") {
-    screenFeed.style.display = 'block';
+    screenFeed.style.visibility = 'visible';
+    screenFeed.style.position = 'relative';
     showCurrentCandidate();
   } else if (tab === "profile") {
-    screenProfile.style.display = 'block';
+    screenProfile.style.visibility = 'visible';
+    screenProfile.style.position = 'relative';
   }
+  
+  // Табы active
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tab);
+  });
 }
 
-tabButtons.forEach(btn => {
+// ДИАГНОСТИКА кнопок ПОСЛЕ объявления setActiveTab()
+console.log("Кнопок найдено:", tabButtons.length);
+tabButtons.forEach((btn, i) => {
+  console.log(`Кнопка ${i}:`, btn.dataset.tab);
   btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
 });
 
@@ -370,12 +368,6 @@ updateProfileBtn.addEventListener("click", () => {
   // ✅ УБРАНО setActiveTab("feed") — табы работают по кнопкам!
 })();
 
-// === СЛУШАТЕЛЬ ЧЕКБОКСА ГЕОЛОКАЦИИ ===
-document.getElementById("profile-use-geolocation").addEventListener("change", (e) => {
-  profileData.use_geolocation = e.target.checked;
-  if (e.target.checked && !userLocation) requestUserLocation();
-});
-
 // Скрытие клавиатуры при клике вне input
 document.addEventListener('click', (e) => {
   if (!e.target.closest('input, textarea, select')) {
@@ -383,8 +375,19 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Загрузка фото
-document.getElementById('profile-photo').addEventListener('change', (e) => {
+// Безопасные addEventListener
+const safeAddEvent = (el, event, handler) => {
+  if (el) el.addEventListener(event, handler);
+};
+
+safeAddEvent(document.getElementById("profile-use-geolocation"), "change", (e) => {
+  if (profileData) {
+    profileData.use_geolocation = e.target.checked;
+    if (e.target.checked && !userLocation) requestUserLocation();
+  }
+});
+
+safeAddEvent(document.getElementById('profile-photo'), 'change', (e) => {
   const file = e.target.files[0];
   if (file && file.size > 5 * 1024 * 1024) {
     alert('Фото слишком большое (макс 5MB)');
@@ -403,3 +406,5 @@ document.getElementById('profile-photo').addEventListener('change', (e) => {
     reader.readAsDataURL(file);
   }
 });
+
+}); // Закрытие DOMContentLoaded
