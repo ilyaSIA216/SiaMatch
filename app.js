@@ -87,34 +87,15 @@ function saveProfile(obj) {
 
 // === Демо-данные с городами ===
 const candidates = [
-  {
-    id: 1, name: "Алина", age: 24, gender: "female", city: "Москва",
-    latitude: 55.7558, longitude: 37.6176,
-    bio: "Люблю путешествия, кофе и долгие разговоры. Москва ❤️",
-    photo: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&w=800"
-  },
-  {
-    id: 2, name: "Дмитрий", age: 28, gender: "male", city: "Санкт-Петербург",
-    latitude: 59.9343, longitude: 30.3351,
-    bio: "Инженер, обожаю походы и настолки. СПб!",
-    photo: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&w=800"
-  },
-  {
-    id: 3, name: "Екатерина", age: 26, gender: "female", city: "Москва",
-    latitude: 55.7558, longitude: 37.6176,
-    bio: "Фотограф, коты и книги — моя слабость. Ищу интересного собеседника.",
-    photo: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&w=800"
-  },
-  {
-    id: 4, name: "Алексей", age: 30, gender: "male", city: "Казань",
-    latitude: 55.8304, longitude: 49.0661,
-    bio: "Спорт, музыка, путешествия. Казань.",
-    photo: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&w=800"
-  }
+  {id:1,name:"Алина",age:24,gender:"female",city:"Москва",latitude:55.7558,longitude:37.6176,bio:"Люблю кофе ☕ Москва ❤️",photo:"https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800"},
+  {id:2,name:"Дмитрий",age:28,gender:"male",city:"Санкт-Петербург",latitude:59.9343,longitude:30.3351,bio:"Инженер СПб",photo:"https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800"},
+  {id:3,name:"Екатерина",age:26,gender:"female",city:"Москва",latitude:55.76,longitude:37.62,bio:"Фотограф ❤️",photo:"https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800"},
+  {id:4,name:"Алексей",age:30,gender:"male",city:"Казань",latitude:55.8304,longitude:49.0661,bio:"Спортсмен Казань",photo:"https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=800"}
 ];
 
 let currentIndex = 0;
 let likedIds = [];
+let userLocation = null;  // ← НОВОЕ
 let profileData = null;
 
 // === ФИЛЬТРАЦИЯ КАНДИДАТОВ ===
@@ -122,13 +103,25 @@ function getFilteredCandidates() {
   if (!profileData) return [];
   
   const oppositeGender = profileData.gender === 'male' ? 'female' : 'male';
-  return candidates.filter(c => 
+  let filtered = candidates.filter(c => 
     c.gender === oppositeGender &&
-    c.city === profileData.city &&
     c.age >= profileData.min_age_filter &&
     c.age <= profileData.max_age_filter &&
     !likedIds.includes(c.id)
   );
+
+  // ГЕОЛОКАЦИЯ ВКЛЮЧЕНА
+  if (profileData.use_geolocation && userLocation && profileData.max_distance_km) {
+    filtered = filtered.filter(c => {
+      if (!c.latitude || !c.longitude) return false;
+      const dist = calculateDistance(userLocation.lat, userLocation.lon, c.latitude, c.longitude);
+      return dist <= profileData.max_distance_km;
+    });
+  } else {
+    filtered = filtered.filter(c => c.city === profileData.city);
+  }
+  
+  return filtered;
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -140,6 +133,26 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
             Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
+}
+
+// === ГЕОЛОКАЦИЯ ===
+function requestUserLocation() {
+  if (!navigator.geolocation) {
+    alert("Геолокация не поддерживается");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userLocation = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude
+      };
+      alert(`📍 Геолокация: ${Math.round(position.coords.accuracy)}м точность`);
+      showCurrentCandidate();
+    },
+    () => alert("Геолокация отклонена. Ищем по городу."),
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 // === ЛЕНТА ===
@@ -242,7 +255,8 @@ saveProfileBtn.addEventListener("click", () => {
     first_name: user ? user.first_name : null,
     username: user ? user.username : null,
     age: ageValue, gender, city, latitude, longitude, bio,
-    min_age_filter: 18, max_age_filter: 35, max_distance_km: 50
+    min_age_filter: 18, max_age_filter: 35, max_distance_km: 50,
+    use_geolocation: false
   };
 
   saveProfile(profileData);
@@ -277,6 +291,9 @@ updateProfileBtn.addEventListener("click", () => {
   profileData.min_age_filter = Number(profileMinAge.value);
   profileData.max_age_filter = Number(profileMaxAge.value);
   profileData.max_distance_km = Number(profileMaxDistance.value);
+  profileData.use_geolocation = document.getElementById("profile-use-geolocation").checked;  // ← ДОБАВИТЬ
+
+  if (profileData.use_geolocation && !userLocation) requestUserLocation();  // ← ДОБАВИТЬ
 
   saveProfile(profileData);
   alert("Профиль обновлён! Фильтры применены ✏️");
@@ -305,8 +322,17 @@ updateProfileBtn.addEventListener("click", () => {
   profileMinAge.value = profileData.min_age_filter || 18;
   profileMaxAge.value = profileData.max_age_filter || 35;
   profileMaxDistance.value = profileData.max_distance_km || 50;
+  if (profileData.use_geolocation !== undefined) {
+    document.getElementById("profile-use-geolocation").checked = profileData.use_geolocation;
+  }
 
   onboardingScreen.style.display = "none";
   tabBar.classList.remove("hidden");
   setActiveTab("feed");
 })();
+
+// === СЛУШАТЕЛЬ ЧЕКБОКСА ГЕОЛОКАЦИИ ===
+document.getElementById("profile-use-geolocation").addEventListener("change", (e) => {
+  profileData.use_geolocation = e.target.checked;
+  if (e.target.checked && !userLocation) requestUserLocation();
+});
