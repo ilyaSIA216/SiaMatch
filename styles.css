@@ -464,10 +464,18 @@ body {
   flex-direction: column !important;
 }
 
-#saveProfileBtn {
-  order: -1 !important;
+/* ✅ ПРАВИЛЬНОЕ ПОЗИЦИОНИРОВАНИЕ КНОПКИ */
+.primary {
+  position: sticky !important;
+  top: 20px !important;
   margin: 20px auto 40px !important;
   width: 95% !important;
+  z-index: 10 !important;
+}
+
+#onboarding-screen #card {
+  padding-top: 80px !important;  /* Место под sticky кнопку */
+  padding-bottom: 200px !important;
 }
 
 body {
