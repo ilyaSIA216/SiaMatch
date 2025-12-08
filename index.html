@@ -20,6 +20,7 @@
     <h1>Welcome to SiaMatch</h1>
     <div id="username">Loading user info...</div>
 
+    <!-- Анкета пользователя -->
     <div id="profile-form">
       <h2>Ваш профиль 🍀</h2>
 
@@ -48,6 +49,29 @@
         ></textarea>
         <div class="hint">Минимум 10 символов, максимум 300</div>
       </div>
+    </div>
+
+    <!-- Лента знакомств (кандидат) -->
+    <div id="feed" class="hidden">
+      <h2 class="feed-title">Познакомьтесь 🍀</h2>
+      <div id="candidate-card">
+        <div class="candidate-photo-wrapper">
+          <img id="candidate-photo" src="" alt="Фото" />
+        </div>
+        <div class="candidate-info">
+          <div class="candidate-name-age">
+            <span id="candidate-name"></span>,
+            <span id="candidate-age"></span>
+          </div>
+          <div id="candidate-city" class="candidate-city"></div>
+          <div id="candidate-bio" class="candidate-bio"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
+        <button id="btn-like" class="btn-circle btn-like">❤️</button>
+      </div>
+      <div id="feed-status" class="feed-status"></div>
     </div>
 
     <button id="mainButton">Продолжить 🍀</button>
