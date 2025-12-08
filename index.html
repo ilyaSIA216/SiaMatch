@@ -33,6 +33,26 @@
         <div class="field">
           <label for="gender">Пол</label>
           <select id="gender">
+                    <div class="field">
+          <label for="city">Город <span style="color:#ef4444;">*</span></label>
+          <select id="city" required>
+            <option value="">Выберите город</option>
+            <option value="Москва">Москва</option>
+            <option value="Санкт-Петербург">Санкт-Петербург</option>
+            <option value="Казань">Казань</option>
+            <option value="Новосибирск">Новосибирск</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="latitude">Широта (опционально)</label>
+          <input type="number" id="latitude" step="any" placeholder="55.7558" />
+        </div>
+        <div class="field">
+          <label for="longitude">Долгота (опционально)</label>
+          <input type="number" id="longitude" step="any" placeholder="37.6176" />
+        </div>
+
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
             <option value="other">Другое</option>
