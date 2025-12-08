@@ -380,16 +380,20 @@ textarea {
 }
 
 /* ✅ ФИНАЛЬНЫЕ РАЗМЕРЫ (ЕДИНСТВЕННЫЙ БЛОК) */
+/* Чаты: увеличить ширину в 2 раза */
 #screen-chats {
+  max-width: 900px; /* было 460px, теперь примерно в 2 раза шире */
   min-height: 400px;
-  padding: 40px 8px;         /* ШИРЕ чаты */
-  max-width: 460px;          /* МАКСИМАЛЬНАЯ ширина */
+  padding: 40px 8px;
   margin: 0 auto;
 }
 
+/* Лента свайпов: увеличить ширину на 10% */
 #screen-feed {
+  max-width: 396px; /* 360px + 10% = 396px */
   min-height: 420px;
-  padding: 8px;              /* МЕНЬШЕ отступы */
+  padding: 8px;
+  margin: 0 auto;
 }
 
 #screen-profile {
@@ -399,4 +403,10 @@ textarea {
 
 .candidate-photo-wrapper {
   height: 180px !important;  /* КОРОЧЕ фото */
+}
+
+/* Подогнать карточку кандидатки под новую ширину */
+#candidate-card {
+  max-width: 396px; /* Соответствует ширине свайпов */
+  margin: 0 auto 16px;
 }
