@@ -27,13 +27,14 @@
         <div class="field">
           <label for="gender">Пол</label>
           <select id="gender">
+            <option value="">Выберите пол</option>
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
             <option value="other">Другое</option>
           </select>
         </div>
 
-        <!-- НОВЫЕ ПОЛЯ -->
+        <!-- Город -->
         <div class="field">
           <label for="city">Город <span style="color:#ef4444;">*</span></label>
           <select id="city" required>
@@ -106,6 +107,7 @@
         <div class="field">
           <label for="profile-gender">Пол</label>
           <select id="profile-gender">
+            <option value="">Выберите пол</option>
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
             <option value="other">Другое</option>
@@ -115,6 +117,7 @@
         <div class="field">
           <label for="profile-city">Город</label>
           <select id="profile-city">
+            <option value="">Выберите город</option>
             <option value="Москва">Москва</option>
             <option value="Санкт-Петербург">Санкт-Петербург</option>
             <option value="Казань">Казань</option>
@@ -138,7 +141,15 @@
 
         <!-- ФИЛЬТРЫ -->
         <div class="field">
-          <label>Фильтр по возрасту</label>
+          <label class="checkbox-field">
+            <input type="checkbox" id="profile-use-geolocation" />
+            Использовать мою геолокацию для поиска поблизости
+          </label>
+          <div class="hint">Показывать анкеты в радиусе <span id="distance-value">10</span> км</div>
+        </div>
+
+        <div class="field">
+          <label>Возрастной диапазон</label>
           <div class="age-range">
             <input type="number" id="profile-min-age" min="18" max="60" value="18" />
             <span>—</span>
