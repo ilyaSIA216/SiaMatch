@@ -113,13 +113,15 @@ textarea {
   margin-top: 2px;
 }
 
-/* Основные кнопки */
+/* Основные кнопки — iPhone ФИКС */
 .primary {
-  position: sticky;
-  bottom: 20px;
-  margin: 20px auto;
-  width: 90%;
-  z-index: 10;
+  position: relative !important;
+  z-index: 999 !important;
+  margin: 20px auto !important;
+  width: 90% !important;
+  display: block !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
   
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: #ffffff;
@@ -133,6 +135,7 @@ textarea {
 }
 
 .primary:active {
+  position: relative !important;
   transform: translateY(1px);
   box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35);
   background: linear-gradient(135deg, #16a34a, #15803d);
@@ -413,3 +416,15 @@ body { padding: 0 !important; margin: 0 !important; }
 /* 🚀 ФИНАЛЬНЫЙ ТАБ ФИКС */
 #tab-bar { z-index: 9999 !important; }
 .tab-btn { z-index: 9999 !important; }
+
+/* iOS MOBILE ФИКСЫ */
+input, textarea, select {
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+
+button {
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
