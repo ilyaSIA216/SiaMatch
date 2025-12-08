@@ -1,239 +1,80 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en" data-color-mode="auto" data-light-theme="light" data-dark-theme="dark" data-a11y-animated-images="system" data-a11y-link-underlines="true">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiaMatch - Регистрация</title>
-    <link rel="stylesheet" href="styles/common.css">
-    <link rel="stylesheet" href="styles/auth.css">
-    
-    <!-- QRCode библиотека -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+  <title>SiaMatch - Dating</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --tg-theme-bg-color: #fff;
+      --tg-theme-text-color: #000;
+    }
+    body {
+      background-color: var(--tg-theme-bg-color);
+      color: var(--tg-theme-text-color);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    #username {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    #mainButton {
+      background-color: #0088cc;
+      color: white;
+      border: none;
+      padding: 15px 35px;
+      font-size: 18px;
+      border-radius: 25px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+    }
+    #mainButton:active {
+      background-color: #005f7f;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Шаг 0: Приветствие -->
-        <div id="step-0" class="step">
-            <div class="welcome-container">
-                <div class="app-logo">💖</div>
-                <div class="app-title">🍀 SiaMatch</div>
-                <div class="welcome-text" id="welcome-text">Добро пожаловать в мир знакомств!</div>
-                <button class="btn" onclick="startOnboarding()">Начать знакомство</button>
-            </div>
-        </div>
+  <h1>Welcome to SiaMatch</h1>
+  <div id="username">Loading user info...</div>
+  <button id="mainButton">Продолжить</button>
 
-        <!-- Шаг 1: Имя -->
-        <div id="step-1" class="step hidden">
-            <button class="back-btn" onclick="goToStep(0)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
+  <script>
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
 
-                <h2>Как вас зовут?</h2>
-                <p class="step-description">
-                    Введите ваше настоящее имя
-                </p>
+    // Установка цветов темы из Telegram
+    const theme = Telegram.WebApp.themeParams;
+    document.documentElement.style.setProperty('--tg-theme-bg-color', theme.bg_color || '#ffffff');
+    document.documentElement.style.setProperty('--tg-theme-text-color', theme.text_color || '#000000');
 
-                <div class="input-group">
-                    <input type="text" id="name-input" placeholder="Например: Анна" maxlength="30">
-                </div>
+    // Получение данных пользователя
+    const user = Telegram.WebApp.initDataUnsafe.user;
 
-                <button class="btn" onclick="saveName()">Далее</button>
-            </div>
-        </div>
+    // Отображение имени пользователя
+    const usernameElem = document.getElementById('username');
+    if (user) {
+      usernameElem.textContent = `Привет, ${user.first_name || user.username}!`;
+    } else {
+      usernameElem.textContent = 'Информация о пользователе недоступна.';
+    }
 
-        <!-- Шаг 2: Пол -->
-        <div id="step-2" class="step hidden">
-            <button class="back-btn" onclick="goToStep(1)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
-
-                <h2>Ваш пол</h2>
-                <p class="step-description">
-                    Выберите ваш пол
-                </p>
-
-                <div class="gender-selection">
-                    <div class="gender-option" onclick="selectGender('male')">
-                        <div class="gender-icon">👨</div>
-                        <div class="gender-label">Мужчина</div>
-                    </div>
-                    <div class="gender-option" onclick="selectGender('female')">
-                        <div class="gender-icon">👩</div>
-                        <div class="gender-label">Женщина</div>
-                    </div>
-                </div>
-
-                <button class="btn" onclick="saveGender()">Далее</button>
-            </div>
-        </div>
-
-        <!-- Шаг 3: Возраст -->
-        <div id="step-3" class="step hidden">
-            <button class="back-btn" onclick="goToStep(2)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
-
-                <h2>Сколько вам лет?</h2>
-                <p class="step-description">
-                    Укажите ваш возраст
-                </p>
-
-                <div class="input-group">
-                    <select id="age-select">
-                        <option value="">Выберите возраст</option>
-                    </select>
-                </div>
-
-                <button class="btn" onclick="saveAge()">Далее</button>
-            </div>
-        </div>
-
-        <!-- Шаг 4: Город -->
-        <div id="step-4" class="step hidden">
-            <button class="back-btn" onclick="goToStep(3)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
-
-                <h2>Из какого вы города?</h2>
-                <p class="step-description">
-                    Выберите ваш город из списка
-                </p>
-
-                <div class="input-group">
-                    <select id="city-select">
-                        <option value="">Выберите город</option>
-                    </select>
-                </div>
-
-                <button class="btn" onclick="saveCity()">Далее</button>
-            </div>
-        </div>
-
-        <!-- Шаг 5: Основное фото -->
-        <div id="step-5" class="step hidden">
-            <button class="back-btn" onclick="goToStep(4)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                </div>
-
-                <h2>Добавьте ваше фото</h2>
-                <p class="step-description">
-                    Загрузите ваше лучшее фото
-                </p>
-
-                <div class="photo-upload-container">
-                    <div class="photo-drop-area" onclick="document.getElementById('main-photo-input').click()">
-                        <div class="photo-icon">📸</div>
-                        <div class="photo-text">Нажмите чтобы загрузить фото</div>
-                    </div>
-                    
-                    <img id="main-photo-preview" class="photo-preview" alt="Предпросмотр фото">
-                    
-                    <input type="file" id="main-photo-input" class="file-input-hidden" 
-                           accept="image/*" onchange="previewMainPhoto(event)">
-                </div>
-
-                <button class="btn" onclick="saveMainPhoto()">Далее</button>
-            </div>
-        </div>
-
-        <!-- Шаг 6: Селфи для подтверждения -->
-        <div id="step-6" class="step hidden">
-            <button class="back-btn" onclick="goToStep(5)">← Назад</button>
-            
-            <div class="step-content">
-                <div class="progress-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot active"></div>
-                </div>
-
-                <h2>Подтверждение личности</h2>
-                <p class="step-description">
-                    Сделайте селфи сейчас, чтобы подтвердить, что это действительно вы
-                </p>
-
-                <div class="photo-upload-container">
-                    <div class="photo-drop-area" onclick="document.getElementById('selfie-input').click()">
-                        <div class="photo-icon">🤳</div>
-                        <div class="photo-text">Сделайте селфи сейчас</div>
-                    </div>
-                    
-                    <img id="selfie-preview" class="photo-preview" alt="Предпросмотр селфи">
-                    
-                    <input type="file" id="selfie-input" class="file-input-hidden" 
-                           accept="image/*" onchange="previewSelfie(event)">
-                </div>
-
-                <button class="btn" onclick="saveSelfie()">Отправить на проверку</button>
-            </div>
-        </div>
-
-        <!-- Шаг 7: Ожидание проверки -->
-        <div id="step-7" class="step hidden">
-            <div class="verification-screen">
-                <div class="verification-icon">⏳</div>
-                <div class="verification-title">Данные на проверке</div>
-                <div class="verification-text">
-                    Ваша анкета отправлена на модерацию.<br>
-                    Пожалуйста, ожидайте подтверждения.
-                </div>
-                
-                <div class="loading-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Скрипты в правильном порядке -->
-    <script src="js/device-check.js"></script> <!-- Проверка устройства -->
-    <script src="js/utils.js"></script> <!-- Основные утилиты -->
-    <script src="js/photo-utils.js"></script> <!-- Работа с фото -->
-    <script src="js/auth.js"></script> <!-- Логика регистрации -->
+    // Кнопка из Mini App API
+    const mainBtn = document.getElementById('mainButton');
+    mainBtn.onclick = () => {
+      alert('Продолжаем работу с приложением...');
+      // Здесь можно добавить переход к следующему шагу, например, открытие формы профиля
+    };
+  </script>
 </body>
 </html>
