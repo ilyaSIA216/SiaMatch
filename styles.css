@@ -26,14 +26,14 @@ body {
 
 #card {
   width: 100%;
-  max-width: 100%;           /* ← БЫЛО 420px → 100% */
+  max-width: 100%;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 24px;
   padding: 20px 18px 120px 18px;
   box-shadow: 0 10px 25px rgba(22, 163, 74, 0.18);
   backdrop-filter: blur(8px);
   min-height: calc(100vh - 144px);
-  margin: 0 auto 80px;       /* ← margin: 0 auto */
+  margin: 0 auto 80px;
 }
 
 .logo {
@@ -379,34 +379,43 @@ textarea {
   }
 }
 
-/* ✅ ФИНАЛЬНЫЕ РАЗМЕРЫ (ЕДИНСТВЕННЫЙ БЛОК) */
-/* Чаты: увеличить ширину в 2 раза */
-#screen-chats {
-  max-width: 900px; /* было 460px, теперь примерно в 2 раза шире */
-  min-height: 400px;
-  padding: 40px 8px;
-  margin: 0 auto;
+.candidate-photo-wrapper {
+  height: 180px !important;
 }
 
-/* Лента свайпов: увеличить ширину на 10% */
+/* 🚀 СИЛОВОЕ РАСШИРЕНИЕ ЭКРАНОВ */
+#screen-chats {
+  width: 100vw !important;
+  position: relative !important;
+  left: calc(-50vw + 50%) !important;
+  max-width: 900px !important;
+  padding: 40px 16px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  min-height: 400px;
+}
+
 #screen-feed {
-  max-width: 396px; /* 360px + 10% = 396px */
+  max-width: 396px !important;
+  width: 396px !important;
+  margin: 0 auto !important;
+  padding: 8px !important;
   min-height: 420px;
-  padding: 8px;
-  margin: 0 auto;
 }
 
 #screen-profile {
-  padding: 20px;
-  min-height: 450px;
+  padding: 20px !important;
+  min-height: 450px !important;
 }
 
-.candidate-photo-wrapper {
-  height: 180px !important;  /* КОРОЧЕ фото */
-}
-
-/* Подогнать карточку кандидатки под новую ширину */
 #candidate-card {
-  max-width: 396px; /* Соответствует ширине свайпов */
-  margin: 0 auto 16px;
+  max-width: 396px !important;
+  width: 100% !important;
+  margin: 0 auto 16px !important;
+}
+
+/* Фикс body flex для чатов */
+body:has(#screen-chats) {
+  padding: 0 !important;
+  justify-content: flex-start !important;
 }
