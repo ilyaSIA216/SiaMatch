@@ -352,15 +352,15 @@ textarea {
   display: none;
 }
 
-/* Полная высота экранов */
+/* Общие стили экранов — БЕЗ flex и высоты */
 .screen {
-  min-height: calc(100vh - 140px); /* vh - табы - хедер */
   padding: 20px;
   box-sizing: border-box;
 }
 
-/* Центрирование контента на пустых экранах */
+/* Полная высота экранов — ТОЛЬКО для Чатов и Ленты */
 #screen-chats, #screen-feed {
+  min-height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -369,14 +369,22 @@ textarea {
   padding: 40px 20px;
 }
 
+/* Профиль — обычные отступы */
+#screen-profile {
+  padding: 20px;
+}
+
 #chats-empty {
   max-width: 280px;
   margin: 0 auto;
+  font-size: 16px;
 }
 
 #feed-status {
   margin-top: 20px;
   max-width: 300px;
+  font-size: 14px;
+  color: var(--siamatch-green);
 }
 
 /* Карточка кандидата на всю ширину */
@@ -389,7 +397,6 @@ textarea {
 /* Адаптив для маленьких экранов */
 @media (max-height: 600px) {
   .screen {
-    min-height: calc(100vh - 100px);
     padding: 10px;
   }
 }
