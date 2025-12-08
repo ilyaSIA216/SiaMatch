@@ -47,15 +47,6 @@
         </div>
 
         <div class="field">
-          <label for="latitude">Широта (опционально)</label>
-          <input type="number" id="latitude" step="any" placeholder="55.7558" />
-        </div>
-        <div class="field">
-          <label for="longitude">Долгота (опционально)</label>
-          <input type="number" id="longitude" step="any" placeholder="37.6176" />
-        </div>
-
-        <div class="field">
           <label for="bio">О себе</label>
           <textarea id="bio" rows="3" maxlength="300" placeholder="Коротко о себе и кого хотите встретить 🍀"></textarea>
           <div class="hint">Минимум 10 символов, максимум 300</div>
@@ -67,12 +58,12 @@
       <!-- ЭКРАН: ЧАТЫ -->
       <div id="screen-chats" class="screen hidden">
         <h2 class="screen-title">Чаты 💬</h2>
-        <div id="chats-empty" class="hint">У вас пока нет активных чатов.</div>
+        <div id="chats-empty" class="hint">Здесь пока пусто</div>
         <ul id="chats-list"></ul>
       </div>
 
       <!-- ЭКРАН: ЛЕНТА -->
-      <div id="screen-feed" class="screen hidden">
+      <div id="screen-feed" class="screen screen-clean hidden">
         <h2 class="screen-title">Познакомьтесь 🍀</h2>
         <div id="candidate-card">
           <div class="candidate-photo-wrapper">
@@ -96,7 +87,7 @@
       </div>
 
       <!-- ЭКРАН: ПРОФИЛЬ -->
-      <div id="screen-profile" class="screen hidden">
+      <div id="screen-profile" class="screen screen-clean hidden">
         <h2 class="screen-title">Мой профиль ✏️</h2>
 
         <div class="field">
@@ -123,15 +114,6 @@
             <option value="Казань">Казань</option>
             <option value="Новосибирск">Новосибирск</option>
           </select>
-        </div>
-
-        <div class="field">
-          <label for="profile-latitude">Широта</label>
-          <input type="number" id="profile-latitude" step="any" placeholder="55.7558" />
-        </div>
-        <div class="field">
-          <label for="profile-longitude">Долгота</label>
-          <input type="number" id="profile-longitude" step="any" placeholder="37.6176" />
         </div>
 
         <div class="field">
