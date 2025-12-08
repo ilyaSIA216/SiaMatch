@@ -29,11 +29,11 @@ body {
   max-width: 420px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 24px;
-  padding: 20px 18px 120px 18px;  /* ← УВЕЛИЧИТЬ padding-bottom */
+  padding: 20px 18px 120px 18px;
   box-shadow: 0 10px 25px rgba(22, 163, 74, 0.18);
   backdrop-filter: blur(8px);
-  min-height: calc(100vh - 144px);  /* ← ДОБАВИТЬ */
-  margin-bottom: 80px;              /* ← ДОБАВИТЬ */
+  min-height: calc(100vh - 144px);
+  margin-bottom: 80px;
 }
 
 .logo {
@@ -188,7 +188,7 @@ textarea {
 
 .candidate-photo-wrapper {
   width: 100%;
-  height: 210px;
+  height: 180px;  /* Компактное фото */
   overflow: hidden;
   background: #d1fae5;
   display: flex;
@@ -327,7 +327,7 @@ textarea {
   justify-content: space-around;
   align-items: center;
   padding: 0 8px;
-  z-index: 1000;  /* ← ВЫШЕ ВСЕГО */
+  z-index: 1000;
 }
 
 .tab-btn {
@@ -360,40 +360,16 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Полная высота экранов — ТОЛЬКО для Чатов и Ленты */
-#screen-chats, #screen-feed {
-  min-height: calc(100vh - 140px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 40px 20px;
-}
-
-/* Профиль — обычные отступы */
-#screen-profile {
-  padding: 20px;
-}
-
-#chats-empty {
-  max-width: 280px;
-  margin: 0 auto;
-  font-size: 16px;
-}
-
-#feed-status {
-  margin-top: 20px;
-  max-width: 300px;
-  font-size: 14px;
-  color: var(--siamatch-green);
+/* Контент не перекрывает табы */
+#app-root {
+  padding-bottom: 80px;
 }
 
 /* Карточка кандидата на всю ширину */
 #candidate-card {
   width: 100%;
-  max-width: 380px;
-  margin: 0 auto 20px;
+  max-width: 360px;
+  margin: 0 auto 16px;
 }
 
 /* Адаптив для маленьких экранов */
@@ -403,20 +379,17 @@ textarea {
   }
 }
 
-/* Контент не перекрывает табы */
-#app-root {
-  padding-bottom: 80px;  /* ← МЕСТО ПОД ТАБЫ */
-}
-
-/* Фикс высоты для экранов */
+/* ✅ ФИНАЛЬНЫЕ РАЗМЕРЫ */
 #screen-chats {
   min-height: 400px;
-  padding: 40px 20px;
+  padding: 40px 10px;
+  max-width: 450px;
+  margin: 0 auto;
 }
 
 #screen-feed {
-  min-height: 500px;
-  padding: 20px;
+  min-height: 450px;
+  padding: 10px;
 }
 
 #screen-profile {
