@@ -9,75 +9,125 @@
     content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
   />
 
-  <!-- Общие стили приложения -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="card">
-    <div class="logo">🍀</div>
-    <div class="app-name">SiaMatch</div>
+  <div id="app-root">
+    <div id="card">
+      <div class="logo">🍀</div>
+      <div class="app-name">SiaMatch</div>
 
-    <h1>Welcome to SiaMatch</h1>
-    <div id="username">Loading user info...</div>
+      <h1>Welcome to SiaMatch</h1>
+      <div id="username">Loading user info...</div>
 
-    <!-- Анкета пользователя -->
-    <div id="profile-form">
-      <h2>Ваш профиль 🍀</h2>
+      <!-- ЭКРАН 0: первичная анкета (onboarding) -->
+      <div id="onboarding-screen">
+        <h2 class="screen-title">Ваш профиль 🍀</h2>
 
-      <div class="field">
-        <label for="age">Возраст</label>
-        <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
-        <div class="hint">Только пользователи 18+</div>
-      </div>
-
-      <div class="field">
-        <label for="gender">Пол</label>
-        <select id="gender">
-          <option value="male">Мужской</option>
-          <option value="female">Женский</option>
-          <option value="other">Другое</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="bio">О себе</label>
-        <textarea
-          id="bio"
-          rows="3"
-          maxlength="300"
-          placeholder="Коротко о себе и кого хотите встретить 🍀"
-        ></textarea>
-        <div class="hint">Минимум 10 символов, максимум 300</div>
-      </div>
-    </div>
-
-    <!-- Лента знакомств (кандидат) -->
-    <div id="feed" class="hidden">
-      <h2 class="feed-title">Познакомьтесь 🍀</h2>
-      <div id="candidate-card">
-        <div class="candidate-photo-wrapper">
-          <img id="candidate-photo" src="" alt="Фото" />
+        <div class="field">
+          <label for="age">Возраст</label>
+          <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
+          <div class="hint">Только пользователи 18+</div>
         </div>
-        <div class="candidate-info">
-          <div class="candidate-name-age">
-            <span id="candidate-name"></span>,
-            <span id="candidate-age"></span>
+
+        <div class="field">
+          <label for="gender">Пол</label>
+          <select id="gender">
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="bio">О себе</label>
+          <textarea
+            id="bio"
+            rows="3"
+            maxlength="300"
+            placeholder="Коротко о себе и кого хотите встретить 🍀"
+          ></textarea>
+          <div class="hint">Минимум 10 символов, максимум 300</div>
+        </div>
+
+        <button id="saveProfileBtn" class="primary">Сохранить профиль 🍀</button>
+      </div>
+
+      <!-- ЭКРАН: ЧАТЫ -->
+      <div id="screen-chats" class="screen hidden">
+        <h2 class="screen-title">Чаты 💬</h2>
+        <div id="chats-empty" class="hint">
+          У вас пока нет активных чатов. Лайкните пару анкет, чтобы появились совпадения.
+        </div>
+        <ul id="chats-list"></ul>
+      </div>
+
+      <!-- ЭКРАН: ЛЕНТА -->
+      <div id="screen-feed" class="screen hidden">
+        <h2 class="screen-title">Познакомьтесь 🍀</h2>
+        <div id="candidate-card">
+          <div class="candidate-photo-wrapper">
+            <img id="candidate-photo" src="" alt="Фото" />
           </div>
-          <div id="candidate-city" class="candidate-city"></div>
-          <div id="candidate-bio" class="candidate-bio"></div>
+          <div class="candidate-info">
+            <div class="candidate-name-age">
+              <span id="candidate-name"></span>,
+              <span id="candidate-age"></span>
+            </div>
+            <div id="candidate-city" class="candidate-city"></div>
+            <div id="candidate-bio" class="candidate-bio"></div>
+          </div>
         </div>
+        <div class="actions">
+          <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
+          <button id="btn-like" class="btn-circle btn-like">❤️</button>
+        </div>
+        <div id="feed-status" class="feed-status"></div>
       </div>
-      <div class="actions">
-        <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
-        <button id="btn-like" class="btn-circle btn-like">❤️</button>
+
+      <!-- ЭКРАН: ПРОФИЛЬ/НАСТРОЙКИ -->
+      <div id="screen-profile" class="screen hidden">
+        <h2 class="screen-title">Мой профиль ✏️</h2>
+
+        <div class="field">
+          <label for="profile-age">Возраст</label>
+          <input type="number" id="profile-age" min="18" max="99" />
+        </div>
+
+        <div class="field">
+          <label for="profile-gender">Пол</label>
+          <select id="profile-gender">
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="profile-bio">О себе</label>
+          <textarea id="profile-bio" rows="3" maxlength="300"></textarea>
+        </div>
+
+        <!-- Заготовка под подписку -->
+        <div class="field">
+          <label>Подписка</label>
+          <div class="hint">
+            В будущем здесь появится возможность покупать Premium (больше лайков, бусты и т.п.).
+          </div>
+        </div>
+
+        <button id="updateProfileBtn" class="primary">Сохранить изменения ✏️</button>
       </div>
-      <div id="feed-status" class="feed-status"></div>
     </div>
 
-    <button id="mainButton">Продолжить 🍀</button>
+    <!-- Нижняя навигация -->
+    <div id="tab-bar" class="hidden">
+      <button class="tab-btn active" data-tab="chats">💬</button>
+      <button class="tab-btn" data-tab="feed">🍀</button>
+      <button class="tab-btn" data-tab="profile">✏️</button>
+    </div>
   </div>
 
-  <!-- Telegram WebApp SDK и логика приложения -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="app.js"></script>
 </body>
