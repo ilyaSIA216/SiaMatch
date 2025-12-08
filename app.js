@@ -219,8 +219,9 @@ btnDislike.addEventListener("click", () => {
 
 // === ТАБЫ ===
 function setActiveTab(tab) {
-  // Скрыть все экраны
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  screenChats.classList.add("hidden");
+  screenFeed.classList.add("hidden");
+  screenProfile.classList.add("hidden");
   
   // Показать логотип только на онбординге
   const logo = document.querySelector('.logo');
@@ -228,28 +229,23 @@ function setActiveTab(tab) {
   const h1 = document.querySelector('h1');
   const username = document.getElementById('username');
   
-  if (tab === 'onboarding') {
-    logo.style.display = 'block';
-    appName.style.display = 'block';
-    h1.style.display = 'block';
-    username.style.display = 'block';
-  } else {
-    logo.style.display = 'none';
-    appName.style.display = 'none';
-    h1.style.display = 'none';
-    username.style.display = 'none';
-  }
+  logo.style.display = 'none';
+  appName.style.display = 'none';
+  h1.style.display = 'none';
+  username.style.display = 'none';
 
   tabButtons.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.tab === tab);
   });
 
-  if (tab === "chats") screenChats.classList.remove("hidden");
-  else if (tab === "feed") {
+  if (tab === "chats") {
+    screenChats.classList.remove("hidden");
+  } else if (tab === "feed") {
     screenFeed.classList.remove("hidden");
     showCurrentCandidate();
+  } else if (tab === "profile") {
+    screenProfile.classList.remove("hidden");
   }
-  else if (tab === "profile") screenProfile.classList.remove("hidden");
 }
 
 tabButtons.forEach(btn => {
