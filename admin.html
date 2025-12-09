@@ -18,6 +18,7 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --info: #3b82f6;
+      --pending: #f59e0b;
     }
     * {
       box-sizing: border-box;
@@ -206,6 +207,8 @@
     .stat-number.new { color: var(--info); }
     .stat-number.active { color: #10b981; }
     .stat-number.blocked { color: var(--danger); }
+    .stat-number.pending { color: var(--pending); }
+    .stat-number.verified { color: #10b981; }
     .stat-label {
       font-size: 12px;
       color: var(--muted);
@@ -285,6 +288,12 @@
     .user-item.new {
       border-left: 4px solid var(--info);
     }
+    .user-item.pending {
+      border-left: 4px solid var(--pending);
+    }
+    .user-item.verified {
+      border-left: 4px solid #10b981;
+    }
     .user-main {
       display: flex;
       flex-direction: column;
@@ -292,12 +301,41 @@
     }
     .user-name {
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .verification-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .verification-badge.pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--pending);
+    }
+    .verification-badge.verified {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    .verification-badge.not-verified {
+      background: rgba(107, 114, 128, 0.2);
+      color: var(--muted);
+    }
+    .verification-badge.rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
     }
     .user-meta {
       color: var(--muted);
       font-size: 12px;
       display: flex;
       gap: 12px;
+      flex-wrap: wrap;
     }
     .user-actions {
       display: flex;
@@ -332,6 +370,24 @@
       padding: 0;
       text-align: right;
     }
+    .verify-btn {
+      border: none;
+      background: none;
+      color: #10b981;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+      text-align: right;
+    }
+    .reject-btn {
+      border: none;
+      background: none;
+      color: var(--danger);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+      text-align: right;
+    }
 
     /* Баннеры разделов */
     .section-banner {
@@ -341,13 +397,21 @@
       background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
       border: 1px solid rgba(34, 197, 94, 0.2);
     }
-    .section-banner.search {
+    .section-banner.new {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
       border-color: rgba(59, 130, 246, 0.2);
     }
     .section-banner.blocked {
       background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
       border-color: rgba(239, 68, 68, 0.2);
+    }
+    .section-banner.search {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+    .section-banner.verification {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
+      border-color: rgba(245, 158, 11, 0.2);
     }
     .section-banner h3 {
       margin: 0 0 6px;
@@ -357,6 +421,77 @@
       margin: 0;
       font-size: 13px;
       color: var(--muted);
+    }
+
+    /* Модальное окно для верификации */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(2, 6, 23, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .photo-comparison {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .photo-container {
+      flex: 1;
+      text-align: center;
+    }
+    .photo-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .verification-photo {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 12px;
+      border: 2px solid var(--accent);
+      margin: 0 auto;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .modal-actions .primary {
+      flex: 1;
     }
   </style>
 </head>
@@ -392,6 +527,7 @@
       <div id="admin-tabs">
         <button class="tab-btn active" data-tab="all">Все пользователи</button>
         <button class="tab-btn" data-tab="new">Новые</button>
+        <button class="tab-btn" data-tab="verification">Верификация ⏳</button>
         <button class="tab-btn" data-tab="blocked">Заблокированные</button>
         <button class="tab-btn" data-tab="search">Поиск</button>
       </div>
@@ -405,6 +541,10 @@
         <div class="stat-card">
           <span class="stat-number new" id="stat-new">0</span>
           <span class="stat-label">Новых за 24ч</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number pending" id="stat-pending">0</span>
+          <span class="stat-label">На верификации</span>
         </div>
         <div class="stat-card">
           <span class="stat-number active" id="stat-active">0</span>
@@ -422,9 +562,14 @@
         <p>Полный список зарегистрированных пользователей. Можно сортировать, фильтровать и выполнять модерацию.</p>
       </div>
 
-      <div id="section-banner-new" class="section-banner hidden">
+      <div id="section-banner-new" class="section-banner new hidden">
         <h3>Новые пользователи</h3>
         <p>Пользователи, зарегистрировавшиеся за последние 24 часа. Отслеживайте активность приложения.</p>
+      </div>
+
+      <div id="section-banner-verification" class="section-banner verification hidden">
+        <h3>Заявки на верификацию ⏳</h3>
+        <p>Проверьте селфи-фото пользователей и подтвердите или отклоните верификацию.</p>
       </div>
 
       <div id="section-banner-blocked" class="section-banner blocked hidden">
@@ -460,6 +605,13 @@
           <option value="Санкт-Петербург">Санкт-Петербург</option>
           <option value="Казань">Казань</option>
         </select>
+        <select id="filter-verification" class="filter-select">
+          <option value="">Все статусы</option>
+          <option value="not_verified">Не верифицированы</option>
+          <option value="pending">На проверке</option>
+          <option value="verified">Верифицированы</option>
+          <option value="rejected">Отклонены</option>
+        </select>
         <input type="number" id="filter-age-min" class="filter-select" placeholder="Возраст от" min="18" max="99">
         <input type="number" id="filter-age-max" class="filter-select" placeholder="до" min="18" max="99">
       </div>
@@ -467,6 +619,19 @@
       <!-- Результаты -->
       <div id="results-info">Загружаем данные...</div>
       <ul id="users-list"></ul>
+    </div>
+  </div>
+
+  <!-- Модальное окно для верификации -->
+  <div id="verification-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Проверка верификации</h3>
+        <button class="close-btn" id="close-modal-btn">×</button>
+      </div>
+      <div id="modal-content">
+        <!-- Контент будет заполняться динамически -->
+      </div>
     </div>
   </div>
 
@@ -491,6 +656,7 @@
     const searchBtn = document.getElementById("search-btn");
     const filterGender = document.getElementById("filter-gender");
     const filterCity = document.getElementById("filter-city");
+    const filterVerification = document.getElementById("filter-verification");
     const filterAgeMin = document.getElementById("filter-age-min");
     const filterAgeMax = document.getElementById("filter-age-max");
 
@@ -501,6 +667,7 @@
     // Статистика
     const statTotal = document.getElementById("stat-total");
     const statNew = document.getElementById("stat-new");
+    const statPending = document.getElementById("stat-pending");
     const statActive = document.getElementById("stat-active");
     const statBlocked = document.getElementById("stat-blocked");
 
@@ -508,22 +675,30 @@
     const sectionBanners = {
       all: document.getElementById("section-banner-all"),
       new: document.getElementById("section-banner-new"),
+      verification: document.getElementById("section-banner-verification"),
       blocked: document.getElementById("section-banner-blocked"),
       search: document.getElementById("section-banner-search")
     };
+
+    // Модальное окно
+    const verificationModal = document.getElementById("verification-modal");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const modalContent = document.getElementById("modal-content");
 
     // Текущее состояние
     let currentTab = "all";
     let allUsers = [];
     let filteredUsers = [];
 
-    // Демо-данные пользователей (расширенные)
+    // Демо-данные пользователей с верификацией
     function generateDemoUsers(count = 50) {
       const cities = ["Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Екатеринбург", "Краснодар"];
       const names = {
         male: ["Александр", "Дмитрий", "Максим", "Артём", "Иван", "Кирилл", "Михаил"],
         female: ["Анастасия", "Мария", "Анна", "Виктория", "Екатерина", "Елена", "Ольга"]
       };
+      
+      const verificationStatuses = ['not_verified', 'pending', 'verified', 'rejected'];
       
       const users = [];
       const now = new Date();
@@ -544,6 +719,17 @@
         // 20% новых (за последние 24 часа)
         const isNew = daysAgo === 0;
         
+        // Статус верификации
+        const verificationStatus = verificationStatuses[Math.floor(Math.random() * verificationStatuses.length)];
+        const verified = verificationStatus === 'verified';
+        
+        // Фото для верификации (демо)
+        const verificationPhoto = verified || verificationStatus === 'pending' ? 
+          `https://randomuser.me/api/portraits/${gender === 'male' ? 'men' : 'women'}/${i % 50}.jpg` : null;
+        
+        // Основное фото профиля
+        const profilePhoto = `https://randomuser.me/api/portraits/${gender === 'male' ? 'men' : 'women'}/${i % 50}.jpg`;
+        
         users.push({
           id: i,
           name: name,
@@ -556,7 +742,13 @@
           days_ago: daysAgo,
           blocked: blocked,
           is_new: isNew,
-          last_active: new Date(now.getTime() - Math.floor(Math.random() * 7) * dayMs).toISOString()
+          last_active: new Date(now.getTime() - Math.floor(Math.random() * 7) * dayMs).toISOString(),
+          verification_status: verificationStatus,
+          verified: verified,
+          verification_photo: verificationPhoto,
+          profile_photo: profilePhoto,
+          verification_request_date: verificationStatus === 'pending' ? 
+            new Date(now.getTime() - Math.floor(Math.random() * 24) * 60 * 60 * 1000).toISOString() : null
         });
       }
       
@@ -571,10 +763,12 @@
       const total = allUsers.length;
       const newUsers = allUsers.filter(u => u.is_new).length;
       const blocked = allUsers.filter(u => u.blocked).length;
+      const pendingVerification = allUsers.filter(u => u.verification_status === 'pending').length;
       const active = total - blocked;
       
       statTotal.textContent = total;
       statNew.textContent = newUsers;
+      statPending.textContent = pendingVerification;
       statActive.textContent = active;
       statBlocked.textContent = blocked;
     }
@@ -595,6 +789,12 @@
           filtered.sort((a, b) => b.id - a.id);
           break;
           
+        case "verification":
+          // Только на верификации
+          filtered = allUsers.filter(u => u.verification_status === 'pending');
+          filtered.sort((a, b) => new Date(b.verification_request_date) - new Date(a.verification_request_date));
+          break;
+          
         case "blocked":
           // Только заблокированные
           filtered = allUsers.filter(u => u.blocked);
@@ -606,6 +806,7 @@
           const searchTerm = searchInput.value.trim().toLowerCase();
           const genderFilter = filterGender.value;
           const cityFilter = filterCity.value;
+          const verificationFilter = filterVerification.value;
           const ageMin = parseInt(filterAgeMin.value) || 18;
           const ageMax = parseInt(filterAgeMax.value) || 99;
           
@@ -623,10 +824,13 @@
             // Фильтр по городу
             const matchesCity = !cityFilter || u.city === cityFilter;
             
+            // Фильтр по верификации
+            const matchesVerification = !verificationFilter || u.verification_status === verificationFilter;
+            
             // Фильтр по возрасту
             const matchesAge = u.age >= ageMin && u.age <= ageMax;
             
-            return matchesSearch && matchesGender && matchesCity && matchesAge;
+            return matchesSearch && matchesGender && matchesCity && matchesVerification && matchesAge;
           });
           
           filtered.sort((a, b) => b.id - a.id);
@@ -637,6 +841,47 @@
       return filtered;
     }
 
+    // Показать модальное окно верификации
+    function showVerificationModal(user) {
+      modalContent.innerHTML = `
+        <div class="photo-comparison">
+          <div class="photo-container">
+            <div class="photo-label">Фото в профиле</div>
+            <img src="${user.profile_photo}" alt="Фото профиля" class="verification-photo" />
+          </div>
+          <div class="photo-container">
+            <div class="photo-label">Селфи для верификации</div>
+            <img src="${user.verification_photo}" alt="Селфи" class="verification-photo" />
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <strong>Информация о пользователе:</strong><br>
+          ID: ${user.id}<br>
+          Имя: ${user.name}, ${user.age} лет<br>
+          Username: @${user.username}<br>
+          Город: ${user.city}<br>
+          Дата запроса: ${user.verification_request_date ? new Date(user.verification_request_date).toLocaleString() : 'Не указана'}
+        </div>
+        <div class="modal-actions">
+          <button id="approve-verification-btn" class="primary">✅ Подтвердить верификацию</button>
+          <button id="reject-verification-btn" style="background: var(--danger);">❌ Отклонить</button>
+        </div>
+      `;
+      
+      verificationModal.classList.remove('hidden');
+      
+      // Обработчики для кнопок в модальном окне
+      document.getElementById('approve-verification-btn').onclick = () => {
+        approveVerification(user.id);
+        verificationModal.classList.add('hidden');
+      };
+      
+      document.getElementById('reject-verification-btn').onclick = () => {
+        rejectVerification(user.id);
+        verificationModal.classList.add('hidden');
+      };
+    }
+
     // Рендеринг пользователей
     function renderUsers(users) {
       usersList.innerHTML = "";
@@ -645,6 +890,7 @@
         const emptyMsg = {
           "all": "Нет зарегистрированных пользователей",
           "new": "Нет новых пользователей за последние 24 часа",
+          "verification": "Нет заявок на верификацию",
           "blocked": "Нет заблокированных пользователей",
           "search": "По вашему запросу ничего не найдено"
         }[currentTab];
@@ -657,6 +903,7 @@
       const tabTitles = {
         "all": "Все пользователи",
         "new": "Новые пользователи",
+        "verification": "Заявки на верификацию",
         "blocked": "Заблокированные пользователи",
         "search": "Результаты поиска"
       };
@@ -666,12 +913,24 @@
       // Рендерим каждого пользователя
       users.forEach((u) => {
         const li = document.createElement("li");
-        li.className = `user-item ${u.blocked ? 'blocked' : ''} ${u.is_new ? 'new' : ''}`;
+        li.className = `user-item ${u.blocked ? 'blocked' : ''} ${u.is_new ? 'new' : ''} ${u.verification_status}`;
 
         const main = document.createElement("div");
         main.className = "user-main";
+        
+        // Бейдж верификации
+        const verificationBadgeText = {
+          'not_verified': 'Не верифицирован',
+          'pending': '⏳ На проверке',
+          'verified': '✅ Верифицирован',
+          'rejected': '❌ Отклонен'
+        }[u.verification_status];
+        
         main.innerHTML = `
-          <span class="user-name">${u.name}, ${u.age} лет</span>
+          <div class="user-name">
+            ${u.name}, ${u.age} лет
+            <span class="verification-badge ${u.verification_status}">${verificationBadgeText}</span>
+          </div>
           <div class="user-meta">
             <span>ID: ${u.id}</span>
             <span>@${u.username}</span>
@@ -696,6 +955,17 @@
             alert("У пользователя нет username.");
           }
         };
+
+        // Кнопки для верификации
+        if (u.verification_status === 'pending') {
+          const verifyBtn = document.createElement("button");
+          verifyBtn.className = "verify-btn";
+          verifyBtn.textContent = "🔍 Проверить";
+          verifyBtn.onclick = () => {
+            showVerificationModal(u);
+          };
+          actions.appendChild(verifyBtn);
+        }
 
         const blockBtn = document.createElement("button");
         blockBtn.className = u.blocked ? "unblock-btn" : "block-btn";
@@ -725,6 +995,32 @@
         li.appendChild(actions);
         usersList.appendChild(li);
       });
+    }
+
+    // Подтвердить верификацию
+    function approveVerification(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (user) {
+        user.verified = true;
+        user.verification_status = 'verified';
+        user.verification_photo = null; // Очищаем селфи после проверки
+        alert(`✅ Верификация для ${user.name} подтверждена!\n\nТеперь в ленте рядом с её анкетой будет отображаться значок верификации ✅`);
+        switchTab(currentTab); // Обновляем список
+        updateStats();
+      }
+    }
+
+    // Отклонить верификацию
+    function rejectVerification(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (user) {
+        user.verified = false;
+        user.verification_status = 'rejected';
+        user.verification_photo = null; // Очищаем селфи после проверки
+        alert(`❌ Верификация для ${user.name} отклонена.\n\nПользователь сможет повторно отправить селфи для проверки.`);
+        switchTab(currentTab); // Обновляем список
+        updateStats();
+      }
     }
 
     // Переключение вкладок
@@ -778,6 +1074,12 @@
       loginCard.classList.remove("hidden");
       passwordInput.value = "";
       currentTab = "all";
+      verificationModal.classList.add('hidden');
+    };
+
+    // Закрыть модальное окно
+    closeModalBtn.onclick = () => {
+      verificationModal.classList.add('hidden');
     };
 
     // Поиск
@@ -792,6 +1094,7 @@
     // Обработчики фильтров
     filterGender.addEventListener("change", () => switchTab("search"));
     filterCity.addEventListener("change", () => switchTab("search"));
+    filterVerification.addEventListener("change", () => switchTab("search"));
     filterAgeMin.addEventListener("change", () => switchTab("search"));
     filterAgeMax.addEventListener("change", () => switchTab("search"));
 
