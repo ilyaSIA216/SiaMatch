@@ -119,7 +119,7 @@
       margin-top: 4px;
     }
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     /* Админ-панель */
@@ -214,16 +214,12 @@
       color: var(--muted);
     }
 
-    /* Поисковая строка (только в поиске) */
+    /* Поисковая строка */
     #search-row {
       display: flex;
       gap: 8px;
       margin-bottom: 16px;
       align-items: center;
-      display: none;
-    }
-    #search-row.active {
-      display: flex;
     }
     #search-input {
       flex: 1;
@@ -235,15 +231,12 @@
       white-space: nowrap;
     }
 
-    /* Фильтры (только в поиске) */
+    /* Фильтры */
     #filters-row {
       display: none;
       gap: 8px;
       margin-bottom: 16px;
       flex-wrap: wrap;
-    }
-    #filters-row.active {
-      display: flex;
     }
     .filter-select {
       padding: 8px 12px;
@@ -506,7 +499,7 @@
       <div class="field">
         <label for="password">Пароль</label>
         <input type="password" id="password" autocomplete="off" />
-        <div class="hint">Введите админ‑пароль, чтобы открыть панель управления.</div>
+        <div class="hint">Введите админ‑пароль: <strong>s21i06a95</strong></div>
       </div>
 
       <button id="login-btn" class="primary">Войти</button>
@@ -583,7 +576,7 @@
       </div>
 
       <!-- Поисковая строка (только для вкладки "Поиск") -->
-      <div id="search-row">
+      <div id="search-row" class="hidden">
         <input
           type="text"
           id="search-input"
@@ -593,7 +586,7 @@
       </div>
 
       <!-- Фильтры (только для вкладки "Поиск") -->
-      <div id="filters-row">
+      <div id="filters-row" class="hidden">
         <select id="filter-gender" class="filter-select">
           <option value="">Все полы</option>
           <option value="male">Мужской</option>
@@ -636,9 +629,10 @@
   </div>
 
   <script>
+    // Константы
     const ADMIN_PASSWORD = "s21i06a95";
 
-    // DOM элементы
+    // DOM элементы - логин
     const loginCard = document.getElementById("login-card");
     const adminCard = document.getElementById("admin-card");
     const loginBtn = document.getElementById("login-btn");
@@ -646,10 +640,10 @@
     const passwordInput = document.getElementById("password");
     const loginError = document.getElementById("login-error");
 
-    // Табы
+    // DOM элементы - табы
     const tabButtons = document.querySelectorAll(".tab-btn");
     
-    // Поиск и фильтры
+    // DOM элементы - поиск и фильтры
     const searchRow = document.getElementById("search-row");
     const filtersRow = document.getElementById("filters-row");
     const searchInput = document.getElementById("search-input");
@@ -660,18 +654,18 @@
     const filterAgeMin = document.getElementById("filter-age-min");
     const filterAgeMax = document.getElementById("filter-age-max");
 
-    // Результаты
+    // DOM элементы - результаты
     const resultsInfo = document.getElementById("results-info");
     const usersList = document.getElementById("users-list");
 
-    // Статистика
+    // DOM элементы - статистика
     const statTotal = document.getElementById("stat-total");
     const statNew = document.getElementById("stat-new");
     const statPending = document.getElementById("stat-pending");
     const statActive = document.getElementById("stat-active");
     const statBlocked = document.getElementById("stat-blocked");
 
-    // Баннеры
+    // DOM элементы - баннеры
     const sectionBanners = {
       all: document.getElementById("section-banner-all"),
       new: document.getElementById("section-banner-new"),
@@ -680,17 +674,17 @@
       search: document.getElementById("section-banner-search")
     };
 
-    // Модальное окно
+    // DOM элементы - модальное окно
     const verificationModal = document.getElementById("verification-modal");
     const closeModalBtn = document.getElementById("close-modal-btn");
     const modalContent = document.getElementById("modal-content");
 
-    // Текущее состояние
+    // Переменные состояния
     let currentTab = "all";
     let allUsers = [];
     let filteredUsers = [];
 
-    // Демо-данные пользователей с верификацией
+    // Генерация демо-данных пользователей
     function generateDemoUsers(count = 50) {
       const cities = ["Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Екатеринбург", "Краснодар"];
       const names = {
@@ -724,7 +718,7 @@
         const verified = verificationStatus === 'verified';
         
         // Фото для верификации (демо)
-        const verificationPhoto = verified || verificationStatus === 'pending' ? 
+        const verificationPhoto = (verified || verificationStatus === 'pending') ? 
           `https://randomuser.me/api/portraits/${gender === 'male' ? 'men' : 'women'}/${i % 50}.jpg` : null;
         
         // Основное фото профиля
@@ -754,9 +748,6 @@
       
       return users;
     }
-
-    // Инициализация данных
-    allUsers = generateDemoUsers(50);
 
     // Обновление статистики
     function updateStats() {
@@ -792,7 +783,10 @@
         case "verification":
           // Только на верификации
           filtered = allUsers.filter(u => u.verification_status === 'pending');
-          filtered.sort((a, b) => new Date(b.verification_request_date) - new Date(a.verification_request_date));
+          filtered.sort((a, b) => {
+            if (!a.verification_request_date || !b.verification_request_date) return 0;
+            return new Date(b.verification_request_date) - new Date(a.verification_request_date);
+          });
           break;
           
         case "blocked":
@@ -864,7 +858,7 @@
         </div>
         <div class="modal-actions">
           <button id="approve-verification-btn" class="primary">✅ Подтвердить верификацию</button>
-          <button id="reject-verification-btn" style="background: var(--danger);">❌ Отклонить</button>
+          <button id="reject-verification-btn" style="background: var(--danger); border: none; color: white; padding: 10px 16px; border-radius: 999px; cursor: pointer;">❌ Отклонить</button>
         </div>
       `;
       
@@ -880,6 +874,30 @@
         rejectVerification(user.id);
         verificationModal.classList.add('hidden');
       };
+    }
+
+    // Подтвердить верификацию
+    function approveVerification(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (user) {
+        user.verified = true;
+        user.verification_status = 'verified';
+        alert(`✅ Верификация для ${user.name} подтверждена!\n\nТеперь в ленте рядом с её анкетой будет отображаться значок верификации ✅`);
+        switchTab(currentTab);
+        updateStats();
+      }
+    }
+
+    // Отклонить верификацию
+    function rejectVerification(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (user) {
+        user.verified = false;
+        user.verification_status = 'rejected';
+        alert(`❌ Верификация для ${user.name} отклонена.\n\nПользователь сможет повторно отправить селфи для проверки.`);
+        switchTab(currentTab);
+        updateStats();
+      }
     }
 
     // Рендеринг пользователей
@@ -913,7 +931,13 @@
       // Рендерим каждого пользователя
       users.forEach((u) => {
         const li = document.createElement("li");
-        li.className = `user-item ${u.blocked ? 'blocked' : ''} ${u.is_new ? 'new' : ''} ${u.verification_status}`;
+        
+        // Классы для стилизации
+        const classes = ['user-item'];
+        if (u.blocked) classes.push('blocked');
+        if (u.is_new) classes.push('new');
+        classes.push(u.verification_status);
+        li.className = classes.join(' ');
 
         const main = document.createElement("div");
         main.className = "user-main";
@@ -945,18 +969,18 @@
         const actions = document.createElement("div");
         actions.className = "user-actions";
 
-        const openBtn = document.createElement("button");
-        openBtn.className = "link-btn";
-        openBtn.textContent = "Открыть в TG";
-        openBtn.onclick = () => {
-          if (u.username) {
+        // Кнопка "Открыть в TG"
+        if (u.username && u.username !== 'undefined') {
+          const openBtn = document.createElement("button");
+          openBtn.className = "link-btn";
+          openBtn.textContent = "Открыть в TG";
+          openBtn.onclick = () => {
             window.open("https://t.me/" + u.username, "_blank");
-          } else {
-            alert("У пользователя нет username.");
-          }
-        };
+          };
+          actions.appendChild(openBtn);
+        }
 
-        // Кнопки для верификации
+        // Кнопка для проверки верификации (только для pending)
         if (u.verification_status === 'pending') {
           const verifyBtn = document.createElement("button");
           verifyBtn.className = "verify-btn";
@@ -967,19 +991,14 @@
           actions.appendChild(verifyBtn);
         }
 
+        // Кнопка блокировки/разблокировки
         const blockBtn = document.createElement("button");
         blockBtn.className = u.blocked ? "unblock-btn" : "block-btn";
         blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
         blockBtn.onclick = () => {
           u.blocked = !u.blocked;
-          u.is_new = false; // Снимаем статус "новый" при блокировке
-          blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
-          blockBtn.className = u.blocked ? "unblock-btn" : "block-btn";
-          li.classList.toggle('blocked', u.blocked);
-          
-          updateStats();
-          filterUsersByTab();
-          renderUsers(filteredUsers);
+          u.is_new = false;
+          switchTab(currentTab);
           
           alert(
             u.blocked
@@ -987,40 +1006,12 @@
               : "✅ Анкета разблокирована (демо-режим)"
           );
         };
-
-        actions.appendChild(openBtn);
         actions.appendChild(blockBtn);
 
         li.appendChild(main);
         li.appendChild(actions);
         usersList.appendChild(li);
       });
-    }
-
-    // Подтвердить верификацию
-    function approveVerification(userId) {
-      const user = allUsers.find(u => u.id === userId);
-      if (user) {
-        user.verified = true;
-        user.verification_status = 'verified';
-        user.verification_photo = null; // Очищаем селфи после проверки
-        alert(`✅ Верификация для ${user.name} подтверждена!\n\nТеперь в ленте рядом с её анкетой будет отображаться значок верификации ✅`);
-        switchTab(currentTab); // Обновляем список
-        updateStats();
-      }
-    }
-
-    // Отклонить верификацию
-    function rejectVerification(userId) {
-      const user = allUsers.find(u => u.id === userId);
-      if (user) {
-        user.verified = false;
-        user.verification_status = 'rejected';
-        user.verification_photo = null; // Очищаем селфи после проверки
-        alert(`❌ Верификация для ${user.name} отклонена.\n\nПользователь сможет повторно отправить селфи для проверки.`);
-        switchTab(currentTab); // Обновляем список
-        updateStats();
-      }
     }
 
     // Переключение вкладок
@@ -1033,12 +1024,21 @@
       });
       
       // Показываем/скрываем поиск и фильтры
-      searchRow.classList.toggle('active', tabName === 'search');
-      filtersRow.classList.toggle('active', tabName === 'search');
+      if (tabName === 'search') {
+        searchRow.classList.remove('hidden');
+        filtersRow.classList.remove('hidden');
+      } else {
+        searchRow.classList.add('hidden');
+        filtersRow.classList.add('hidden');
+      }
       
       // Показываем/скрываем баннеры
       Object.keys(sectionBanners).forEach(key => {
-        sectionBanners[key].classList.toggle('hidden', key !== tabName);
+        if (key === tabName) {
+          sectionBanners[key].classList.remove('hidden');
+        } else {
+          sectionBanners[key].classList.add('hidden');
+        }
       });
       
       // Фильтруем и рендерим
@@ -1047,7 +1047,7 @@
     }
 
     // Логин
-    loginBtn.onclick = () => {
+    function handleLogin() {
       const value = passwordInput.value;
       if (value === ADMIN_PASSWORD) {
         loginError.textContent = "";
@@ -1061,59 +1061,84 @@
       } else {
         loginError.textContent = "Неверный пароль.";
       }
-    };
-
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") loginBtn.click();
-    });
+    }
 
     // Логаут
-    logoutBtn.onclick = () => {
+    function handleLogout() {
       localStorage.removeItem("siamatch_admin_logged_in");
       adminCard.classList.add("hidden");
       loginCard.classList.remove("hidden");
       passwordInput.value = "";
       currentTab = "all";
       verificationModal.classList.add('hidden');
-    };
+    }
 
-    // Закрыть модальное окно
-    closeModalBtn.onclick = () => {
-      verificationModal.classList.add('hidden');
-    };
-
-    // Поиск
-    searchBtn.onclick = () => {
-      switchTab("search");
-    };
-
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") switchTab("search");
-    });
-
-    // Обработчики фильтров
-    filterGender.addEventListener("change", () => switchTab("search"));
-    filterCity.addEventListener("change", () => switchTab("search"));
-    filterVerification.addEventListener("change", () => switchTab("search"));
-    filterAgeMin.addEventListener("change", () => switchTab("search"));
-    filterAgeMax.addEventListener("change", () => switchTab("search"));
-
-    // Обработчики табов
-    tabButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        switchTab(btn.dataset.tab);
+    // Инициализация при загрузке страницы
+    function initAdminPanel() {
+      console.log('🔄 Инициализация админ-панели...');
+      
+      // Генерация демо-данных
+      allUsers = generateDemoUsers(50);
+      console.log('✅ Сгенерировано демо-пользователей:', allUsers.length);
+      
+      // Обработчики для логина
+      loginBtn.onclick = handleLogin;
+      
+      passwordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleLogin();
       });
-    });
 
-    // Авто-логин
-    (function init() {
+      // Обработчик для логаута
+      logoutBtn.onclick = handleLogout;
+
+      // Закрыть модальное окно
+      closeModalBtn.onclick = () => {
+        verificationModal.classList.add('hidden');
+      };
+
+      // Поиск
+      searchBtn.onclick = () => {
+        switchTab("search");
+      };
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") switchTab("search");
+      });
+
+      // Обработчики фильтров
+      const filters = [filterGender, filterCity, filterVerification, filterAgeMin, filterAgeMax];
+      filters.forEach(filter => {
+        filter.addEventListener("change", () => {
+          if (currentTab === 'search') {
+            const users = filterUsersByTab();
+            renderUsers(users);
+          }
+        });
+      });
+
+      // Обработчики табов
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          switchTab(btn.dataset.tab);
+        });
+      });
+
+      // Проверка авто-логина
       if (localStorage.getItem("siamatch_admin_logged_in") === "1") {
+        console.log('🔑 Автоматический логин...');
         loginCard.classList.add("hidden");
         adminCard.classList.remove("hidden");
         updateStats();
         switchTab("all");
+      } else {
+        console.log('🔒 Требуется логин');
       }
-    })();
+      
+      console.log('✅ Админ-панель инициализирована');
+    }
+
+    // Запуск инициализации при загрузке страницы
+    document.addEventListener('DOMContentLoaded', initAdminPanel);
   </script>
 </body>
 </html>
