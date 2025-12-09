@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Шапка с счетчиком лайков -->
-  <div id="header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb;">
+  <!-- Шапка НЕ фиксированная, только показывается в ленте -->
+  <div id="header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb;">
     <div style="font-size: 22px; font-weight: 700; color: var(--siamatch-green-dark); display: flex; align-items: center; gap: 8px;">
       <span>🍀</span>
       <span>SiaMatch</span>
@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <div id="app-root" style="padding-top: 70px;">
+  <div id="app-root">
     <div id="card">
       <!-- ЭКРАН ПРИВЕТСТВИЯ -->
       <div id="welcome-screen">
@@ -79,19 +79,23 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ЧАТОВ -->
-      <div id="screen-chats" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Чаты 💬</h2>
-          <div id="chats-empty" class="hint">Здесь пока пусто</div>
-          <ul id="chats-list"></ul>
-        </div>
-      </div>
+      <!-- УБИРАЕМ ЭКРАН ЧАТОВ - он теперь в матчах -->
 
-      <!-- ЭКРАН ЛЕНТЫ -->
+      <!-- ЭКРАН ЛЕНТЫ (СВАЙПОВ) -->
       <div id="screen-feed" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Познакомьтесь 🍀</h2>
+        <!-- Шапка с лайками показывается только здесь -->
+        <div class="feed-header">
+          <div style="font-size: 22px; font-weight: 700; color: var(--siamatch-green-dark); display: flex; align-items: center; gap: 8px; margin-left: 10px;">
+            <span>🍀</span>
+            <span>SiaMatch</span>
+          </div>
+          <div id="likes-counter-feed" class="likes-counter" style="display: none;">
+            ❤️ <span id="likes-count-feed">0</span>
+          </div>
+        </div>
+        
+        <div class="screen-content" style="padding-top: 10px;">
+          <!-- УБИРАЕМ ЗАГОЛОВОК "Познакомьтесь" -->
           
           <div id="candidate-card">
             <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
@@ -120,7 +124,7 @@
         </div>
       </div>
 
-      <!-- ЭКРАН МАТЧЕЙ -->
+      <!-- ЭКРАН МАТЧЕЙ (вместо чатов) -->
       <div id="screen-matches" class="screen hidden">
         <div class="screen-content">
           <h2 class="screen-title">Ваши матчи ❤️</h2>
@@ -281,14 +285,14 @@
 
     <!-- НИЖНЯЯ НАВИГАЦИЯ -->
     <div id="tab-bar" class="hidden">
-      <button class="tab-btn" data-tab="chats">💬</button>
+      <!-- УБИРАЕМ КНОПКУ ЧАТОВ, ВМЕСТО НЕЕ МАТЧИ -->
       <button class="tab-btn active" data-tab="feed">🍀</button>
-      <button class="tab-btn" data-tab="matches">❤️</button>
+      <button class="tab-btn" data-tab="matches">💬</button> <!-- Иконка чата, но ведет к матчам -->
       <button class="tab-btn" data-tab="profile">✏️</button>
     </div>
   </div>
 
-  <!-- ЭКРАН ЧАТА -->
+  <!-- ЭКРАН ЧАТА (открывается из матчей) -->
   <div id="chat-screen" class="screen hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: white; display: flex; flex-direction: column;">
     <div class="chat-header">
       <button id="back-to-matches" style="background: none; border: none; font-size: 24px; padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">←</button>
@@ -313,6 +317,23 @@
   <script src="app.js"></script>
 
   <style>
+    /* Шапка в ленте */
+    .feed-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 1000;
+    }
+    
+    /* Чат */
     #chat-screen {
       z-index: 2000;
     }
@@ -336,6 +357,7 @@
       z-index: 10;
     }
     
+    /* Пустое состояние матчей */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
