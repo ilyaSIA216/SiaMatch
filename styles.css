@@ -282,6 +282,30 @@ body.keyboard-open #saveProfileBtn {
 }
 
 /* ===== ЛЕНТА СВАЙПОВ ===== */
+#screen-feed {
+  background: #f4fff7;
+}
+
+.feed-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 1000;
+}
+
+#screen-feed .screen-content {
+  padding-top: 10px;
+  padding-bottom: 90px;
+}
+
 #candidate-card {
   border-radius: 24px;
   overflow: hidden;
@@ -479,14 +503,6 @@ body.keyboard-open #updateProfileBtn {
   display: none;
 }
 
-/* ===== ЧАТЫ ===== */
-#chats-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  font-size: 16px;
-}
-
 /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
 #tab-bar {
   position: fixed;
@@ -526,11 +542,28 @@ body.keyboard-open #tab-bar {
   border-radius: 14px;
   margin: 0 5px;
   transition: all 0.2s;
+  position: relative;
 }
 
 .tab-btn.active {
   background: rgba(34, 197, 94, 0.15);
   color: var(--siamatch-green);
+}
+
+.tab-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* FIX для select выпадающих списков */
@@ -1012,6 +1045,14 @@ select:focus {
   .match-card {
     padding: 14px;
   }
+  
+  .feed-header {
+    padding: 10px 16px;
+  }
+  
+  #screen-feed .screen-content {
+    padding-top: 5px;
+  }
 }
 
 /* Адаптив для очень маленьких экранов */
@@ -1032,5 +1073,9 @@ select:focus {
   
   .verification-section {
     padding: 12px;
+  }
+  
+  .candidate-photo-wrapper {
+    height: 250px;
   }
 }
