@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentIndex = 0;
   let likedIds = [];
   let hasInitialized = false;
+  let keyboardHeight = 0;
+  let originalHeight = window.innerHeight;
   
   // Демо-данные
   const candidates = [
@@ -23,12 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const onboardingScreen = document.getElementById("onboarding-screen");
   const saveProfileBtn = document.getElementById("saveProfileBtn");
   const tabBar = document.getElementById("tab-bar");
-  
-  // FIX: Удаляем старый заголовочный блок
-  const oldHeader = document.querySelector('.header-block');
-  if (oldHeader) {
-    oldHeader.remove();
-  }
+  const appRoot = document.getElementById("app-root");
+  const card = document.getElementById("card");
   
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
@@ -38,26 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Telegram WebApp обнаружен');
         
         tg.ready();
-        tg.expand(); // Полноэкранный режим
+        tg.expand();
         
-        // Скрываем Telegram кнопку MainButton
         if (tg.MainButton) {
           tg.MainButton.hide();
         }
         
-        // Настройки для iOS
         if (isIOS) {
           console.log('📱 iOS обнаружен');
           document.body.classList.add('no-bounce');
-          
-          // Исправляем высоту viewport
-          fixIOSViewport();
-          
-          // Обработчики для клавиатуры
           setupKeyboardHandlers();
         }
         
-        // Обновляем viewport
         setTimeout(() => {
           if (tg && typeof tg.requestViewport === 'function') {
             tg.requestViewport();
@@ -72,58 +62,122 @@ document.addEventListener('DOMContentLoaded', function() {
     return false;
   }
   
-  // ===== FIX ДЛЯ iOS VIEWPORT =====
-  function fixIOSViewport() {
-    const setVH = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-      document.body.style.height = window.innerHeight + 'px';
-    };
+  // ===== FIX ДЛЯ КЛАВИАТУРЫ iOS =====
+  function setupKeyboardHandlers() {
+    console.log('⌨️ Настраиваю обработчики клавиатуры');
     
-    setVH();
-    window.addEventListener('resize', setVH);
-    window.addEventListener('orientationchange', () => {
-      setTimeout(setVH, 300);
-    });
+    // Сохраняем оригинальную высоту
+    originalHeight = window.innerHeight;
+    
+    // Обработчик изменения размера окна (срабатывает при появлении/скрытии клавиатуры)
+    window.addEventListener('resize', handleResize);
+    
+    // Обработчик фокуса на поле ввода
+    document.addEventListener('focusin', handleFocusIn);
+    
+    // Обработчик потери фокуса
+    document.addEventListener('focusout', handleFocusOut);
+    
+    // Обработчик тапа вне поля ввода
+    document.addEventListener('touchstart', handleTouchOutside);
   }
   
-  // ===== ОБРАБОТЧИКИ КЛАВИАТУРЫ =====
-  function setupKeyboardHandlers() {
-    let originalHeight = window.innerHeight;
+  function handleResize() {
+    const newHeight = window.innerHeight;
+    const heightDiff = originalHeight - newHeight;
     
-    window.addEventListener('resize', function() {
-      const newHeight = window.innerHeight;
+    console.log('📏 Изменение высоты окна:', {
+      original: originalHeight,
+      new: newHeight,
+      diff: heightDiff
+    });
+    
+    // Если разница значительная (> 100px) - это клавиатура
+    if (heightDiff > 100) {
+      keyboardHeight = heightDiff;
+      console.log('⌨️ Клавиатура открылась, высота:', keyboardHeight);
       
-      if (newHeight < originalHeight) {
-        // Клавиатура открылась
-        document.body.classList.add('keyboard-open');
-        
-        // Прокручиваем активное поле ввода в видимую область
-        const activeElement = document.activeElement;
-        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-          setTimeout(() => {
-            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 300);
-        }
-      } else {
-        // Клавиатура закрылась
-        document.body.classList.remove('keyboard-open');
-        
-        // Прокручиваем обратно
+      // Добавляем класс для стилей
+      document.body.classList.add('keyboard-open');
+      
+      // Поднимаем контент над клавиатурой
+      if (card) {
+        card.style.transform = `translateY(-${Math.min(150, keyboardHeight - 100)}px)`;
+      }
+      
+      // Прокручиваем активное поле в видимую область
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          activeElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
         }, 100);
       }
+    } 
+    // Если высота вернулась к исходной - клавиатура закрылась
+    else if (Math.abs(originalHeight - newHeight) < 50) {
+      console.log('⌨️ Клавиатура закрылась');
       
-      originalHeight = newHeight;
-    });
-    
-    // Скрываем клавиатуру при тапе вне поля ввода
-    document.addEventListener('touchstart', function(e) {
-      if (!e.target.closest('input, textarea, select')) {
-        document.activeElement?.blur();
+      // Убираем класс для стилей
+      document.body.classList.remove('keyboard-open');
+      
+      // Возвращаем контент на место
+      if (card) {
+        card.style.transform = 'translateY(0)';
       }
-    });
+      
+      // Прокручиваем обратно к началу
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (card) card.scrollTop = 0;
+      }, 200);
+      
+      keyboardHeight = 0;
+    }
+    
+    originalHeight = newHeight;
+  }
+  
+  function handleFocusIn(e) {
+    if (e.target.matches('input, textarea, select')) {
+      console.log('🎯 Фокус на поле ввода:', e.target.id || e.target.name);
+      
+      // Для iOS сразу добавляем класс (на всякий случай)
+      if (isIOS) {
+        setTimeout(() => {
+          document.body.classList.add('keyboard-open');
+        }, 100);
+      }
+    }
+  }
+  
+  function handleFocusOut(e) {
+    if (e.target.matches('input, textarea, select')) {
+      console.log('🎯 Потеря фокуса с поля ввода');
+      
+      // На iOS клавиатура закрывается не сразу, ждем немного
+      if (isIOS) {
+        setTimeout(() => {
+          // Проверяем, есть ли еще активные поля ввода
+          const activeElement = document.activeElement;
+          if (!activeElement || !activeElement.matches('input, textarea, select')) {
+            console.log('✅ Все поля ввода потеряли фокус, закрываем клавиатуру');
+            document.body.classList.remove('keyboard-open');
+            if (card) card.style.transform = 'translateY(0)';
+          }
+        }, 500);
+      }
+    }
+  }
+  
+  function handleTouchOutside(e) {
+    // Если тап не на поле ввода и не на кнопке, скрываем клавиатуру
+    if (!e.target.closest('input, textarea, select, button')) {
+      document.activeElement?.blur();
+    }
   }
   
   // ===== LOCALSTORAGE ФУНКЦИИ =====
@@ -153,14 +207,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Настраиваю кнопку "Начать знакомство"');
     
-    // Удаляем все старые обработчики
     startBtn.onclick = null;
     startBtn.ontouchstart = null;
     
-    // Добавляем надежный обработчик
     startBtn.addEventListener('click', handleStartClick, { passive: true });
     
-    // Touch обработчик для iOS
     startBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       handleStartClick();
@@ -170,27 +221,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function handleStartClick() {
     console.log('🎯 Кнопка "Начать знакомство" нажата');
     
-    // Haptic feedback
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
       } catch (e) {}
     }
     
-    // Скрываем приветственный экран
     if (welcomeScreen) {
       welcomeScreen.classList.add("hidden");
     }
     
-    // Проверяем, есть ли профиль
     profileData = loadProfile();
     
     if (profileData) {
-      // Профиль есть - идем сразу в ленту
       console.log('📁 Профиль найден, переходим в ленту');
       showMainApp();
     } else {
-      // Профиля нет - показываем анкету
       console.log('📝 Профиля нет, показываем анкету');
       showOnboarding();
     }
@@ -205,12 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
       tabBar.classList.add("hidden");
     }
     
-    // FIX: Прокручиваем к началу
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 100);
     
-    // Настраиваем кнопку сохранения
     setupSaveButton();
   }
   
@@ -220,103 +264,101 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Настраиваю кнопку "Сохранить профиль"');
     
-    // Удаляем старые обработчики
     saveProfileBtn.onclick = null;
     saveProfileBtn.ontouchstart = null;
     
-    // Добавляем новый обработчик
     saveProfileBtn.addEventListener('click', handleSaveProfile, { passive: true });
     
-    // Touch обработчик для iOS
     saveProfileBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       handleSaveProfile();
     }, { passive: false });
     
-    // Делаем кнопку видимой и фиксированной
     saveProfileBtn.style.display = 'block';
   }
   
   function handleSaveProfile() {
     console.log('💾 Сохраняю профиль...');
     
-    // Получаем значения
-    const ageValue = Number(document.getElementById("age").value);
-    const gender = document.getElementById("gender").value;
-    const city = document.getElementById("city").value;
-    const bio = document.getElementById("bio").value.trim();
+    // Сначала скрываем клавиатуру если открыта
+    document.activeElement?.blur();
+    document.body.classList.remove('keyboard-open');
+    if (card) card.style.transform = 'translateY(0)';
     
-    // Валидация
-    if (!ageValue || ageValue < 18 || ageValue > 99) {
-      alert("Возраст должен быть от 18 до 99 лет");
-      return;
-    }
-    if (!gender) {
-      alert("Выберите пол");
-      return;
-    }
-    if (!city) {
-      alert("Выберите город");
-      return;
-    }
-    if (bio.length < 10) {
-      alert("О себе минимум 10 символов");
-      return;
-    }
-    
-    // Создаем профиль
-    const user = tg?.initDataUnsafe?.user || { id: 1, first_name: "Пользователь" };
-    profileData = {
-      tg_id: user.id,
-      first_name: user.first_name || "Пользователь",
-      username: user.username || "",
-      age: ageValue,
-      gender,
-      city,
-      bio,
-      min_age_filter: 18,
-      max_age_filter: 35,
-      max_distance_km: 50,
-      use_geolocation: false
-    };
-    
-    // Сохраняем
-    if (saveProfile(profileData)) {
-      console.log('✅ Профиль сохранен');
+    // Ждем немного чтобы клавиатура закрылась
+    setTimeout(() => {
+      // Получаем значения
+      const ageValue = Number(document.getElementById("age").value);
+      const gender = document.getElementById("gender").value;
+      const city = document.getElementById("city").value;
+      const bio = document.getElementById("bio").value.trim();
       
-      // Haptic feedback
-      if (tg?.HapticFeedback) {
-        try {
-          tg.HapticFeedback.impactOccurred('medium');
-        } catch (e) {}
+      // Валидация
+      if (!ageValue || ageValue < 18 || ageValue > 99) {
+        alert("Возраст должен быть от 18 до 99 лет");
+        return;
+      }
+      if (!gender) {
+        alert("Выберите пол");
+        return;
+      }
+      if (!city) {
+        alert("Выберите город");
+        return;
+      }
+      if (bio.length < 10) {
+        alert("О себе минимум 10 символов");
+        return;
       }
       
-      // Переходим к основному приложению
-      showMainApp();
+      // Создаем профиль
+      const user = tg?.initDataUnsafe?.user || { id: 1, first_name: "Пользователь" };
+      profileData = {
+        tg_id: user.id,
+        first_name: user.first_name || "Пользователь",
+        username: user.username || "",
+        age: ageValue,
+        gender,
+        city,
+        bio,
+        min_age_filter: 18,
+        max_age_filter: 35,
+        max_distance_km: 50,
+        use_geolocation: false
+      };
       
-      // Сообщение об успехе
-      setTimeout(() => {
-        alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀");
-      }, 300);
-    } else {
-      alert("❌ Ошибка при сохранении профиля");
-    }
+      // Сохраняем
+      if (saveProfile(profileData)) {
+        console.log('✅ Профиль сохранен');
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.impactOccurred('medium');
+          } catch (e) {}
+        }
+        
+        showMainApp();
+        
+        setTimeout(() => {
+          alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀");
+        }, 300);
+      } else {
+        alert("❌ Ошибка при сохранении профиля");
+      }
+    }, 300);
   }
   
   // ===== ПОКАЗАТЬ ОСНОВНОЕ ПРИЛОЖЕНИЕ =====
   function showMainApp() {
     console.log('🚀 Показываю основное приложение');
     
-    // Скрываем все экраны кроме основного
     if (welcomeScreen) welcomeScreen.classList.add("hidden");
     if (onboardingScreen) onboardingScreen.classList.add("hidden");
     
-    // Показываем таб-бар
     if (tabBar) {
       tabBar.classList.remove("hidden");
     }
     
-    // Активируем ленту
     setActiveTab("feed");
   }
   
@@ -324,46 +366,39 @@ document.addEventListener('DOMContentLoaded', function() {
   function setActiveTab(tab) {
     console.log('🔘 Активирую таб:', tab);
     
-    // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'welcome-screen') { // Не скрываем welcome screen
+      if (screen.id !== 'welcome-screen') {
         screen.classList.add('hidden');
       }
     });
     
-    // Показываем выбранный экран
     const screenId = 'screen-' + tab;
     const screen = document.getElementById(screenId);
     if (screen) {
       screen.classList.remove('hidden');
     }
     
-    // Обновляем активные кнопки
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     
-    // Инициализируем экран
     if (tab === 'feed') {
       initFeed();
     } else if (tab === 'profile') {
       initProfile();
     }
     
-    // Прокручиваем вверх
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 50);
   }
   
-  // Настройка обработчиков табов
   function setupTabButtons() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const tab = this.dataset.tab;
         setActiveTab(tab);
         
-        // Haptic feedback
         if (tg?.HapticFeedback) {
           try {
             tg.HapticFeedback.selectionChanged();
@@ -380,7 +415,6 @@ document.addEventListener('DOMContentLoaded', function() {
     currentIndex = 0;
     showCurrentCandidate();
     
-    // Настраиваем кнопки ленты
     const btnLike = document.getElementById("btn-like");
     const btnDislike = document.getElementById("btn-dislike");
     
@@ -399,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const filtered = candidates.filter(c => !likedIds.includes(c.id));
     
     if (currentIndex >= filtered.length) {
-      // Кандидаты закончились
       document.getElementById("candidate-name").textContent = "";
       document.getElementById("candidate-age").textContent = "";
       document.getElementById("candidate-city").textContent = "";
@@ -457,11 +490,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function initProfile() {
     console.log('👤 Инициализирую профиль');
     
-    // Загружаем профиль
     profileData = loadProfile();
     
     if (profileData) {
-      // Заполняем поля
       document.getElementById("profile-age").value = profileData.age || "";
       document.getElementById("profile-gender").value = profileData.gender || "";
       document.getElementById("profile-city").value = profileData.city || "";
@@ -475,7 +506,6 @@ document.addEventListener('DOMContentLoaded', function() {
         geoCheckbox.checked = profileData.use_geolocation || false;
       }
       
-      // Фото профиля
       if (profileData.custom_photo_url) {
         const preview = document.getElementById('photo-preview');
         if (preview) {
@@ -485,7 +515,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
-    // Настраиваем кнопку обновления
     const updateBtn = document.getElementById("updateProfileBtn");
     if (updateBtn) {
       updateBtn.onclick = null;
@@ -493,7 +522,6 @@ document.addEventListener('DOMContentLoaded', function() {
       updateBtn.style.display = 'block';
     }
     
-    // Загрузка фото
     const photoInput = document.getElementById('profile-photo');
     if (photoInput) {
       photoInput.addEventListener('change', handlePhotoUpload);
@@ -503,37 +531,42 @@ document.addEventListener('DOMContentLoaded', function() {
   function handleUpdateProfile() {
     console.log('📝 Обновляю профиль...');
     
-    if (!profileData) {
-      alert("Сначала создайте профиль!");
-      return;
-    }
+    // Сначала скрываем клавиатуру если открыта
+    document.activeElement?.blur();
+    document.body.classList.remove('keyboard-open');
+    if (card) card.style.transform = 'translateY(0)';
     
-    // Обновляем данные
-    profileData.age = Number(document.getElementById("profile-age").value);
-    profileData.gender = document.getElementById("profile-gender").value;
-    profileData.city = document.getElementById("profile-city").value;
-    profileData.bio = document.getElementById("profile-bio").value.trim();
-    profileData.min_age_filter = Number(document.getElementById("profile-min-age").value);
-    profileData.max_age_filter = Number(document.getElementById("profile-max-age").value);
-    profileData.max_distance_km = Number(document.getElementById("profile-max-distance").value);
-    
-    const geoCheckbox = document.getElementById("profile-use-geolocation");
-    if (geoCheckbox) {
-      profileData.use_geolocation = geoCheckbox.checked;
-    }
-    
-    // Сохраняем
-    if (saveProfile(profileData)) {
-      alert("✅ Профиль обновлён!");
-      
-      if (tg?.HapticFeedback) {
-        try {
-          tg.HapticFeedback.impactOccurred('light');
-        } catch (e) {}
+    setTimeout(() => {
+      if (!profileData) {
+        alert("Сначала создайте профиль!");
+        return;
       }
-    } else {
-      alert("❌ Ошибка при обновлении профиля");
-    }
+      
+      profileData.age = Number(document.getElementById("profile-age").value);
+      profileData.gender = document.getElementById("profile-gender").value;
+      profileData.city = document.getElementById("profile-city").value;
+      profileData.bio = document.getElementById("profile-bio").value.trim();
+      profileData.min_age_filter = Number(document.getElementById("profile-min-age").value);
+      profileData.max_age_filter = Number(document.getElementById("profile-max-age").value);
+      profileData.max_distance_km = Number(document.getElementById("profile-max-distance").value);
+      
+      const geoCheckbox = document.getElementById("profile-use-geolocation");
+      if (geoCheckbox) {
+        profileData.use_geolocation = geoCheckbox.checked;
+      }
+      
+      if (saveProfile(profileData)) {
+        alert("✅ Профиль обновлён!");
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.impactOccurred('light');
+          } catch (e) {}
+        }
+      } else {
+        alert("❌ Ошибка при обновлении профиля");
+      }
+    }, 300);
   }
   
   function handlePhotoUpload(e) {
@@ -553,7 +586,6 @@ document.addEventListener('DOMContentLoaded', function() {
         preview.style.display = 'block';
       }
       
-      // Сохраняем в профиль
       if (profileData) {
         profileData.custom_photo_url = event.target.result;
         saveProfile(profileData);
@@ -571,17 +603,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('🎬 Инициализация приложения...');
     
-    // Инициализируем Telegram
     initTelegram();
-    
-    // Настраиваем UI
     setupStartButton();
     setupTabButtons();
     
-    // Загружаем профиль
     profileData = loadProfile();
     
-    // FIX: Всегда показываем приветственный экран сначала
+    // ВСЕГДА показываем приветственный экран первым
     if (welcomeScreen) {
       welcomeScreen.classList.remove("hidden");
       console.log('👋 Показываю приветственный экран');
@@ -595,10 +623,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // Скрываем таб-бар
     if (tabBar) tabBar.classList.add("hidden");
     
-    // FIX для iOS
     if (isIOS) {
       setTimeout(() => {
         window.scrollTo(0, 0);
@@ -609,6 +635,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // ===== ЗАПУСК =====
-  // Ждем немного чтобы DOM полностью загрузился
   setTimeout(initApp, 100);
 });
