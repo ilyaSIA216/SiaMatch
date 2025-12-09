@@ -1,267 +1,56 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <title>SiaMatch</title>
-  <!-- КРИТИЧЕСКИЕ МЕТА-ТЕГИ ДЛЯ iOS -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div id="app-root">
-    <div id="card">
-      <!-- ЭКРАН ПРИВЕТСТВИЯ -->
-      <div id="welcome-screen">
-        <div class="welcome-logo">🍀</div>
-        <div class="welcome-title">SiaMatch</div>
-        <div class="welcome-subtitle">Найди свою пару</div>
-        <div id="username">Привет!</div>
-        <div class="welcome-text">Добро пожаловать в SiaMatch!</div>
-        <div class="welcome-description">
-          Приложение для знакомств в Telegram.<br>
-          Найди свою идеальную пару рядом с тобой.
-        </div>
-        <button id="startBtn" class="primary">Начать знакомство</button>
-      </div>
+<!-- Добавляем счетчик лайков в шапку -->
+<div id="header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb;">
+  <div style="font-size: 20px; font-weight: 700; color: var(--siamatch-green-dark);">🍀 SiaMatch</div>
+  <div id="likes-counter" class="likes-counter" style="display: none;">
+    ❤️ <span id="likes-count">0</span>
+  </div>
+</div>
 
-      <!-- ЭКРАН АНКЕТЫ -->
-      <div id="onboarding-screen" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Заполните анкету 🍀</h2>
+<!-- Обновляем основную структуру -->
+<div id="app-root" style="padding-top: 60px;"> <!-- Добавляем отступ для шапки -->
+  
+  <!-- В tab-bar добавляем новую вкладку -->
+  <div id="tab-bar" class="hidden">
+    <button class="tab-btn" data-tab="chats">💬</button>
+    <button class="tab-btn active" data-tab="feed">🍀</button>
+    <button class="tab-btn" data-tab="matches">❤️</button> <!-- Новая вкладка -->
+    <button class="tab-btn" data-tab="profile">✏️</button>
+  </div>
 
-          <div class="field">
-            <label for="age">Возраст</label>
-            <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
-            <div class="hint">Только пользователи 18+</div>
-          </div>
-
-          <div class="field">
-            <label for="gender">Пол</label>
-            <select id="gender" required>
-              <option value="">Выберите пол</option>
-              <option value="male">Мужской</option>
-              <option value="female">Женский</option>
-              <option value="other">Другое</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="city">Город <span style="color:#ef4444;">*</span></label>
-            <select id="city" required>
-              <option value="">Выберите город</option>
-              <option value="Москва">Москва</option>
-              <option value="Санкт-Петербург">Санкт-Петербург</option>
-              <option value="Казань">Казань</option>
-              <option value="Новосибирск">Новосибирск</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="bio">О себе</label>
-            <textarea id="bio" rows="4" maxlength="300" placeholder="Расскажите о себе, своих интересах и кого вы хотите встретить 🍀"></textarea>
-            <div class="hint">Минимум 10 символов, максимум 300</div>
-          </div>
-
-          <!-- FIX: Кнопка всегда видна -->
-          <button id="saveProfileBtn">Сохранить профиль 🍀</button>
+  <!-- Новый экран матчей -->
+  <div id="screen-matches" class="screen hidden">
+    <div class="screen-content">
+      <h2 class="screen-title">Ваши матчи ❤️</h2>
+      
+      <!-- Список матчей -->
+      <div id="matches-list">
+        <div class="empty-state" id="matches-empty">
+          <div style="font-size: 48px; margin-bottom: 20px;">💘</div>
+          <h3>Пока нет матчей</h3>
+          <p style="color: #666; margin-top: 10px;">Лайкайте людей в ленте, и если они ответят взаимностью - здесь появится чат!</p>
         </div>
       </div>
-
-      <!-- ЭКРАН ЧАТОВ -->
-      <div id="screen-chats" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Чаты 💬</h2>
-          <div id="chats-empty" class="hint">Здесь пока пусто</div>
-          <ul id="chats-list"></ul>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ЛЕНТЫ -->
-      <div id="screen-feed" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Познакомьтесь 🍀</h2>
-          
-          <div id="candidate-card">
-            <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
-            <div id="candidate-verified" class="candidate-verified hidden">✅</div>
-            
-            <div class="candidate-photo-wrapper">
-              <img id="candidate-photo" src="" alt="Фото" />
-            </div>
-            <div class="candidate-info">
-              <div class="candidate-name-age">
-                <span id="candidate-name"></span>,
-                <span id="candidate-age"></span>
-              </div>
-              <div id="candidate-city" class="candidate-city"></div>
-              <div id="candidate-bio" class="candidate-bio"></div>
-            </div>
-          </div>
-          
-          <div class="actions">
-            <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
-            <button id="btn-like" class="btn-circle btn-like">❤️</button>
-          </div>
-          
-          <div id="feed-status" class="feed-status"></div>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ПРОФИЛЯ -->
-      <div id="screen-profile" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Мой профиль ✏️</h2>
-
-          <div class="field">
-            <label for="profile-age">Возраст</label>
-            <input type="number" id="profile-age" min="18" max="99" />
-          </div>
-
-          <div class="field">
-            <label for="profile-gender">Пол</label>
-            <select id="profile-gender">
-              <option value="">Выберите пол</option>
-              <option value="male">Мужской</option>
-              <option value="female">Женский</option>
-              <option value="other">Другое</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="profile-city">Город</label>
-            <select id="profile-city">
-              <option value="">Выберите город</option>
-              <option value="Москва">Москва</option>
-              <option value="Санкт-Петербург">Санкт-Петербург</option>
-              <option value="Казань">Казань</option>
-              <option value="Новосибирск">Новосибирск</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="profile-bio">О себе</label>
-            <textarea id="profile-bio" rows="4" maxlength="300"></textarea>
-          </div>
-
-          <div class="field">
-            <label>Фото профиля 📸</label>
-            <input type="file" id="profile-photo" accept="image/*" />
-            <div class="hint">Выберите фото (до 5MB)</div>
-            <img id="photo-preview" />
-          </div>
-
-          <!-- ===== СЕКЦИЯ ВЕРИФИКАЦИИ ===== -->
-          <div class="field verification-section">
-            <label>Верификация анкеты 🔐</label>
-            
-            <!-- Статус верификации -->
-            <div id="verification-status" class="profile-verification-status not-verified">
-              Анкета не верифицирована
-            </div>
-            
-            <!-- Кнопка для неверифицированных -->
-            <button id="verifyProfileBtn" class="primary" style="margin-top: 12px; width: 100%;">
-              🔐 Верифицировать анкету
-            </button>
-            
-            <!-- Секция загрузки фото (скрыта по умолчанию) -->
-            <div id="verification-section-content" class="verification-section-content hidden">
-              <h3>🔐 Верификация анкеты</h3>
-              <div class="verification-instruction">
-                Для верификации необходимо отправить селфи-фото. Администратор сравнит его с фото в вашем профиле.
-              </div>
-              
-              <div class="verification-steps">
-                <div class="verification-step">
-                  <div class="step-number">1</div>
-                  <div class="step-text">Сделайте селфи при хорошем освещении</div>
-                </div>
-                <div class="verification-step">
-                  <div class="step-number">2</div>
-                  <div class="step-text">Лицо должно быть чётко видно</div>
-                </div>
-                <div class="verification-step">
-                  <div class="step-number">3</div>
-                  <div class="step-text">Фото будет проверено в течение 24 часов</div>
-                </div>
-              </div>
-              
-              <label for="verification-photo" style="display: block; margin-top: 16px;">
-                Селфи-фото для верификации
-              </label>
-              <input type="file" id="verification-photo" accept="image/*" capture="user" style="width: 100%;" />
-              <div class="hint">Используйте камеру для селфи. Фото должно быть чётким.</div>
-              
-              <img id="verification-preview" />
-              
-              <button id="submit-verification" class="primary" style="margin-top: 16px;">Отправить на проверку</button>
-              <button id="cancel-verification" style="margin-top: 8px;">Отмена</button>
-            </div>
-            
-            <!-- Секция "На проверке" -->
-            <div id="verification-pending-section" class="verification-status-section pending hidden">
-              <div class="verification-status-icon">⏳</div>
-              <h4>На проверке</h4>
-              <p>Ваша анкета отправлена на верификацию. Проверка занимает до 24 часов.</p>
-            </div>
-            
-            <!-- Секция "Верифицирована" -->
-            <div id="verification-verified-section" class="verification-status-section verified hidden">
-              <div class="verification-status-icon">✅</div>
-              <h4>Анкета верифицирована</h4>
-              <p>Ваша личность подтверждена. На вашем профиле отображается значок верификации.</p>
-            </div>
-            
-            <!-- Секция "Отклонена" -->
-            <div id="verification-rejected-section" class="verification-status-section rejected hidden">
-              <div class="verification-status-icon">❌</div>
-              <h4>Верификация отклонена</h4>
-              <p>Фото не прошло проверку. Убедитесь, что селфи чёткое и соответствует фото в профиле.</p>
-              <button id="retry-verification" class="primary" style="margin-top: 12px;">
-                Попробовать снова
-              </button>
-            </div>
-          </div>
-          <!-- ===== КОНЕЦ СЕКЦИИ ВЕРИФИКАЦИИ ===== -->
-
-          <div class="field">
-            <label class="checkbox-field">
-              <input type="checkbox" id="profile-use-geolocation" />
-              Использовать мою геолокацию для поиска поблизости
-            </label>
-          </div>
-
-          <div class="field">
-            <label>Возрастной диапазон</label>
-            <div class="age-range">
-              <input type="number" id="profile-min-age" min="18" max="60" value="18" />
-              <span>—</span>
-              <input type="number" id="profile-max-age" min="18" max="60" value="35" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="profile-max-distance">Максимум расстояние (км)</label>
-            <input type="number" id="profile-max-distance" min="1" max="500" value="50" />
-          </div>
-
-          <!-- FIX: Кнопка всегда видна -->
-          <button id="updateProfileBtn">Сохранить изменения ✏️</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
-    <div id="tab-bar" class="hidden">
-      <button class="tab-btn" data-tab="chats">💬</button>
-      <button class="tab-btn active" data-tab="feed">🍀</button>
-      <button class="tab-btn" data-tab="profile">✏️</button>
     </div>
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+  <!-- Экран чата (будет открываться поверх) -->
+  <div id="chat-screen" class="screen hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: white;">
+    <div class="chat-header" style="position: sticky; top: 0; background: white; padding: 15px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px;">
+      <button id="back-to-matches" style="background: none; border: none; font-size: 24px;">←</button>
+      <div id="chat-partner-info">
+        <!-- Информация о собеседнике -->
+      </div>
+    </div>
+    
+    <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px;">
+      <!-- Сообщения будут здесь -->
+    </div>
+    
+    <div class="chat-input" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #e5e7eb;">
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="message-input" placeholder="Напишите сообщение..." style="flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #e5e7eb;" />
+        <button id="send-message" style="background: var(--siamatch-green); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 20px;">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
