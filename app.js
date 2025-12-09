@@ -127,6 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const sendMessageBtn = document.getElementById("send-message");
   const chatPartnerInfo = document.getElementById("chat-partner-info");
   
+  // Новые счетчики для ленты
+  let likesCounterFeed = null;
+  let likesCountFeed = null;
+  
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
     try {
@@ -478,6 +482,9 @@ document.addEventListener('DOMContentLoaded', function() {
     renderMatchesList();
     initWebSocket();
     
+    // Добавляем бейдж на кнопку матчей если есть непрочитанные
+    updateMatchesBadge();
+    
     // Добавляем демо-лайки при первом запуске
     setTimeout(() => {
       if (totalLikes === 0) {
@@ -522,18 +529,24 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function updateLikesCounter() {
-    if (likesCounter && likesCount) {
+    // Обновляем счетчик в ленте
+    if (likesCounterFeed && likesCountFeed) {
       if (totalLikes > 0) {
-        likesCounter.style.display = 'flex';
-        likesCount.textContent = totalLikes;
+        likesCounterFeed.style.display = 'flex';
+        likesCountFeed.textContent = totalLikes;
         
-        likesCount.style.transform = 'scale(1.2)';
+        likesCountFeed.style.transform = 'scale(1.2)';
         setTimeout(() => {
-          likesCount.style.transform = 'scale(1)';
+          likesCountFeed.style.transform = 'scale(1)';
         }, 300);
       } else {
-        likesCounter.style.display = 'none';
+        likesCounterFeed.style.display = 'none';
       }
+    }
+    
+    // Удаляем общий счетчик из шапки (больше не нужен)
+    if (likesCounter) {
+      likesCounter.style.display = 'none';
     }
   }
   
@@ -546,6 +559,42 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         tg.HapticFeedback.impactOccurred('light');
       } catch (e) {}
+    }
+  }
+  
+  // Функция для обновления бейджа на кнопке матчей
+  function updateMatchesBadge() {
+    const totalUnread = matches.reduce((sum, match) => sum + match.unread, 0);
+    const matchesTab = document.querySelector('.tab-btn[data-tab="matches"]');
+    
+    if (matchesTab) {
+      // Удаляем старый бейдж если есть
+      const oldBadge = matchesTab.querySelector('.tab-badge');
+      if (oldBadge) oldBadge.remove();
+      
+      // Добавляем новый бейдж если есть непрочитанные
+      if (totalUnread > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'tab-badge';
+        badge.textContent = totalUnread > 9 ? '9+' : totalUnread;
+        badge.style.cssText = `
+          position: absolute;
+          top: 5px;
+          right: 5px;
+          background: #ef4444;
+          color: white;
+          font-size: 10px;
+          font-weight: bold;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+        matchesTab.style.position = 'relative';
+        matchesTab.appendChild(badge);
+      }
     }
   }
   
@@ -670,6 +719,9 @@ document.addEventListener('DOMContentLoaded', function() {
       matchCard.addEventListener('click', () => openChat(match));
       matchesList.appendChild(matchCard);
     });
+    
+    // Обновляем бейдж на кнопке табов
+    updateMatchesBadge();
   }
   
   // ===== ЧАТЫ =====
@@ -679,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentChat = match;
     match.unread = 0;
     saveMatchesData();
-    renderMatchesList();
+    renderMatchesList(); // Это обновит и бейдж
     
     if (chatScreen) {
       chatScreen.classList.remove('hidden');
@@ -792,8 +844,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentChat.unread = 0;
     
     renderChatMessages();
-    renderMatchesList();
-    saveMatchesData();
+    renderMatchesList(); // Обновит бейдж
     
     if (currentTab !== 'matches' && document.hidden) {
       showMessageNotification(currentChat.name, randomReply);
@@ -823,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (randomMatch !== currentChat) {
           randomMatch.unread++;
           saveMatchesData();
-          renderMatchesList();
+          renderMatchesList(); // Обновит бейдж
           
           if (currentTab !== 'matches') {
             showMessageNotification(randomMatch.name, "Привет! 😊");
@@ -838,27 +889,42 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🔘 Активирую таб:', tab);
     currentTab = tab;
     
+    // Управляем отображением шапки
+    const header = document.getElementById("header");
+    if (header) {
+      if (tab === 'feed') {
+        header.classList.remove('hidden');
+      } else {
+        header.classList.add('hidden');
+      }
+    }
+    
+    // Управляем экраном чата
     if (chatScreen && tab !== 'chat') {
       chatScreen.classList.add('hidden');
       currentChat = null;
     }
     
+    // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(screen => {
       if (screen.id !== 'welcome-screen' && !screen.id.includes('chat')) {
         screen.classList.add('hidden');
       }
     });
     
+    // Показываем нужный экран
     const screenId = tab === 'matches' ? 'screen-matches' : 'screen-' + tab;
     const screen = document.getElementById(screenId);
     if (screen) {
       screen.classList.remove('hidden');
     }
     
+    // Обновляем активные кнопки табов
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     
+    // Инициализация экрана
     if (tab === 'feed') {
       initFeed();
     } else if (tab === 'profile') {
@@ -867,6 +933,7 @@ document.addEventListener('DOMContentLoaded', function() {
       renderMatchesList();
     }
     
+    // Прокрутка вверх
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 50);
@@ -1285,6 +1352,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupStartButton();
     setupTabButtons();
     setupNewButtons();
+    
+    // Инициализируем счетчики лайков
+    likesCounterFeed = document.getElementById("likes-counter-feed");
+    likesCountFeed = document.getElementById("likes-count-feed");
     
     profileData = loadProfile();
     
