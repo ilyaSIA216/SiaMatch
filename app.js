@@ -1,34 +1,106 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // ===== Весь твой код отсюда =====
+  // ===== iOS FIX: Принудительный сброс стилей =====
+  document.body.style.height = '100vh';
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.height = '100vh';
+  document.documentElement.style.overflow = 'hidden';
+  
+  // ===== Telegram WebApp инициализация =====
   let tg = null;
+  let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  
   try {
     if (window.Telegram && Telegram.WebApp) {
       tg = Telegram.WebApp;
       tg.ready();
       
-      // Telegram WebApp ПОЛНЫЙ ЭКРАН
-      if (tg) {
-        tg.expand();                    // ← Полноэкранный режим
-        // ФИКС A: безопасный вызов requestViewport
-        if (typeof tg.requestViewport === 'function') tg.requestViewport();
-        document.body.style.padding = '0';
-        document.body.style.margin = '0';
-        document.body.style.alignItems = 'stretch';  // ← КРИТИЧНО!
+      // iOS FIX: Правильная инициализация
+      if (isIOS || tg.platform === 'ios' || tg.platform === 'macos') {
+        document.body.style.webkitOverflowScrolling = 'touch';
+        document.body.style.overflowY = 'auto';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        
+        // Предотвращаем bounce эффект
+        document.addEventListener('touchmove', function(e) {
+          if (e.target.closest('#card')) {
+            const card = document.getElementById('card');
+            const isAtTop = card.scrollTop === 0;
+            const isAtBottom = card.scrollHeight - card.scrollTop === card.clientHeight;
+            
+            if (isAtTop && e.touches[0].pageY > e.touches[0].clientY) {
+              e.preventDefault();
+            }
+            if (isAtBottom && e.touches[0].pageY < e.touches[0].clientY) {
+              e.preventDefault();
+            }
+          }
+        }, { passive: false });
       }
       
-      // Адаптация под Telegram
-      if (tg) {
-        // УДАЛЕНО: tg.MainButton.setText('🍀 SiaMatch').show();
-        window.addEventListener('resize', () => {
-          document.body.style.height = window.innerHeight + 'px';
-        });
-      }
+      tg.expand();
+      
+      // iOS FIX: Безопасный requestViewport
+      setTimeout(() => {
+        if (tg && typeof tg.requestViewport === 'function') {
+          tg.requestViewport();
+        }
+      }, 300);
+      
+      // FIX для нижней панели на iOS
+      tg.viewportStableHeight = true;
+      
+      // Применяем тему Telegram
+      applyTelegramTheme();
     }
   } catch (e) {
     console.error("Telegram WebApp init error:", e);
   }
 
-  // DOM элементы
+  // ===== iOS FIX: Принудительный ресайз =====
+  function forceResize() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    const appRoot = document.getElementById('app-root');
+    if (appRoot) {
+      appRoot.style.height = window.innerHeight + 'px';
+    }
+    
+    const card = document.getElementById('card');
+    if (card) {
+      card.style.maxHeight = (window.innerHeight - 70) + 'px';
+    }
+  }
+  
+  window.addEventListener('resize', forceResize);
+  window.addEventListener('orientationchange', function() {
+    setTimeout(forceResize, 300);
+  });
+  
+  // Вызываем сразу
+  setTimeout(forceResize, 100);
+  setTimeout(forceResize, 500);
+
+  // ===== Применение темы Telegram =====
+  function applyTelegramTheme() {
+    if (!tg) return;
+    
+    const themeParams = tg.themeParams;
+    const root = document.documentElement;
+    
+    if (themeParams.bg_color) {
+      root.style.setProperty('--tg-theme-bg-color', themeParams.bg_color);
+    }
+    if (themeParams.text_color) {
+      root.style.setProperty('--tg-theme-text-color', themeParams.text_color);
+    }
+    if (themeParams.button_color) {
+      root.style.setProperty('--siamatch-green', themeParams.button_color);
+    }
+  }
+
+  // ===== DOM элементы =====
   const usernameElem = document.getElementById("username");
   const welcomeScreen = document.getElementById("welcome-screen");
   const startBtn = document.getElementById("startBtn");
@@ -58,61 +130,55 @@ document.addEventListener('DOMContentLoaded', function() {
   const profileMaxDistance = document.getElementById("profile-max-distance");
   const updateProfileBtn = document.getElementById("updateProfileBtn");
 
-  // Чаты
-  const chatsList = document.getElementById("chats-list");
-  const chatsEmpty = document.getElementById("chats-empty");
-
-  // === БЕЗОПАСНЫЕ ОБРАБОТЧИКИ ===
+  // ===== БЕЗОПАСНЫЕ ОБРАБОТЧИКИ =====
   const safeAddEvent = (el, event, handler) => {
-    if (el) el.addEventListener(event, handler);
+    if (el) {
+      el.removeEventListener(event, handler);
+      el.addEventListener(event, handler, { passive: event !== 'touchstart' });
+    }
   };
 
-  // 🚀 ОБНОВЛЕННАЯ MAINBUTTON
+  // ===== ОБНОВЛЕННАЯ MAINBUTTON =====
   function updateMainButton() {
     if (!tg) return;
 
-    // если пользователь ещё в онбординге или приветствии — вообще скрываем MainButton
-    const onboardingVisible =
-      onboardingScreen && onboardingScreen.style.display !== "none" &&
-      !onboardingScreen.classList.contains("hidden");
-    const welcomeVisible =
-      welcomeScreen && !welcomeScreen.classList.contains("hidden");
+    const onboardingVisible = 
+      onboardingScreen && 
+      !onboardingScreen.classList.contains("hidden") &&
+      onboardingScreen.style.display !== "none";
+    
+    const welcomeVisible = 
+      welcomeScreen && 
+      !welcomeScreen.classList.contains("hidden");
 
     if (onboardingVisible || welcomeVisible) {
       tg.MainButton.hide();
       return;
     }
 
-    // иначе можно показывать просто бренд-кнопку, без обработчика
     tg.MainButton.setText("🍀 SiaMatch");
     tg.MainButton.onClick(null);
     tg.MainButton.show();
   }
 
-  // Паддинг для карточки онбординга
-  const onboardingCard = document.querySelector('#onboarding-screen #card');
-  if (onboardingCard) {
-    onboardingCard.style.paddingBottom = '120px';
-  }
-
-  // Telegram user - ФИКС 1
+  // ===== Telegram user =====
   let user = tg?.initDataUnsafe?.user || null;
   if (user && usernameElem) {
     const name = user.first_name || user.username || "друг";
     usernameElem.textContent = `Привет, ${name}!`;
   } else {
     usernameElem.textContent = "Привет, друг! 👋";
-    user = { id: 1, first_name: "Тестовый", username: "user" }; // ДЕМО
+    user = { id: 1, first_name: "Тестовый", username: "user" };
   }
 
   // Telegram фото автоматически
   if (user?.photo_url) {
-    profileData = loadProfile() || {};  // ← loadProfile() вместо null
+    profileData = loadProfile() || {};
     profileData.telegram_photo_url = user.photo_url;
     saveProfile(profileData);
   }
 
-  // === localStorage ===
+  // ===== localStorage функции =====
   function loadProfile() {
     try {
       const raw = localStorage.getItem("siamatch_profile");
@@ -127,12 +193,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function saveProfile(obj) {
     try {
       localStorage.setItem("siamatch_profile", JSON.stringify(obj));
+      return true;
     } catch (e) {
       console.error("saveProfile error:", e);
+      return false;
     }
   }
 
-  // === Демо-данные с городами ===
+  // ===== Демо-данные с городами =====
   const candidates = [
     {id:1,name:"Алина",age:24,gender:"female",city:"Москва",latitude:55.7558,longitude:37.6176,bio:"Люблю кофе ☕ Москва ❤️",photo:"https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800"},
     {id:2,name:"Дмитрий",age:28,gender:"male",city:"Санкт-Петербург",latitude:59.9343,longitude:30.3351,bio:"Инженер СПб",photo:"https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800"},
@@ -145,21 +213,39 @@ document.addEventListener('DOMContentLoaded', function() {
   let userLocation = null;
   let profileData = null;
 
-  // === ФИЛЬТРАЦИЯ КАНДИДАТОВ - ФИКС 3 ===
+  // ===== ФИЛЬТРАЦИЯ КАНДИДАТОВ =====
   function getFilteredCandidates() {
     if (!profileData) {
-      console.log("❌ profileData пустой!");
-      return []; 
+      return candidates.filter(c => !likedIds.includes(c.id));
     }
     
-    // ДЕМО: всегда показывать всех для теста
-    let filtered = candidates.filter(c => !likedIds.includes(c.id));
-    console.log("📊 Найдено кандидатов:", filtered.length);
+    let filtered = candidates.filter(c => {
+      if (likedIds.includes(c.id)) return false;
+      
+      // Фильтр по возрасту
+      if (c.age < profileData.min_age_filter || c.age > profileData.max_age_filter) {
+        return false;
+      }
+      
+      // Фильтр по расстоянию
+      if (profileData.use_geolocation && userLocation && c.latitude && c.longitude) {
+        const dist = calculateDistance(userLocation.lat, userLocation.lon, c.latitude, c.longitude);
+        if (dist > profileData.max_distance_km) return false;
+      }
+      
+      // Фильтр по полу (опционально)
+      if (profileData.gender_preference && profileData.gender_preference !== c.gender) {
+        return false;
+      }
+      
+      return true;
+    });
+    
     return filtered;
   }
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Радиус Земли в км
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -169,27 +255,35 @@ document.addEventListener('DOMContentLoaded', function() {
     return R * c;
   }
 
-  // === ГЕОЛОКАЦИЯ ===
+  // ===== ГЕОЛОКАЦИЯ =====
   function requestUserLocation() {
     if (!navigator.geolocation) {
       alert("Геолокация не поддерживается");
       return;
     }
+    
     navigator.geolocation.getCurrentPosition(
       (position) => {
         userLocation = {
           lat: position.coords.latitude,
           lon: position.coords.longitude
         };
-        alert(`📍 Геолокация: ${Math.round(position.coords.accuracy)}м точность`);
+        console.log(`📍 Геолокация получена: ${userLocation.lat}, ${userLocation.lon}`);
         showCurrentCandidate();
       },
-      () => alert("Геолокация отклонена. Ищем по городу."),
-      { enableHighAccuracy: true, timeout: 10000 }
+      (error) => {
+        console.error("Геолокация отклонена:", error);
+        alert("Геолокация отклонена. Ищем по городу.");
+      },
+      { 
+        enableHighAccuracy: true, 
+        timeout: 10000,
+        maximumAge: 0 
+      }
     );
   }
 
-  // === ЛЕНТА ===
+  // ===== ЛЕНТА =====
   function showCurrentCandidate() {
     const filtered = getFilteredCandidates();
     
@@ -209,14 +303,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const c = filtered[currentIndex];
-    // ФИКС 2 - дефолт фото
     candidatePhoto.src = c.photo || 'https://via.placeholder.com/300x400/22c55e/f0fdf4?text=🍀';
     candidateName.textContent = c.name;
     candidateAge.textContent = c.age;
     candidateCity.textContent = c.city;
     
     // Расстояние
-    if (profileData.use_geolocation && userLocation && c.latitude && c.longitude) {
+    if (profileData && profileData.use_geolocation && userLocation && c.latitude && c.longitude) {
       const dist = calculateDistance(userLocation.lat, userLocation.lon, c.latitude, c.longitude);
       candidateDistance.textContent = `${Math.round(dist)} км`;
     } else {
@@ -229,48 +322,92 @@ document.addEventListener('DOMContentLoaded', function() {
     btnDislike.disabled = false;
   }
 
-  btnLike.addEventListener("click", () => {
+  // ===== iOS FIX: Улучшенные обработчики кликов =====
+  function addIOSClickFix(element) {
+    if (!element) return;
+    
+    let touchStartTime;
+    let touchStartX;
+    let touchStartY;
+    
+    element.addEventListener('touchstart', function(e) {
+      touchStartTime = Date.now();
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      this.style.transform = 'scale(0.95)';
+    }, { passive: true });
+    
+    element.addEventListener('touchend', function(e) {
+      const touchEndTime = Date.now();
+      const touchDuration = touchEndTime - touchStartTime;
+      
+      if (touchDuration < 500) {
+        this.style.transform = '';
+        setTimeout(() => {
+          this.click();
+        }, 50);
+      }
+    }, { passive: true });
+    
+    element.addEventListener('touchmove', function(e) {
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+      
+      if (deltaX > 10 || deltaY > 10) {
+        this.style.transform = '';
+      }
+    }, { passive: true });
+  }
+
+  // Применяем iOS fix ко всем кнопкам
+  document.querySelectorAll('button').forEach(addIOSClickFix);
+
+  // Обработчики ленты
+  safeAddEvent(btnLike, "click", () => {
     const filtered = getFilteredCandidates();
     if (currentIndex < filtered.length) {
       likedIds.push(filtered[currentIndex].id);
       currentIndex += 1;
       showCurrentCandidate();
+      if (tg && tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+      }
     }
   });
 
-  btnDislike.addEventListener("click", () => {
+  safeAddEvent(btnDislike, "click", () => {
     const filtered = getFilteredCandidates();
     if (currentIndex < filtered.length) {
       currentIndex += 1;
       showCurrentCandidate();
+      if (tg && tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+      }
     }
   });
 
-  // === ТАБЫ ===
+  // ===== ТАБЫ =====
   function setActiveTab(tab) {
-    console.log("🔥 TAB:", tab);
+    console.log("🔥 Активируем таб:", tab);
     
-    // 1. СКРЫТЬ ОНБОРДИНГ И ПРИВЕТСТВИЕ
-    if (welcomeScreen) welcomeScreen.classList.add("hidden");
-    if (onboardingScreen) {
-      onboardingScreen.classList.add("hidden");
-      onboardingScreen.style.display = 'none';
-    }
-    
-    // 2. СКРЫТЬ ВСЕ ЭКРАНЫ display: none!
+    // 1. СКРЫТЬ ВСЕ ЭКРАНЫ
     document.querySelectorAll('.screen').forEach(screen => {
-      screen.style.display = 'none';
+      screen.classList.add('hidden');
     });
     
-    // 3. ПОКАЗАТЬ ТОЛЬКО ОДИН
+    // 2. СКРЫТЬ ПРИВЕТСТВИЕ И ОНБОРДИНГ
+    if (welcomeScreen) welcomeScreen.classList.add("hidden");
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    
+    // 3. ПОКАЗАТЬ ВЫБРАННЫЙ ЭКРАН
     if (tab === 'chats') {
-      document.getElementById('screen-chats').style.display = 'block';
+      document.getElementById('screen-chats').classList.remove('hidden');
     } else if (tab === 'feed') {
-      document.getElementById('screen-feed').style.display = 'block';
+      document.getElementById('screen-feed').classList.remove('hidden');
       currentIndex = 0;
       showCurrentCandidate();
     } else if (tab === 'profile') {
-      document.getElementById('screen-profile').style.display = 'block';
+      document.getElementById('screen-profile').classList.remove('hidden');
     }
     
     // 4. АКТИВНЫЙ ТАБ
@@ -278,19 +415,23 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     
-    // Обновляем MainButton при смене табов
+    // 5. Показываем таб-бар
+    if (tabBar) tabBar.classList.remove("hidden");
+    
+    // 6. Обновляем MainButton
     updateMainButton();
+    
+    // 7. iOS FIX: Принудительный ресайз после смены таба
+    setTimeout(forceResize, 100);
   }
 
-  // ДИАГНОСТИКА кнопок ПОСЛЕ объявления setActiveTab()
-  console.log("Кнопок найдено:", tabButtons.length);
-  tabButtons.forEach((btn, i) => {
-    console.log(`Кнопка ${i}:`, btn.dataset.tab);
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+  // Обработчики табов
+  tabButtons.forEach((btn) => {
+    safeAddEvent(btn, "click", () => setActiveTab(btn.dataset.tab));
   });
 
-  // === РЕДАКТИРОВАНИЕ ПРОФИЛЯ ===
-  updateProfileBtn.addEventListener("click", () => {
+  // ===== РЕДАКТИРОВАНИЕ ПРОФИЛЯ =====
+  safeAddEvent(updateProfileBtn, "click", function() {
     if (!profileData) return alert("Сначала заполните профиль!");
 
     profileData.age = Number(profileAge.value);
@@ -302,37 +443,53 @@ document.addEventListener('DOMContentLoaded', function() {
     profileData.max_distance_km = Number(profileMaxDistance.value);
     profileData.use_geolocation = document.getElementById("profile-use-geolocation").checked;
 
-    if (profileData.use_geolocation && !userLocation) requestUserLocation();
+    if (profileData.use_geolocation && !userLocation) {
+      requestUserLocation();
+    }
 
-    saveProfile(profileData);
-    alert("Профиль обновлён! Фильтры применены ✏️");
+    if (saveProfile(profileData)) {
+      alert("Профиль обновлён! Фильтры применены ✏️");
+    }
   });
 
-  // Обработчик для кнопки "Начать общение"
-  safeAddEvent(startBtn, "click", () => {
-    // скрыть приветствие, показать онбординг
+  // ===== ОНБОРДИНГ =====
+  safeAddEvent(startBtn, "click", function() {
     if (welcomeScreen) welcomeScreen.classList.add("hidden");
     if (onboardingScreen) {
       onboardingScreen.classList.remove("hidden");
-      onboardingScreen.style.display = "block";
     }
-    // скрыть таб-бар до заполнения анкеты
     if (tabBar) tabBar.classList.add("hidden");
-    // обновить состояние основной кнопки Telegram при необходимости
     updateMainButton();
+    
+    // iOS FIX: Фокус на первое поле
+    setTimeout(() => {
+      document.getElementById("age")?.focus();
+    }, 300);
   });
 
-  // Обработчик для кнопки сохранения профиля
-  safeAddEvent(saveProfileBtn, "click", () => {
+  // ===== СОХРАНЕНИЕ ПРОФИЛЯ =====
+  safeAddEvent(saveProfileBtn, "click", function() {
     const ageValue = Number(document.getElementById("age").value);
     const gender = document.getElementById("gender").value;
     const city = document.getElementById("city").value;
     const bio = document.getElementById("bio").value.trim();
 
-    if (!ageValue || ageValue < 18 || ageValue > 99) return alert("Возраст 18-99");
-    if (!gender) return alert("Выберите пол");
-    if (!city) return alert("Выберите город");
-    if (bio.length < 10) return alert("О себе минимум 10 символов");
+    if (!ageValue || ageValue < 18 || ageValue > 99) {
+      alert("Возраст должен быть от 18 до 99 лет");
+      return;
+    }
+    if (!gender) {
+      alert("Выберите пол");
+      return;
+    }
+    if (!city) {
+      alert("Выберите город");
+      return;
+    }
+    if (bio.length < 10) {
+      alert("О себе минимум 10 символов");
+      return;
+    }
 
     profileData = {
       tg_id: user?.id || 1,
@@ -350,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveProfile(profileData);
 
-    // заполняем экран профиля
+    // Заполняем экран профиля
     if (profileAge) profileAge.value = ageValue;
     if (profileGender) profileGender.value = gender;
     if (profileCity) profileCity.value = city;
@@ -359,30 +516,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (profileMaxAge) profileMaxAge.value = 35;
     if (profileMaxDistance) profileMaxDistance.value = 50;
 
-    // скрываем онбординг, показываем табы и ленту
-    if (onboardingScreen) onboardingScreen.style.display = "none";
+    // Скрываем онбординг, показываем табы
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
     if (tabBar) tabBar.classList.remove("hidden");
+    
+    // iOS FIX: Скрываем клавиатуру
+    document.activeElement?.blur();
+    
     setActiveTab("feed");
-    if (tg) tg.MainButton.hide();
     alert("✅ Профиль сохранён! Добро пожаловать 🍀");
   });
 
-  // === ИНИЦИАЛИЗАЦИЯ ===
-  (function initOnStart() {
+  // ===== ИНИЦИАЛИЗАЦИЯ =====
+  function initOnStart() {
     profileData = loadProfile();
+    
     if (!profileData) {
-      // нет сохранённого профиля: показываем приветствие
+      // Нет сохранённого профиля: показываем приветствие
       if (welcomeScreen) welcomeScreen.classList.remove("hidden");
-      if (onboardingScreen) {
-        onboardingScreen.classList.add("hidden");
-        onboardingScreen.style.display = "none";
-      }
+      if (onboardingScreen) onboardingScreen.classList.add("hidden");
       if (tabBar) tabBar.classList.add("hidden");
       updateMainButton();
       return;
     }
 
-    // ... твой существующий код заполнения полей ...
     // Заполняем онбординг
     document.getElementById("age").value = profileData.age || "";
     document.getElementById("gender").value = profileData.gender || "";
@@ -397,6 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
     profileMinAge.value = profileData.min_age_filter || 18;
     profileMaxAge.value = profileData.max_age_filter || 35;
     profileMaxDistance.value = profileData.max_distance_km || 50;
+    
     if (profileData.use_geolocation !== undefined) {
       document.getElementById("profile-use-geolocation").checked = profileData.use_geolocation;
     }
@@ -410,64 +568,99 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // Показываем ленту
     if (welcomeScreen) welcomeScreen.classList.add("hidden");
-    onboardingScreen.style.display = "none";
-    tabBar.classList.remove("hidden");
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    if (tabBar) tabBar.classList.remove("hidden");
+    
     setActiveTab("feed");
     updateMainButton();
-  })();
+  }
 
-  // 🚀 ИСПРАВЛЕННЫЙ ГЛОБАЛЬНЫЙ ОБРАБОТЧИК КЛИКОВ ДЛЯ iOS
-  document.addEventListener('click', (e) => {
-    const target = e.target;
+  // Запускаем инициализацию
+  setTimeout(initOnStart, 100);
 
-    // Не трогаем клики по кнопкам и формам
-    if (target.closest('button, .primary, input, textarea, select')) {
-      return;
+  // ===== iOS FIX: Обработчик клавиатуры =====
+  window.addEventListener('focusin', function(e) {
+    if (isIOS && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      setTimeout(() => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     }
-
-    document.activeElement?.blur();
-    if (tg && tg.HapticFeedback?.selectionChanged) {
-      tg.HapticFeedback.selectionChanged();
-    }
-    setTimeout(() => window.scrollTo(0, 0), 100);
-  }, true);
-
-  // iOS resize fix
-  window.addEventListener('resize', () => {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') document.activeElement?.blur();
+  window.addEventListener('focusout', function() {
+    if (isIOS) {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100);
+    }
   });
 
-  safeAddEvent(document.getElementById("profile-use-geolocation"), "change", (e) => {
+  // ===== Обработчик геолокации =====
+  safeAddEvent(document.getElementById("profile-use-geolocation"), "change", function(e) {
     if (profileData) {
       profileData.use_geolocation = e.target.checked;
-      if (e.target.checked && !userLocation) requestUserLocation();
+      if (e.target.checked && !userLocation) {
+        requestUserLocation();
+      }
+      saveProfile(profileData);
     }
   });
 
-  safeAddEvent(document.getElementById('profile-photo'), 'change', (e) => {
+  // ===== Загрузка фото =====
+  safeAddEvent(document.getElementById('profile-photo'), 'change', function(e) {
     const file = e.target.files[0];
-    if (file && file.size > 5 * 1024 * 1024) {
-      alert('Фото слишком большое (макс 5MB)');
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Фото слишком большое (максимум 5MB)');
       return;
     }
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        profileData = profileData || {};
-        profileData.custom_photo_url = ev.target.result;
-        document.getElementById('photo-preview').src = ev.target.result;
-        document.getElementById('photo-preview').style.display = 'block';
-        saveProfile(profileData);
+    
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      profileData = profileData || {};
+      profileData.custom_photo_url = ev.target.result;
+      
+      const preview = document.getElementById('photo-preview');
+      if (preview) {
+        preview.src = ev.target.result;
+        preview.style.display = 'block';
+      }
+      
+      if (saveProfile(profileData)) {
         alert('Фото загружено! 📸');
-      };
-      reader.readAsDataURL(file);
-    }
+      }
+    };
+    reader.readAsDataURL(file);
   });
 
-}); // Закрытие DOMContentLoaded
+  // ===== iOS FIX: Предотвращаем bounce при скролле =====
+  if (isIOS) {
+    let startY;
+    const card = document.getElementById('card');
+    
+    safeAddEvent(card, 'touchstart', function(e) {
+      startY = e.touches[0].clientY;
+    }, true);
+    
+    safeAddEvent(card, 'touchmove', function(e) {
+      const currentY = e.touches[0].clientY;
+      const isScrollingDown = currentY > startY;
+      const isAtTop = this.scrollTop === 0;
+      const isAtBottom = this.scrollHeight - this.scrollTop <= this.clientHeight + 1;
+      
+      if ((isAtTop && isScrollingDown) || (isAtBottom && !isScrollingDown)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
+  // ===== iOS FIX: Автоматическое скрытие клавиатуры при тапе вне поля =====
+  document.addEventListener('touchstart', function(e) {
+    if (isIOS && !e.target.closest('input, textarea, select')) {
+      document.activeElement?.blur();
+    }
+  });
+});
