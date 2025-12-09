@@ -2,42 +2,17 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <title>SiaMatch - Dating</title>
+  <title>SiaMatch</title>
   <!-- КРИТИЧЕСКИЕ МЕТА-ТЕГИ ДЛЯ iOS -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    /* Дополнительные стили для iOS */
-    :root {
-      --vh: 1vh;
-    }
-    
-    @media (max-width: 768px) {
-      html, body {
-        height: 100%;
-        overflow: hidden;
-      }
-      
-      #app-root {
-        height: calc(var(--vh, 1vh) * 100);
-      }
-    }
-  </style>
 </head>
 <body>
   <div id="app-root">
     <div id="card">
-      <!-- Верхний блок (только на приветственном экране) -->
-      <div class="header-block">
-        <div class="logo">🍀</div>
-        <div class="app-name">SiaMatch</div>
-        <h1>Welcome to SiaMatch</h1>
-        <div id="username">Loading user info...</div>
-      </div>
-
-      <!-- ПРИВЕТСТВЕННЫЙ ЭКРАН -->
+      <!-- ЭКРАН ПРИВЕТСТВИЯ -->
       <div id="welcome-screen">
         <div class="welcome-logo">🍀</div>
         <div class="welcome-title">SiaMatch</div>
@@ -51,7 +26,7 @@
         <button id="startBtn" class="primary">Начать знакомство</button>
       </div>
 
-      <!-- ЭКРАН ОНБОРДИНГА (анкета) -->
+      <!-- ЭКРАН АНКЕТЫ -->
       <div id="onboarding-screen" class="screen hidden">
         <div class="screen-content">
           <h2 class="screen-title">Заполните анкету 🍀</h2>
@@ -89,9 +64,8 @@
             <div class="hint">Минимум 10 символов, максимум 300</div>
           </div>
 
-          <div class="button-container">
-            <button id="saveProfileBtn" class="primary">Сохранить профиль 🍀</button>
-          </div>
+          <!-- FIX: Кнопка всегда видна -->
+          <button id="saveProfileBtn">Сохранить профиль 🍀</button>
         </div>
       </div>
 
@@ -104,7 +78,7 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ЛЕНТЫ (свайпы) -->
+      <!-- ЭКРАН ЛЕНТЫ -->
       <div id="screen-feed" class="screen hidden">
         <div class="screen-content">
           <h2 class="screen-title">Познакомьтесь 🍀</h2>
@@ -196,9 +170,8 @@
             <input type="number" id="profile-max-distance" min="1" max="500" value="50" />
           </div>
 
-          <div class="button-container">
-            <button id="updateProfileBtn" class="primary">Сохранить изменения ✏️</button>
-          </div>
+          <!-- FIX: Кнопка всегда видна -->
+          <button id="updateProfileBtn">Сохранить изменения ✏️</button>
         </div>
       </div>
     </div>
