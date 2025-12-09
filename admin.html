@@ -16,6 +16,8 @@
       --text: #e5e7eb;
       --muted: #9ca3af;
       --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
     }
     * {
       box-sizing: border-box;
@@ -33,7 +35,7 @@
     }
     #admin-root {
       width: 100%;
-      max-width: 640px;
+      max-width: 800px;
     }
     .card {
       background: rgba(15, 23, 42, 0.96);
@@ -85,10 +87,8 @@
     }
 
     /* Кнопки */
-
     .primary {
       border: none;
-      margin-top: 6px;
       padding: 10px 16px;
       border-radius: 999px;
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
@@ -103,6 +103,7 @@
     }
     #login-btn {
       width: 100%;
+      margin-top: 6px;
     }
 
     .error {
@@ -121,12 +122,11 @@
     }
 
     /* Админ-панель */
-
     #admin-panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
       gap: 8px;
     }
     #admin-panel-header .left {
@@ -151,50 +151,144 @@
       cursor: pointer;
     }
 
+    /* Табы */
+    #admin-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      border: none;
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+    .tab-btn:hover {
+      background: rgba(148, 163, 184, 0.2);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Статистика */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: rgba(2, 6, 23, 0.7);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .stat-number.total { color: var(--accent); }
+    .stat-number.new { color: var(--info); }
+    .stat-number.active { color: #10b981; }
+    .stat-number.blocked { color: var(--danger); }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Поисковая строка (только в поиске) */
     #search-row {
       display: flex;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
       align-items: center;
+      display: none;
+    }
+    #search-row.active {
+      display: flex;
     }
     #search-input {
       flex: 1;
     }
     #search-btn {
       width: auto;
-      padding: 8px 14px;
+      padding: 8px 16px;
       font-size: 14px;
-      margin-top: 0;
       white-space: nowrap;
     }
 
+    /* Фильтры (только в поиске) */
+    #filters-row {
+      display: none;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    #filters-row.active {
+      display: flex;
+    }
+    .filter-select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: var(--text);
+      font-size: 13px;
+      min-width: 120px;
+    }
+
+    /* Результаты */
     #results-info {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     }
     #users-list {
       list-style: none;
       padding: 0;
       margin: 0;
-      max-height: 260px;
+      max-height: 400px;
       overflow-y: auto;
     }
     .user-item {
       border-radius: 10px;
-      padding: 8px 10px;
+      padding: 12px 14px;
       border: 1px solid #1f2937;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       background: #020617;
       font-size: 13px;
+    }
+    .user-item.blocked {
+      border-left: 4px solid var(--danger);
+      opacity: 0.8;
+    }
+    .user-item.new {
+      border-left: 4px solid var(--info);
     }
     .user-main {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
     }
     .user-name {
       font-weight: 500;
@@ -202,12 +296,14 @@
     .user-meta {
       color: var(--muted);
       font-size: 12px;
+      display: flex;
+      gap: 12px;
     }
     .user-actions {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 4px;
+      gap: 6px;
     }
     .link-btn {
       border: none;
@@ -216,6 +312,7 @@
       font-size: 12px;
       cursor: pointer;
       padding: 0;
+      text-align: right;
     }
     .block-btn {
       border: none;
@@ -224,6 +321,42 @@
       font-size: 12px;
       cursor: pointer;
       padding: 0;
+      text-align: right;
+    }
+    .unblock-btn {
+      border: none;
+      background: none;
+      color: var(--warning);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+      text-align: right;
+    }
+
+    /* Баннеры разделов */
+    .section-banner {
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .section-banner.search {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+    .section-banner.blocked {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .section-banner h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+    .section-banner p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
     }
   </style>
 </head>
@@ -250,21 +383,89 @@
       <div id="admin-panel-header">
         <div class="left">
           <h2>Панель администратора</h2>
-          <span>Поиск и модерация анкет</span>
+          <span>Модерация и управление пользователями</span>
         </div>
         <button id="logout-btn">Выйти</button>
       </div>
 
+      <!-- Табы -->
+      <div id="admin-tabs">
+        <button class="tab-btn active" data-tab="all">Все пользователи</button>
+        <button class="tab-btn" data-tab="new">Новые</button>
+        <button class="tab-btn" data-tab="blocked">Заблокированные</button>
+        <button class="tab-btn" data-tab="search">Поиск</button>
+      </div>
+
+      <!-- Статистика -->
+      <div id="stats-section" class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number total" id="stat-total">0</span>
+          <span class="stat-label">Всего пользователей</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number new" id="stat-new">0</span>
+          <span class="stat-label">Новых за 24ч</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number active" id="stat-active">0</span>
+          <span class="stat-label">Активных</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number blocked" id="stat-blocked">0</span>
+          <span class="stat-label">Заблокировано</span>
+        </div>
+      </div>
+
+      <!-- Баннеры разделов -->
+      <div id="section-banner-all" class="section-banner">
+        <h3>Все пользователи</h3>
+        <p>Полный список зарегистрированных пользователей. Можно сортировать, фильтровать и выполнять модерацию.</p>
+      </div>
+
+      <div id="section-banner-new" class="section-banner hidden">
+        <h3>Новые пользователи</h3>
+        <p>Пользователи, зарегистрировавшиеся за последние 24 часа. Отслеживайте активность приложения.</p>
+      </div>
+
+      <div id="section-banner-blocked" class="section-banner blocked hidden">
+        <h3>Заблокированные пользователи</h3>
+        <p>Анкеты, временно или постоянно отключенные от показа в ленте.</p>
+      </div>
+
+      <div id="section-banner-search" class="section-banner search hidden">
+        <h3>Расширенный поиск</h3>
+        <p>Поиск по всем полям анкеты. Используйте фильтры для точных результатов.</p>
+      </div>
+
+      <!-- Поисковая строка (только для вкладки "Поиск") -->
       <div id="search-row">
         <input
           type="text"
           id="search-input"
-          placeholder="Поиск по @username, ID, имени..."
+          placeholder="Поиск по ID, имени, username, городу..."
         />
-        <button id="search-btn" class="primary">Поиск</button>
+        <button id="search-btn" class="primary">Найти</button>
       </div>
 
-      <div id="results-info">Пока ничего не искали.</div>
+      <!-- Фильтры (только для вкладки "Поиск") -->
+      <div id="filters-row">
+        <select id="filter-gender" class="filter-select">
+          <option value="">Все полы</option>
+          <option value="male">Мужской</option>
+          <option value="female">Женский</option>
+        </select>
+        <select id="filter-city" class="filter-select">
+          <option value="">Все города</option>
+          <option value="Москва">Москва</option>
+          <option value="Санкт-Петербург">Санкт-Петербург</option>
+          <option value="Казань">Казань</option>
+        </select>
+        <input type="number" id="filter-age-min" class="filter-select" placeholder="Возраст от" min="18" max="99">
+        <input type="number" id="filter-age-max" class="filter-select" placeholder="до" min="18" max="99">
+      </div>
+
+      <!-- Результаты -->
+      <div id="results-info">Загружаем данные...</div>
       <ul id="users-list"></ul>
     </div>
   </div>
@@ -272,6 +473,7 @@
   <script>
     const ADMIN_PASSWORD = "s21i06a95";
 
+    // DOM элементы
     const loginCard = document.getElementById("login-card");
     const adminCard = document.getElementById("admin-card");
     const loginBtn = document.getElementById("login-btn");
@@ -279,51 +481,206 @@
     const passwordInput = document.getElementById("password");
     const loginError = document.getElementById("login-error");
 
+    // Табы
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    
+    // Поиск и фильтры
+    const searchRow = document.getElementById("search-row");
+    const filtersRow = document.getElementById("filters-row");
     const searchInput = document.getElementById("search-input");
     const searchBtn = document.getElementById("search-btn");
+    const filterGender = document.getElementById("filter-gender");
+    const filterCity = document.getElementById("filter-city");
+    const filterAgeMin = document.getElementById("filter-age-min");
+    const filterAgeMax = document.getElementById("filter-age-max");
+
+    // Результаты
     const resultsInfo = document.getElementById("results-info");
     const usersList = document.getElementById("users-list");
 
-    // Демо-пользователи
-    const demoUsers = [
-      {
-        id: 1,
-        name: "Алина",
-        age: 24,
-        gender: "female",
-        username: "alina_example",
-        city: "Москва",
-        blocked: false
-      },
-      {
-        id: 2,
-        name: "Дмитрий",
-        age: 28,
-        gender: "male",
-        username: "dmitry_228",
-        city: "Санкт-Петербург",
-        blocked: false
-      }
-    ];
+    // Статистика
+    const statTotal = document.getElementById("stat-total");
+    const statNew = document.getElementById("stat-new");
+    const statActive = document.getElementById("stat-active");
+    const statBlocked = document.getElementById("stat-blocked");
 
-    function renderUsers(list, query) {
+    // Баннеры
+    const sectionBanners = {
+      all: document.getElementById("section-banner-all"),
+      new: document.getElementById("section-banner-new"),
+      blocked: document.getElementById("section-banner-blocked"),
+      search: document.getElementById("section-banner-search")
+    };
+
+    // Текущее состояние
+    let currentTab = "all";
+    let allUsers = [];
+    let filteredUsers = [];
+
+    // Демо-данные пользователей (расширенные)
+    function generateDemoUsers(count = 50) {
+      const cities = ["Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Екатеринбург", "Краснодар"];
+      const names = {
+        male: ["Александр", "Дмитрий", "Максим", "Артём", "Иван", "Кирилл", "Михаил"],
+        female: ["Анастасия", "Мария", "Анна", "Виктория", "Екатерина", "Елена", "Ольга"]
+      };
+      
+      const users = [];
+      const now = new Date();
+      const dayMs = 24 * 60 * 60 * 1000;
+      
+      for (let i = 1; i <= count; i++) {
+        const gender = Math.random() > 0.5 ? "male" : "female";
+        const nameList = names[gender];
+        const name = nameList[Math.floor(Math.random() * nameList.length)];
+        
+        // Случайная дата регистрации (от 1 до 30 дней назад)
+        const daysAgo = Math.floor(Math.random() * 30);
+        const registrationDate = new Date(now.getTime() - daysAgo * dayMs);
+        
+        // 10% пользователей заблокированы
+        const blocked = Math.random() < 0.1;
+        
+        // 20% новых (за последние 24 часа)
+        const isNew = daysAgo === 0;
+        
+        users.push({
+          id: i,
+          name: name,
+          age: 18 + Math.floor(Math.random() * 30),
+          gender: gender,
+          username: `${name.toLowerCase()}_${i}`,
+          city: cities[Math.floor(Math.random() * cities.length)],
+          bio: "Люблю активный отдых и путешествия",
+          registration_date: registrationDate.toISOString().split('T')[0],
+          days_ago: daysAgo,
+          blocked: blocked,
+          is_new: isNew,
+          last_active: new Date(now.getTime() - Math.floor(Math.random() * 7) * dayMs).toISOString()
+        });
+      }
+      
+      return users;
+    }
+
+    // Инициализация данных
+    allUsers = generateDemoUsers(50);
+
+    // Обновление статистики
+    function updateStats() {
+      const total = allUsers.length;
+      const newUsers = allUsers.filter(u => u.is_new).length;
+      const blocked = allUsers.filter(u => u.blocked).length;
+      const active = total - blocked;
+      
+      statTotal.textContent = total;
+      statNew.textContent = newUsers;
+      statActive.textContent = active;
+      statBlocked.textContent = blocked;
+    }
+
+    // Фильтрация пользователей по текущей вкладке
+    function filterUsersByTab() {
+      let filtered = [...allUsers];
+      
+      switch(currentTab) {
+        case "all":
+          // Все пользователи, сортировка по ID (новые сверху)
+          filtered.sort((a, b) => b.id - a.id);
+          break;
+          
+        case "new":
+          // Только новые (за последние 24 часа)
+          filtered = allUsers.filter(u => u.is_new);
+          filtered.sort((a, b) => b.id - a.id);
+          break;
+          
+        case "blocked":
+          // Только заблокированные
+          filtered = allUsers.filter(u => u.blocked);
+          filtered.sort((a, b) => b.id - a.id);
+          break;
+          
+        case "search":
+          // Поиск с фильтрами
+          const searchTerm = searchInput.value.trim().toLowerCase();
+          const genderFilter = filterGender.value;
+          const cityFilter = filterCity.value;
+          const ageMin = parseInt(filterAgeMin.value) || 18;
+          const ageMax = parseInt(filterAgeMax.value) || 99;
+          
+          filtered = allUsers.filter(u => {
+            // Поиск по тексту
+            const matchesSearch = !searchTerm || 
+              String(u.id).includes(searchTerm) ||
+              u.name.toLowerCase().includes(searchTerm) ||
+              u.username.toLowerCase().includes(searchTerm) ||
+              u.city.toLowerCase().includes(searchTerm);
+            
+            // Фильтр по полу
+            const matchesGender = !genderFilter || u.gender === genderFilter;
+            
+            // Фильтр по городу
+            const matchesCity = !cityFilter || u.city === cityFilter;
+            
+            // Фильтр по возрасту
+            const matchesAge = u.age >= ageMin && u.age <= ageMax;
+            
+            return matchesSearch && matchesGender && matchesCity && matchesAge;
+          });
+          
+          filtered.sort((a, b) => b.id - a.id);
+          break;
+      }
+      
+      filteredUsers = filtered;
+      return filtered;
+    }
+
+    // Рендеринг пользователей
+    function renderUsers(users) {
       usersList.innerHTML = "";
-      if (!list.length) {
-        resultsInfo.textContent = query
-          ? `По запросу «${query}» ничего не найдено.`
-          : "Результатов нет.";
+      
+      if (!users.length) {
+        const emptyMsg = {
+          "all": "Нет зарегистрированных пользователей",
+          "new": "Нет новых пользователей за последние 24 часа",
+          "blocked": "Нет заблокированных пользователей",
+          "search": "По вашему запросу ничего не найдено"
+        }[currentTab];
+        
+        resultsInfo.textContent = emptyMsg;
         return;
       }
-      resultsInfo.textContent = `Найдено анкет: ${list.length}`;
-      list.forEach((u) => {
+      
+      // Обновляем информацию о результатах
+      const tabTitles = {
+        "all": "Все пользователи",
+        "new": "Новые пользователи",
+        "blocked": "Заблокированные пользователи",
+        "search": "Результаты поиска"
+      };
+      
+      resultsInfo.textContent = `${tabTitles[currentTab]}: ${users.length} анкет`;
+      
+      // Рендерим каждого пользователя
+      users.forEach((u) => {
         const li = document.createElement("li");
-        li.className = "user-item";
+        li.className = `user-item ${u.blocked ? 'blocked' : ''} ${u.is_new ? 'new' : ''}`;
 
         const main = document.createElement("div");
         main.className = "user-main";
         main.innerHTML = `
-          <span class="user-name">${u.name}, ${u.age}</span>
-          <span class="user-meta">@${u.username || "—"} · ID: ${u.id} · ${u.city}</span>
+          <span class="user-name">${u.name}, ${u.age} лет</span>
+          <div class="user-meta">
+            <span>ID: ${u.id}</span>
+            <span>@${u.username}</span>
+            <span>${u.city}</span>
+            <span>${u.gender === 'male' ? '♂ Мужской' : '♀ Женский'}</span>
+            <span>Рег.: ${u.registration_date}</span>
+            ${u.blocked ? '<span style="color:var(--danger)">🚫 Заблокирован</span>' : ''}
+            ${u.is_new ? '<span style="color:var(--info)">🆕 Новый</span>' : ''}
+          </div>
         `;
 
         const actions = document.createElement("div");
@@ -331,7 +688,7 @@
 
         const openBtn = document.createElement("button");
         openBtn.className = "link-btn";
-        openBtn.textContent = "Открыть в Telegram";
+        openBtn.textContent = "Открыть в TG";
         openBtn.onclick = () => {
           if (u.username) {
             window.open("https://t.me/" + u.username, "_blank");
@@ -341,15 +698,23 @@
         };
 
         const blockBtn = document.createElement("button");
-        blockBtn.className = "block-btn";
+        blockBtn.className = u.blocked ? "unblock-btn" : "block-btn";
         blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
         blockBtn.onclick = () => {
           u.blocked = !u.blocked;
+          u.is_new = false; // Снимаем статус "новый" при блокировке
           blockBtn.textContent = u.blocked ? "Разблокировать" : "Заблокировать";
+          blockBtn.className = u.blocked ? "unblock-btn" : "block-btn";
+          li.classList.toggle('blocked', u.blocked);
+          
+          updateStats();
+          filterUsersByTab();
+          renderUsers(filteredUsers);
+          
           alert(
             u.blocked
-              ? "Анкета заблокирована (демо, без бэкенда)."
-              : "Анкета разблокирована (демо)."
+              ? "✅ Анкета заблокирована (демо-режим)"
+              : "✅ Анкета разблокирована (демо-режим)"
           );
         };
 
@@ -362,20 +727,27 @@
       });
     }
 
-    function doSearch() {
-      const q = searchInput.value.trim().toLowerCase();
-      if (!q) {
-        renderUsers([], "");
-        return;
-      }
-      const filtered = demoUsers.filter((u) => {
-        return (
-          String(u.id) === q ||
-          (u.username && u.username.toLowerCase().includes(q)) ||
-          (u.name && u.name.toLowerCase().includes(q))
-        );
+    // Переключение вкладок
+    function switchTab(tabName) {
+      currentTab = tabName;
+      
+      // Обновляем активные кнопки
+      tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
       });
-      renderUsers(filtered, q);
+      
+      // Показываем/скрываем поиск и фильтры
+      searchRow.classList.toggle('active', tabName === 'search');
+      filtersRow.classList.toggle('active', tabName === 'search');
+      
+      // Показываем/скрываем баннеры
+      Object.keys(sectionBanners).forEach(key => {
+        sectionBanners[key].classList.toggle('hidden', key !== tabName);
+      });
+      
+      // Фильтруем и рендерим
+      const users = filterUsersByTab();
+      renderUsers(users);
     }
 
     // Логин
@@ -386,6 +758,10 @@
         loginCard.classList.add("hidden");
         adminCard.classList.remove("hidden");
         localStorage.setItem("siamatch_admin_logged_in", "1");
+        
+        // Инициализация админ-панели
+        updateStats();
+        switchTab("all");
       } else {
         loginError.textContent = "Неверный пароль.";
       }
@@ -401,12 +777,29 @@
       adminCard.classList.add("hidden");
       loginCard.classList.remove("hidden");
       passwordInput.value = "";
+      currentTab = "all";
     };
 
     // Поиск
-    searchBtn.onclick = doSearch;
+    searchBtn.onclick = () => {
+      switchTab("search");
+    };
+
     searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") doSearch();
+      if (e.key === "Enter") switchTab("search");
+    });
+
+    // Обработчики фильтров
+    filterGender.addEventListener("change", () => switchTab("search"));
+    filterCity.addEventListener("change", () => switchTab("search"));
+    filterAgeMin.addEventListener("change", () => switchTab("search"));
+    filterAgeMax.addEventListener("change", () => switchTab("search"));
+
+    // Обработчики табов
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        switchTab(btn.dataset.tab);
+      });
     });
 
     // Авто-логин
@@ -414,6 +807,8 @@
       if (localStorage.getItem("siamatch_admin_logged_in") === "1") {
         loginCard.classList.add("hidden");
         adminCard.classList.remove("hidden");
+        updateStats();
+        switchTab("all");
       }
     })();
   </script>
