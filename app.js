@@ -1,195 +1,251 @@
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('SiaMatch приложение запускается...');
+  console.log('🚀 SiaMatch запускается...');
   
-  // ===== Telegram WebApp инициализация =====
+  // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
   let tg = null;
   let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  let profileData = null;
+  let currentIndex = 0;
+  let likedIds = [];
+  let hasInitialized = false;
   
-  try {
-    if (window.Telegram && Telegram.WebApp) {
-      tg = Telegram.WebApp;
-      console.log('Telegram WebApp обнаружен, платформа:', tg.platform);
-      
-      tg.ready();
-      tg.expand(); // Полноэкранный режим
-      
-      // Настройки для iOS
-      if (isIOS || tg.platform === 'ios' || tg.platform === 'macos') {
-        console.log('iOS обнаружен, применяем исправления...');
-        document.body.classList.add('no-bounce');
-        
-        // Исправляем высоту viewport на iOS
-        const setVH = () => {
-          const vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', `${vh}px`);
-        };
-        setVH();
-        window.addEventListener('resize', setVH);
-        window.addEventListener('orientationchange', () => {
-          setTimeout(setVH, 300);
-        });
-      }
-      
-      // Обновляем viewport после загрузки
-      setTimeout(() => {
-        if (tg && typeof tg.requestViewport === 'function') {
-          tg.requestViewport();
-        }
-      }, 500);
-    } else {
-      console.log('Telegram WebApp не найден, запуск в браузере');
-    }
-  } catch (e) {
-    console.error("Ошибка инициализации Telegram WebApp:", e);
-  }
-
-  // ===== DOM элементы =====
+  // Демо-данные
+  const candidates = [
+    {id:1,name:"Алина",age:24,gender:"female",city:"Москва",bio:"Люблю кофе ☕ Москва ❤️",photo:"https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800"},
+    {id:2,name:"Дмитрий",age:28,gender:"male",city:"Санкт-Петербург",bio:"Инженер СПб",photo:"https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800"},
+    {id:3,name:"Екатерина",age:26,gender:"female",city:"Москва",bio:"Фотограф ❤️",photo:"https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800"},
+  ];
+  
+  // ===== DOM ЭЛЕМЕНТЫ =====
   const welcomeScreen = document.getElementById("welcome-screen");
   const startBtn = document.getElementById("startBtn");
   const usernameElem = document.getElementById("username");
   const onboardingScreen = document.getElementById("onboarding-screen");
   const saveProfileBtn = document.getElementById("saveProfileBtn");
   const tabBar = document.getElementById("tab-bar");
-  const headerBlock = document.querySelector('.header-block');
-
-  // ===== ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ =====
-  let user = tg?.initDataUnsafe?.user || null;
-  console.log('Данные пользователя:', user);
   
-  // Заполняем имя пользователя на приветственном экране
-  if (user && usernameElem) {
-    const name = user.first_name || user.username || "друг";
-    usernameElem.textContent = `Привет, ${name}!`;
-  } else {
-    usernameElem.textContent = "Привет, друг! 👋";
-    user = { id: 1, first_name: "Тестовый", username: "user" };
+  // FIX: Удаляем старый заголовочный блок
+  const oldHeader = document.querySelector('.header-block');
+  if (oldHeader) {
+    oldHeader.remove();
   }
-
-  // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
-  let profileData = null;
-  let candidates = [
-    {id:1,name:"Алина",age:24,gender:"female",city:"Москва",bio:"Люблю кофе ☕ Москва ❤️",photo:"https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800"},
-    {id:2,name:"Дмитрий",age:28,gender:"male",city:"Санкт-Петербург",bio:"Инженер СПб",photo:"https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800"},
-    {id:3,name:"Екатерина",age:26,gender:"female",city:"Москва",bio:"Фотограф ❤️",photo:"https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800"},
-    {id:4,name:"Алексей",age:30,gender:"male",city:"Казань",bio:"Спортсмен Казань",photo:"https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=800"}
-  ];
   
-  let currentIndex = 0;
-  let likedIds = [];
-
-  // ===== ФУНКЦИИ РАБОТЫ С LOCALSTORAGE =====
+  // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
+  function initTelegram() {
+    try {
+      if (window.Telegram && Telegram.WebApp) {
+        tg = Telegram.WebApp;
+        console.log('✅ Telegram WebApp обнаружен');
+        
+        tg.ready();
+        tg.expand(); // Полноэкранный режим
+        
+        // Скрываем Telegram кнопку MainButton
+        if (tg.MainButton) {
+          tg.MainButton.hide();
+        }
+        
+        // Настройки для iOS
+        if (isIOS) {
+          console.log('📱 iOS обнаружен');
+          document.body.classList.add('no-bounce');
+          
+          // Исправляем высоту viewport
+          fixIOSViewport();
+          
+          // Обработчики для клавиатуры
+          setupKeyboardHandlers();
+        }
+        
+        // Обновляем viewport
+        setTimeout(() => {
+          if (tg && typeof tg.requestViewport === 'function') {
+            tg.requestViewport();
+          }
+        }, 500);
+        
+        return true;
+      }
+    } catch (e) {
+      console.error("❌ Ошибка Telegram WebApp:", e);
+    }
+    return false;
+  }
+  
+  // ===== FIX ДЛЯ iOS VIEWPORT =====
+  function fixIOSViewport() {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      document.body.style.height = window.innerHeight + 'px';
+    };
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(setVH, 300);
+    });
+  }
+  
+  // ===== ОБРАБОТЧИКИ КЛАВИАТУРЫ =====
+  function setupKeyboardHandlers() {
+    let originalHeight = window.innerHeight;
+    
+    window.addEventListener('resize', function() {
+      const newHeight = window.innerHeight;
+      
+      if (newHeight < originalHeight) {
+        // Клавиатура открылась
+        document.body.classList.add('keyboard-open');
+        
+        // Прокручиваем активное поле ввода в видимую область
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          setTimeout(() => {
+            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 300);
+        }
+      } else {
+        // Клавиатура закрылась
+        document.body.classList.remove('keyboard-open');
+        
+        // Прокручиваем обратно
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 100);
+      }
+      
+      originalHeight = newHeight;
+    });
+    
+    // Скрываем клавиатуру при тапе вне поля ввода
+    document.addEventListener('touchstart', function(e) {
+      if (!e.target.closest('input, textarea, select')) {
+        document.activeElement?.blur();
+      }
+    });
+  }
+  
+  // ===== LOCALSTORAGE ФУНКЦИИ =====
   function loadProfile() {
     try {
       const raw = localStorage.getItem("siamatch_profile");
-      if (!raw) return null;
-      return JSON.parse(raw);
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
-      console.error("Ошибка загрузки профиля:", e);
+      console.error("❌ Ошибка загрузки профиля:", e);
       return null;
     }
   }
-
+  
   function saveProfile(obj) {
     try {
       localStorage.setItem("siamatch_profile", JSON.stringify(obj));
       return true;
     } catch (e) {
-      console.error("Ошибка сохранения профиля:", e);
+      console.error("❌ Ошибка сохранения профиля:", e);
       return false;
     }
   }
-
+  
   // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
-  if (startBtn) {
-    console.log('Кнопка "Начать знакомство" найдена');
+  function setupStartButton() {
+    if (!startBtn) return;
     
-    // Убираем все старые обработчики
+    console.log('✅ Настраиваю кнопку "Начать знакомство"');
+    
+    // Удаляем все старые обработчики
     startBtn.onclick = null;
     startBtn.ontouchstart = null;
     
-    // Добавляем новый надежный обработчик
-    startBtn.addEventListener('click', handleStartButton, { passive: true });
+    // Добавляем надежный обработчик
+    startBtn.addEventListener('click', handleStartClick, { passive: true });
     
-    // Также добавляем для touch устройств
+    // Touch обработчик для iOS
     startBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
-      e.stopPropagation();
-      handleStartButton();
+      handleStartClick();
     }, { passive: false });
-    
-    // Визуальная обратная связь
-    startBtn.addEventListener('touchstart', function() {
-      this.style.transform = 'scale(0.96)';
-      this.style.opacity = '0.85';
-    }, { passive: true });
-    
-    startBtn.addEventListener('touchend', function() {
-      this.style.transform = '';
-      this.style.opacity = '1';
-    }, { passive: true });
   }
-
-  function handleStartButton() {
-    console.log('Кнопка "Начать знакомство" нажата!');
+  
+  function handleStartClick() {
+    console.log('🎯 Кнопка "Начать знакомство" нажата');
     
-    // Haptic feedback если доступно
-    if (tg && tg.HapticFeedback) {
+    // Haptic feedback
+    if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
-      } catch (e) {
-        console.log('Haptic feedback недоступен');
-      }
+      } catch (e) {}
     }
     
-    // Проверяем, есть ли сохраненный профиль
+    // Скрываем приветственный экран
+    if (welcomeScreen) {
+      welcomeScreen.classList.add("hidden");
+    }
+    
+    // Проверяем, есть ли профиль
     profileData = loadProfile();
     
     if (profileData) {
-      // Если профиль уже есть, сразу переходим к ленте
-      console.log('Профиль уже существует, переходим к ленте');
-      if (welcomeScreen) welcomeScreen.classList.add("hidden");
-      if (tabBar) tabBar.classList.remove("hidden");
-      setActiveTab("feed");
+      // Профиль есть - идем сразу в ленту
+      console.log('📁 Профиль найден, переходим в ленту');
+      showMainApp();
     } else {
-      // Если профиля нет, показываем анкету
-      console.log('Профиля нет, показываем анкету');
-      if (welcomeScreen) welcomeScreen.classList.add("hidden");
-      if (onboardingScreen) {
-        onboardingScreen.classList.remove("hidden");
-        // Скрываем верхний блок
-        if (headerBlock) headerBlock.classList.add("hidden");
-      }
-      if (tabBar) tabBar.classList.add("hidden");
+      // Профиля нет - показываем анкету
+      console.log('📝 Профиля нет, показываем анкету');
+      showOnboarding();
+    }
+  }
+  
+  // ===== ПОКАЗАТЬ АНКЕТУ =====
+  function showOnboarding() {
+    if (onboardingScreen) {
+      onboardingScreen.classList.remove("hidden");
+    }
+    if (tabBar) {
+      tabBar.classList.add("hidden");
     }
     
-    // Прокручиваем к началу
+    // FIX: Прокручиваем к началу
     setTimeout(() => {
       window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
     }, 100);
+    
+    // Настраиваем кнопку сохранения
+    setupSaveButton();
   }
-
-  // ===== ОБРАБОТЧИК КНОПКИ "СОХРАНИТЬ ПРОФИЛЬ" =====
-  if (saveProfileBtn) {
+  
+  // ===== НАСТРОЙКА КНОПКИ "СОХРАНИТЬ ПРОФИЛЬ" =====
+  function setupSaveButton() {
+    if (!saveProfileBtn) return;
+    
+    console.log('✅ Настраиваю кнопку "Сохранить профиль"');
+    
+    // Удаляем старые обработчики
     saveProfileBtn.onclick = null;
+    saveProfileBtn.ontouchstart = null;
+    
+    // Добавляем новый обработчик
     saveProfileBtn.addEventListener('click', handleSaveProfile, { passive: true });
     
+    // Touch обработчик для iOS
     saveProfileBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
-      e.stopPropagation();
       handleSaveProfile();
     }, { passive: false });
-  }
-
-  function handleSaveProfile() {
-    console.log('Сохранение профиля...');
     
-    // Получаем значения из формы
+    // Делаем кнопку видимой и фиксированной
+    saveProfileBtn.style.display = 'block';
+  }
+  
+  function handleSaveProfile() {
+    console.log('💾 Сохраняю профиль...');
+    
+    // Получаем значения
     const ageValue = Number(document.getElementById("age").value);
     const gender = document.getElementById("gender").value;
     const city = document.getElementById("city").value;
     const bio = document.getElementById("bio").value.trim();
-
+    
     // Валидация
     if (!ageValue || ageValue < 18 || ageValue > 99) {
       alert("Возраст должен быть от 18 до 99 лет");
@@ -207,12 +263,13 @@ document.addEventListener('DOMContentLoaded', function() {
       alert("О себе минимум 10 символов");
       return;
     }
-
+    
     // Создаем профиль
+    const user = tg?.initDataUnsafe?.user || { id: 1, first_name: "Пользователь" };
     profileData = {
-      tg_id: user?.id || 1,
-      first_name: user?.first_name || "Тестовый",
-      username: user?.username || "user",
+      tg_id: user.id,
+      first_name: user.first_name || "Пользователь",
+      username: user.username || "",
       age: ageValue,
       gender,
       city,
@@ -222,24 +279,22 @@ document.addEventListener('DOMContentLoaded', function() {
       max_distance_km: 50,
       use_geolocation: false
     };
-
+    
     // Сохраняем
     if (saveProfile(profileData)) {
-      console.log('Профиль успешно сохранен');
+      console.log('✅ Профиль сохранен');
       
       // Haptic feedback
-      if (tg && tg.HapticFeedback) {
+      if (tg?.HapticFeedback) {
         try {
           tg.HapticFeedback.impactOccurred('medium');
         } catch (e) {}
       }
       
-      // Переходим к ленте
-      if (onboardingScreen) onboardingScreen.classList.add("hidden");
-      if (tabBar) tabBar.classList.remove("hidden");
-      setActiveTab("feed");
+      // Переходим к основному приложению
+      showMainApp();
       
-      // Показываем сообщение
+      // Сообщение об успехе
       setTimeout(() => {
         alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀");
       }, 300);
@@ -247,18 +302,34 @@ document.addEventListener('DOMContentLoaded', function() {
       alert("❌ Ошибка при сохранении профиля");
     }
   }
-
+  
+  // ===== ПОКАЗАТЬ ОСНОВНОЕ ПРИЛОЖЕНИЕ =====
+  function showMainApp() {
+    console.log('🚀 Показываю основное приложение');
+    
+    // Скрываем все экраны кроме основного
+    if (welcomeScreen) welcomeScreen.classList.add("hidden");
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    
+    // Показываем таб-бар
+    if (tabBar) {
+      tabBar.classList.remove("hidden");
+    }
+    
+    // Активируем ленту
+    setActiveTab("feed");
+  }
+  
   // ===== УПРАВЛЕНИЕ ТАБАМИ =====
   function setActiveTab(tab) {
-    console.log('Активируем таб:', tab);
+    console.log('🔘 Активирую таб:', tab);
     
     // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(screen => {
-      screen.classList.add('hidden');
+      if (screen.id !== 'welcome-screen') { // Не скрываем welcome screen
+        screen.classList.add('hidden');
+      }
     });
-    
-    // Скрываем верхний блок на всех экранах кроме приветственного
-    if (headerBlock) headerBlock.classList.add("hidden");
     
     // Показываем выбранный экран
     const screenId = 'screen-' + tab;
@@ -267,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
       screen.classList.remove('hidden');
     }
     
-    // Обновляем активные кнопки табов
+    // Обновляем активные кнопки
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
@@ -284,38 +355,32 @@ document.addEventListener('DOMContentLoaded', function() {
       window.scrollTo(0, 0);
     }, 50);
   }
-
-  // Инициализация обработчиков табов
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const tab = this.dataset.tab;
-      setActiveTab(tab);
-      
-      // Haptic feedback
-      if (tg && tg.HapticFeedback) {
-        try {
-          tg.HapticFeedback.selectionChanged();
-        } catch (e) {}
-      }
+  
+  // Настройка обработчиков табов
+  function setupTabButtons() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        setActiveTab(tab);
+        
+        // Haptic feedback
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.selectionChanged();
+          } catch (e) {}
+        }
+      });
     });
-    
-    // Touch feedback
-    btn.addEventListener('touchstart', function() {
-      this.style.opacity = '0.7';
-    }, { passive: true });
-    
-    btn.addEventListener('touchend', function() {
-      this.style.opacity = '1';
-    }, { passive: true });
-  });
-
+  }
+  
   // ===== ЛЕНТА СВАЙПОВ =====
   function initFeed() {
-    console.log('Инициализация ленты...');
+    console.log('🔄 Инициализирую ленту');
+    
     currentIndex = 0;
     showCurrentCandidate();
     
-    // Инициализация кнопок ленты
+    // Настраиваем кнопки ленты
     const btnLike = document.getElementById("btn-like");
     const btnDislike = document.getElementById("btn-dislike");
     
@@ -329,12 +394,12 @@ document.addEventListener('DOMContentLoaded', function() {
       btnDislike.addEventListener('click', handleDislike);
     }
   }
-
+  
   function showCurrentCandidate() {
-    const filteredCandidates = candidates.filter(c => !likedIds.includes(c.id));
+    const filtered = candidates.filter(c => !likedIds.includes(c.id));
     
-    if (currentIndex >= filteredCandidates.length) {
-      // Показываем сообщение, что кандидаты закончились
+    if (currentIndex >= filtered.length) {
+      // Кандидаты закончились
       document.getElementById("candidate-name").textContent = "";
       document.getElementById("candidate-age").textContent = "";
       document.getElementById("candidate-city").textContent = "";
@@ -345,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    const candidate = filteredCandidates[currentIndex];
+    const candidate = filtered[currentIndex];
     
     document.getElementById("candidate-name").textContent = candidate.name;
     document.getElementById("candidate-age").textContent = candidate.age;
@@ -354,51 +419,49 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("candidate-photo").src = candidate.photo;
     document.getElementById("feed-status").textContent = "";
   }
-
+  
   function handleLike() {
-    console.log('Лайк!');
+    console.log('❤️ Лайк!');
     
-    // Haptic feedback
-    if (tg && tg.HapticFeedback) {
+    if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
       } catch (e) {}
     }
     
-    const filteredCandidates = candidates.filter(c => !likedIds.includes(c.id));
-    if (currentIndex < filteredCandidates.length) {
-      likedIds.push(filteredCandidates[currentIndex].id);
+    const filtered = candidates.filter(c => !likedIds.includes(c.id));
+    if (currentIndex < filtered.length) {
+      likedIds.push(filtered[currentIndex].id);
       currentIndex++;
       showCurrentCandidate();
     }
   }
-
+  
   function handleDislike() {
-    console.log('Дизлайк!');
+    console.log('✖️ Дизлайк!');
     
-    // Haptic feedback
-    if (tg && tg.HapticFeedback) {
+    if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
       } catch (e) {}
     }
     
-    const filteredCandidates = candidates.filter(c => !likedIds.includes(c.id));
-    if (currentIndex < filteredCandidates.length) {
+    const filtered = candidates.filter(c => !likedIds.includes(c.id));
+    if (currentIndex < filtered.length) {
       currentIndex++;
       showCurrentCandidate();
     }
   }
-
+  
   // ===== ПРОФИЛЬ =====
   function initProfile() {
-    console.log('Инициализация профиля...');
+    console.log('👤 Инициализирую профиль');
     
     // Загружаем профиль
     profileData = loadProfile();
     
     if (profileData) {
-      // Заполняем поля профиля
+      // Заполняем поля
       document.getElementById("profile-age").value = profileData.age || "";
       document.getElementById("profile-gender").value = profileData.gender || "";
       document.getElementById("profile-city").value = profileData.city || "";
@@ -412,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         geoCheckbox.checked = profileData.use_geolocation || false;
       }
       
-      // Показываем фото если есть
+      // Фото профиля
       if (profileData.custom_photo_url) {
         const preview = document.getElementById('photo-preview');
         if (preview) {
@@ -422,16 +485,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
-    // Инициализация кнопки обновления профиля
-    const updateProfileBtn = document.getElementById("updateProfileBtn");
-    if (updateProfileBtn) {
-      updateProfileBtn.onclick = null;
-      updateProfileBtn.addEventListener('click', handleUpdateProfile);
+    // Настраиваем кнопку обновления
+    const updateBtn = document.getElementById("updateProfileBtn");
+    if (updateBtn) {
+      updateBtn.onclick = null;
+      updateBtn.addEventListener('click', handleUpdateProfile);
+      updateBtn.style.display = 'block';
+    }
+    
+    // Загрузка фото
+    const photoInput = document.getElementById('profile-photo');
+    if (photoInput) {
+      photoInput.addEventListener('change', handlePhotoUpload);
     }
   }
-
+  
   function handleUpdateProfile() {
-    console.log('Обновление профиля...');
+    console.log('📝 Обновляю профиль...');
     
     if (!profileData) {
       alert("Сначала создайте профиль!");
@@ -456,8 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (saveProfile(profileData)) {
       alert("✅ Профиль обновлён!");
       
-      // Haptic feedback
-      if (tg && tg.HapticFeedback) {
+      if (tg?.HapticFeedback) {
         try {
           tg.HapticFeedback.impactOccurred('light');
         } catch (e) {}
@@ -466,102 +535,80 @@ document.addEventListener('DOMContentLoaded', function() {
       alert("❌ Ошибка при обновлении профиля");
     }
   }
-
-  // ===== ЗАГРУЗКА ФОТО ПРОФИЛЯ =====
-  const profilePhotoInput = document.getElementById('profile-photo');
-  if (profilePhotoInput) {
-    profilePhotoInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-          alert('Фото слишком большое (максимум 5MB)');
-          return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const preview = document.getElementById('photo-preview');
-          if (preview) {
-            preview.src = event.target.result;
-            preview.style.display = 'block';
-          }
-          
-          // Сохраняем фото в профиль
-          if (profileData) {
-            profileData.custom_photo_url = event.target.result;
-            saveProfile(profileData);
-          }
-          
-          alert('Фото загружено! 📸');
-        };
-        reader.readAsDataURL(file);
+  
+  function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Фото слишком большое (максимум 5MB)');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const preview = document.getElementById('photo-preview');
+      if (preview) {
+        preview.src = event.target.result;
+        preview.style.display = 'block';
       }
-    });
+      
+      // Сохраняем в профиль
+      if (profileData) {
+        profileData.custom_photo_url = event.target.result;
+        saveProfile(profileData);
+      }
+      
+      alert('Фото загружено! 📸');
+    };
+    reader.readAsDataURL(file);
   }
-
-  // ===== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ =====
+  
+  // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
   function initApp() {
-    console.log('Инициализация приложения...');
+    if (hasInitialized) return;
+    hasInitialized = true;
+    
+    console.log('🎬 Инициализация приложения...');
+    
+    // Инициализируем Telegram
+    initTelegram();
+    
+    // Настраиваем UI
+    setupStartButton();
+    setupTabButtons();
     
     // Загружаем профиль
     profileData = loadProfile();
     
-    if (!profileData) {
-      // Профиля нет - показываем приветственный экран
-      console.log('Профиля нет, показываем приветственный экран');
-      if (welcomeScreen) welcomeScreen.classList.remove("hidden");
-      if (onboardingScreen) onboardingScreen.classList.add("hidden");
-      if (tabBar) tabBar.classList.add("hidden");
-    } else {
-      // Профиль есть - сразу показываем ленту
-      console.log('Профиль есть, показываем ленту');
-      if (welcomeScreen) welcomeScreen.classList.add("hidden");
-      if (onboardingScreen) onboardingScreen.classList.add("hidden");
-      if (tabBar) tabBar.classList.remove("hidden");
-      setActiveTab("feed");
+    // FIX: Всегда показываем приветственный экран сначала
+    if (welcomeScreen) {
+      welcomeScreen.classList.remove("hidden");
+      console.log('👋 Показываю приветственный экран');
     }
+    
+    // Скрываем все остальные экраны
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'welcome-screen') {
+        screen.classList.add('hidden');
+      }
+    });
+    
+    // Скрываем таб-бар
+    if (tabBar) tabBar.classList.add("hidden");
     
     // FIX для iOS
     if (isIOS) {
       setTimeout(() => {
         window.scrollTo(0, 0);
-        document.body.style.height = window.innerHeight + 'px';
       }, 300);
     }
-  }
-
-  // Запускаем инициализацию
-  setTimeout(initApp, 300);
-
-  // ===== FIX для iOS =====
-  if (isIOS) {
-    // Скрываем клавиатуру при тапе вне поля ввода
-    document.addEventListener('touchstart', function(e) {
-      if (!e.target.closest('input, textarea, select')) {
-        document.activeElement?.blur();
-      }
-    });
     
-    // Прокручиваем поле ввода в видимую область
-    document.addEventListener('focusin', function(e) {
-      if (e.target.matches('input, textarea, select')) {
-        setTimeout(() => {
-          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-      }
-    });
+    console.log('✅ Приложение инициализировано');
   }
-
-  // ===== FIX для кнопок на iOS =====
-  document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('touchstart', function() {
-      this.style.transform = 'scale(0.97)';
-      this.style.opacity = '0.9';
-    }, { passive: true });
-    
-    btn.addEventListener('touchend', function() {
-      this.style.transform = '';
-      this.style.opacity = '1';
-    }, { passive: true });
-  });
+  
+  // ===== ЗАПУСК =====
+  // Ждем немного чтобы DOM полностью загрузился
+  setTimeout(initApp, 100);
 });
