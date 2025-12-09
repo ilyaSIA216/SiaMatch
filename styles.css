@@ -63,13 +63,6 @@ html, body {
   padding: 0;
   height: 100%;
   border-radius: 0;
-  /* Убираем трансформацию для клавиатуры - теперь её обрабатывает кнопка */
-}
-
-/* FIX: При открытой клавиатуре */
-body.keyboard-open #card {
-  /* Убираем трансформацию - теперь только кнопка двигается */
-  padding-bottom: 200px; /* Добавляем отступ для кнопки */
 }
 
 /* ===== ЭКРАН ПРИВЕТСТВИЯ ===== */
@@ -183,14 +176,8 @@ body.keyboard-open #card {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 20px 16px 120px; /* Увеличиваем отступ снизу для кнопки */
+  padding: 20px 16px 90px; /* Отступ для кнопки */
   padding-top: max(20px, env(safe-area-inset-top, 20px));
-  transition: padding-bottom 0.3s ease; /* Плавное изменение отступа */
-}
-
-/* FIX: Больше отступ снизу при клавиатуре */
-body.keyboard-open .screen-content {
-  padding-bottom: 280px; /* Увеличиваем для кнопки над клавиатурой */
 }
 
 /* ЗАГОЛОВОК ЭКРАНА */
@@ -209,7 +196,7 @@ body.keyboard-open .screen-content {
 
 /* ===== ЭКРАН ОНБОРДИНГА (анкета) ===== */
 #onboarding-screen .screen-content {
-  padding: max(20px, env(safe-area-inset-top, 20px)) 16px 140px;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 16px 90px;
 }
 
 .field {
@@ -274,14 +261,16 @@ textarea {
   border-radius: 16px;
   cursor: pointer;
   touch-action: manipulation;
-  transition: bottom 0.3s ease, transform 0.1s ease;
+  transition: transform 0.1s ease, opacity 0.3s ease;
   box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
   z-index: 1000;
 }
 
-/* FIX: При открытой клавиатуре поднимаем кнопку выше */
+/* FIX: При открытой клавиатуре полностью скрываем кнопку */
 body.keyboard-open #saveProfileBtn {
-  bottom: max(220px, calc(env(safe-area-inset-bottom, 0px) + 220px));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100px);
 }
 
 #saveProfileBtn:active {
@@ -448,14 +437,16 @@ body.keyboard-open #saveProfileBtn {
   border-radius: 16px;
   cursor: pointer;
   touch-action: manipulation;
-  transition: bottom 0.3s ease, transform 0.1s ease;
+  transition: transform 0.1s ease, opacity 0.3s ease;
   box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
   z-index: 1000;
 }
 
-/* FIX: При открытой клавиатуре поднимаем кнопку выше */
+/* FIX: При открытой клавиатуре полностью скрываем кнопку */
 body.keyboard-open #updateProfileBtn {
-  bottom: max(220px, calc(env(safe-area-inset-bottom, 0px) + 220px));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100px);
 }
 
 #updateProfileBtn:active {
@@ -529,6 +520,17 @@ body.keyboard-open #tab-bar {
   color: var(--siamatch-green);
 }
 
+/* FIX для select выпадающих списков */
+select {
+  z-index: 10;
+  position: relative;
+}
+
+/* Убедимся, что выпадающие списки перекрывают кнопку */
+select:focus {
+  z-index: 1001;
+}
+
 /* ===== iOS FIXES ===== */
 /* Предотвращаем bounce в iOS */
 .no-bounce {
@@ -584,12 +586,8 @@ body.keyboard-open #tab-bar {
   
   #saveProfileBtn,
   #updateProfileBtn {
-    bottom: max(15px, calc(env(safe-area-inset-bottom, 0px) + 15px));
-  }
-  
-  body.keyboard-open #saveProfileBtn,
-  body.keyboard-open #updateProfileBtn {
-    bottom: max(180px, calc(env(safe-area-inset-bottom, 0px) + 180px));
+    padding: 14px 20px;
+    font-size: 16px;
   }
 }
 
@@ -597,16 +595,7 @@ body.keyboard-open #tab-bar {
 @media (max-height: 600px) {
   #saveProfileBtn,
   #updateProfileBtn {
-    padding: 14px 20px;
-    font-size: 16px;
-  }
-  
-  body.keyboard-open #saveProfileBtn,
-  body.keyboard-open #updateProfileBtn {
-    bottom: max(160px, calc(env(safe-area-inset-bottom, 0px) + 160px));
-  }
-  
-  body.keyboard-open .screen-content {
-    padding-bottom: 240px;
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }
