@@ -8,6 +8,23 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Дополнительные стили для iOS */
+    :root {
+      --vh: 1vh;
+    }
+    
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+      
+      #app-root {
+        height: calc(var(--vh, 1vh) * 100);
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="app-root">
@@ -24,7 +41,7 @@
         <button id="startBtn" class="primary">Начать общение</button>
       </div>
 
-      <!-- ЭКРАН 0: первичная анкета (onboarding) -->
+      <!-- ЭКРАН ОНБОРДИНГА -->
       <div id="onboarding-screen" class="screen hidden">
         <h2 class="screen-title">Ваш профиль 🍀</h2>
 
@@ -44,7 +61,6 @@
           </select>
         </div>
 
-        <!-- Город -->
         <div class="field">
           <label for="city">Город <span style="color:#ef4444;">*</span></label>
           <select id="city" required>
@@ -62,20 +78,19 @@
           <div class="hint">Минимум 10 символов, максимум 300</div>
         </div>
 
-        <!-- КНОПКА ВНУТРИ КОНТЕЙНЕРА С ФИКСИРОВАННЫМ ПОЛОЖЕНИЕМ -->
         <div class="button-container">
           <button id="saveProfileBtn" class="primary">Сохранить профиль 🍀</button>
         </div>
       </div>
 
-      <!-- ЭКРАН: ЧАТЫ -->
+      <!-- ЭКРАН ЧАТОВ -->
       <div id="screen-chats" class="screen hidden">
         <h2 class="screen-title">Чаты 💬</h2>
         <div id="chats-empty" class="hint">Здесь пока пусто</div>
         <ul id="chats-list"></ul>
       </div>
 
-      <!-- ЭКРАН: ЛЕНТА -->
+      <!-- ЭКРАН ЛЕНТЫ -->
       <div id="screen-feed" class="screen hidden">
         <h2 class="screen-title">Познакомьтесь 🍀</h2>
         <div id="candidate-card">
@@ -88,7 +103,6 @@
               <span id="candidate-age"></span>
             </div>
             <div id="candidate-city" class="candidate-city"></div>
-            <div id="candidate-distance"></div>
             <div id="candidate-bio" class="candidate-bio"></div>
           </div>
         </div>
@@ -99,7 +113,7 @@
         <div id="feed-status" class="feed-status"></div>
       </div>
 
-      <!-- ЭКРАН: ПРОФИЛЬ -->
+      <!-- ЭКРАН ПРОФИЛЯ -->
       <div id="screen-profile" class="screen hidden">
         <h2 class="screen-title">Мой профиль ✏️</h2>
 
@@ -134,21 +148,18 @@
           <textarea id="profile-bio" rows="3" maxlength="300"></textarea>
         </div>
 
-        <!-- ФОТО ПРОФИЛЯ -->
         <div class="field">
           <label>Фото профиля 📸</label>
           <input type="file" id="profile-photo" accept="image/*" />
           <div class="hint">Выберите фото (до 5MB) или используйте Telegram аватарку</div>
-          <img id="photo-preview" style="width:80px;height:80px;border-radius:50%;margin-top:8px;display:none;border:2px solid var(--siamatch-green)" />
+          <img id="photo-preview" />
         </div>
 
-        <!-- ФИЛЬТРЫ -->
         <div class="field">
           <label class="checkbox-field">
             <input type="checkbox" id="profile-use-geolocation" />
             Использовать мою геолокацию для поиска поблизости
           </label>
-          <div class="hint">Показывать анкеты в радиусе <span id="distance-value">10</span> км</div>
         </div>
 
         <div class="field">
@@ -170,7 +181,7 @@
       </div>
     </div>
 
-    <!-- Нижняя навигация -->
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
     <div id="tab-bar" class="hidden">
       <button class="tab-btn" data-tab="chats">💬</button>
       <button class="tab-btn active" data-tab="feed">🍀</button>
