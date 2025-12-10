@@ -496,18 +496,20 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateVerificationUI() {
     const verifyBtn = document.getElementById('verifyProfileBtn');
     const verificationStatusElem = document.getElementById('verification-status');
-    const verificationSection = document.getElementById('verification-section-content');
+    const verificationSection = document.getElementById('verification-form-section');
     const verificationPendingSection = document.getElementById('verification-pending-section');
     const verificationVerifiedSection = document.getElementById('verification-verified-section');
     const verificationRejectedSection = document.getElementById('verification-rejected-section');
     
     if (!verifyBtn || !verificationStatusElem) return;
     
+    // Скрываем все секции верификации
     if (verificationSection) verificationSection.classList.add('hidden');
     if (verificationPendingSection) verificationPendingSection.classList.add('hidden');
     if (verificationVerifiedSection) verificationVerifiedSection.classList.add('hidden');
     if (verificationRejectedSection) verificationRejectedSection.classList.add('hidden');
     
+    // Показываем кнопку верификации только если статус не верифицирован или отклонен
     verifyBtn.style.display = verificationStatus === 'not_verified' || verificationStatus === 'rejected' ? 'block' : 'none';
     
     switch(verificationStatus) {
@@ -537,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleVerificationRequest() {
-    const verificationSection = document.getElementById('verification-section-content');
+    const verificationSection = document.getElementById('verification-form-section');
     const verifyBtn = document.getElementById('verifyProfileBtn');
     
     if (verificationSection && verifyBtn) {
@@ -587,6 +589,10 @@ document.addEventListener('DOMContentLoaded', function() {
     saveVerificationStatus();
     updateVerificationUI();
     
+    // Скрываем форму верификации после отправки
+    const verificationSection = document.getElementById('verification-form-section');
+    if (verificationSection) verificationSection.classList.add('hidden');
+    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('medium');
@@ -607,6 +613,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const preview = document.getElementById('verification-preview');
     if (preview) preview.style.display = 'none';
+    
+    // Скрываем форму верификации
+    const verificationSection = document.getElementById('verification-form-section');
+    if (verificationSection) verificationSection.classList.add('hidden');
+    
+    // Показываем кнопку верификации
+    const verifyBtn = document.getElementById('verifyProfileBtn');
+    if (verifyBtn) verifyBtn.style.display = 'block';
   }
   
   function retryVerification() {
@@ -620,6 +634,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const preview = document.getElementById('verification-preview');
     if (preview) preview.style.display = 'none';
+    
+    // Скрываем секцию отклонения
+    const verificationRejectedSection = document.getElementById('verification-rejected-section');
+    if (verificationRejectedSection) verificationRejectedSection.classList.add('hidden');
+    
+    // Показываем кнопку верификации
+    const verifyBtn = document.getElementById('verifyProfileBtn');
+    if (verifyBtn) verifyBtn.style.display = 'block';
   }
   
   // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
