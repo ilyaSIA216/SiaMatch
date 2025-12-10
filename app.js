@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let verificationStatus = 'not_verified'; // 'not_verified', 'pending', 'verified', 'rejected'
   let verificationPhoto = null;
   
-  // Обновляем демо-данные с верификацией
+  // Демо-данные кандидатов
   const candidates = [
     {
       id: 1,
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
       city: "Москва",
       bio: "Люблю кофе ☕ Москва ❤️",
       photo: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true, // ✅ Верифицирована
+      verified: true,
       verification_status: 'verified'
     },
     {
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
       bio: "Инженер СПб",
       photo: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: false,
-      verification_status: 'pending' // ⏳ На проверке
+      verification_status: 'pending'
     },
     {
       id: 3,
@@ -47,9 +47,71 @@ document.addEventListener('DOMContentLoaded', function() {
       city: "Москва",
       bio: "Фотограф ❤️",
       photo: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true, // ✅ Верифицирована
+      verified: true,
       verification_status: 'verified'
     },
+    {
+      id: 4,
+      name: "Иван",
+      age: 29,
+      gender: "male",
+      city: "Казань",
+      bio: "Предприниматель. Люблю активный отдых и путешествия 🗺️",
+      photo: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: true,
+      verification_status: 'verified'
+    },
+    {
+      id: 5,
+      name: "София",
+      age: 25,
+      gender: "female",
+      city: "Новосибирск",
+      bio: "Дизайнер. Увлекаюсь йогой и здоровым питанием 🥗",
+      photo: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: false,
+      verification_status: 'pending'
+    }
+  ];
+  
+  // Демо-данные: кто лайкнул пользователя
+  let usersWhoLikedMe = [
+    {
+      id: 4,
+      name: "Иван",
+      age: 29,
+      city: "Казань",
+      photo: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: true,
+      timestamp: Date.now() - 3600000 // 1 час назад
+    },
+    {
+      id: 5,
+      name: "София",
+      age: 25,
+      city: "Новосибирск",
+      photo: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: false,
+      timestamp: Date.now() - 7200000 // 2 часа назад
+    },
+    {
+      id: 6,
+      name: "Александр",
+      age: 31,
+      city: "Москва",
+      photo: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: true,
+      timestamp: Date.now() - 86400000 // 1 день назад
+    },
+    {
+      id: 7,
+      name: "Анна",
+      age: 27,
+      city: "Санкт-Петербург",
+      photo: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: true,
+      timestamp: Date.now() - 172800000 // 2 дня назад
+    }
   ];
   
   // ===== DOM ЭЛЕМЕНТЫ =====
@@ -61,6 +123,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabBar = document.getElementById("tab-bar");
   const appRoot = document.getElementById("app-root");
   const card = document.getElementById("card");
+  
+  // Элементы для системы лайков
+  const likesBadge = document.getElementById('likes-badge');
+  const likesCountElement = document.getElementById('likes-count');
+  const likesCountBadge = document.getElementById('likes-count-badge');
+  const newLikesNotification = document.getElementById('new-likes-notification');
+  const potentialMatchesSection = document.getElementById('potential-matches-section');
+  const potentialMatchesList = document.getElementById('potential-matches-list');
+  const viewAllLikesBtn = document.getElementById('view-all-likes-btn');
   
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
@@ -100,19 +171,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function setupKeyboardHandlers() {
     console.log('⌨️ Настраиваю обработчики клавиатуры');
     
-    // Сохраняем оригинальную высоту
     originalHeight = window.innerHeight;
-    
-    // Обработчик изменения размера окна
     window.addEventListener('resize', handleResize);
-    
-    // Обработчик фокуса на поле ввода
     document.addEventListener('focusin', handleFocusIn);
-    
-    // Обработчик потери фокуса
     document.addEventListener('focusout', handleFocusOut);
-    
-    // Обработчик тапа вне поля ввода
     document.addEventListener('touchstart', handleTouchOutside);
   }
   
@@ -217,42 +279,216 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  // ===== СИСТЕМА ЛАЙКОВ =====
+  function initLikesSystem() {
+    console.log('💗 Инициализирую систему лайков');
+    
+    // Загружаем данные о лайках
+    loadLikesData();
+    
+    // Обновляем UI лайков
+    updateLikesUI();
+    
+    // Настраиваем кнопку просмотра всех лайков
+    if (viewAllLikesBtn) {
+      viewAllLikesBtn.addEventListener('click', showAllLikes);
+    }
+    
+    // Симуляция получения новых лайков (в демо-режиме)
+    if (usersWhoLikedMe.length > 0) {
+      setTimeout(() => {
+        showNewLikesNotification();
+      }, 2000);
+    }
+  }
+  
+  function loadLikesData() {
+    try {
+      const saved = localStorage.getItem("siamatch_likes");
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.usersWhoLikedMe) {
+          usersWhoLikedMe = data.usersWhoLikedMe;
+        }
+        console.log('📂 Загружены данные о лайках:', usersWhoLikedMe.length);
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки данных о лайках:", e);
+    }
+  }
+  
+  function saveLikesData() {
+    try {
+      const data = {
+        usersWhoLikedMe: usersWhoLikedMe,
+        lastUpdated: Date.now()
+      };
+      localStorage.setItem("siamatch_likes", JSON.stringify(data));
+      console.log('💾 Сохранены данные о лайках');
+    } catch (e) {
+      console.error("❌ Ошибка сохранения данных о лайках:", e);
+    }
+  }
+  
+  function updateLikesUI() {
+    const count = usersWhoLikedMe.length;
+    
+    // Обновляем счетчики
+    if (likesCountElement) {
+      likesCountElement.textContent = count;
+    }
+    
+    if (likesCountBadge) {
+      likesCountBadge.textContent = count;
+      
+      // Анимация при изменении количества
+      if (count > 0) {
+        likesCountBadge.style.animation = 'none';
+        setTimeout(() => {
+          likesCountBadge.style.animation = 'pulse 0.5s ease-in-out';
+        }, 10);
+      }
+    }
+    
+    // Показываем/скрываем секцию потенциальных мэтчей
+    if (potentialMatchesSection) {
+      if (count > 0) {
+        potentialMatchesSection.classList.remove('hidden');
+        renderPotentialMatches();
+      } else {
+        potentialMatchesSection.classList.add('hidden');
+      }
+    }
+    
+    // Обновляем уведомление о новых лайках
+    updateNewLikesNotification();
+  }
+  
+  function renderPotentialMatches() {
+    if (!potentialMatchesList) return;
+    
+    // Очищаем список
+    potentialMatchesList.innerHTML = '';
+    
+    // Показываем только первые 3 мэтча
+    const displayCount = Math.min(3, usersWhoLikedMe.length);
+    
+    for (let i = 0; i < displayCount; i++) {
+      const user = usersWhoLikedMe[i];
+      const matchItem = document.createElement('div');
+      matchItem.className = 'potential-match-item';
+      
+      const timeAgo = getTimeAgo(user.timestamp);
+      
+      matchItem.innerHTML = `
+        <img src="${user.photo}" alt="${user.name}" class="potential-match-photo">
+        <div class="potential-match-info">
+          <div class="potential-match-name">${user.name}, ${user.age}</div>
+          <div class="potential-match-details">
+            <span>${user.city}</span>
+            ${user.verified ? '<span class="potential-match-verified">✅</span>' : ''}
+            <span style="color: #999; font-size: 12px;">${timeAgo}</span>
+          </div>
+        </div>
+        <button class="potential-match-action" onclick="handleViewMatch(${user.id})">
+          Посмотреть
+        </button>
+      `;
+      
+      potentialMatchesList.appendChild(matchItem);
+    }
+  }
+  
+  function getTimeAgo(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 60) {
+      return `${minutes} мин назад`;
+    } else if (hours < 24) {
+      return `${hours} ч назад`;
+    } else {
+      return `${days} дн назад`;
+    }
+  }
+  
+  function showNewLikesNotification() {
+    if (!newLikesNotification || usersWhoLikedMe.length === 0) return;
+    
+    // Показываем уведомление
+    newLikesNotification.classList.remove('hidden');
+    
+    // Вибрация (если доступна)
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.impactOccurred('light');
+      } catch (e) {}
+    }
+    
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+      newLikesNotification.classList.add('hidden');
+    }, 5000);
+  }
+  
+  function updateNewLikesNotification() {
+    // В реальном приложении здесь будет логика проверки новых лайков
+    // с момента последнего посещения
+  }
+  
+  function showAllLikes() {
+    console.log('👀 Показываю все лайки');
+    
+    // В реальном приложении здесь будет переход на экран со всеми лайками
+    alert(`У вас ${usersWhoLikedMe.length} лайков!\n\nЭти люди уже оценили вашу анкету. Свайпайте вправо, чтобы познакомиться с ними в ленте.`);
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
+  function handleViewMatch(userId) {
+    console.log('👁️ Просмотр мэтча:', userId);
+    
+    // Переключаемся на ленту и ищем этого пользователя
+    setActiveTab('feed');
+    
+    // В реальном приложении здесь будет поиск пользователя в ленте
+    setTimeout(() => {
+      alert('Перейдите в ленту, чтобы посмотреть анкету этого пользователя 🍀');
+    }, 300);
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
   // ===== СИСТЕМА ВЕРИФИКАЦИИ =====
   function initVerification() {
     console.log('🔐 Инициализирую систему верификации');
     
-    // Загружаем статус верификации
     loadVerificationStatus();
     
-    // Настройка элементов верификации
     const verifyBtn = document.getElementById('verifyProfileBtn');
-    const verificationSection = document.getElementById('verification-section-content');
     const verificationPhotoInput = document.getElementById('verification-photo');
     const submitBtn = document.getElementById('submit-verification');
     const cancelBtn = document.getElementById('cancel-verification');
     const retryBtn = document.getElementById('retry-verification');
     
-    if (verifyBtn) {
-      verifyBtn.addEventListener('click', handleVerificationRequest);
-    }
+    if (verifyBtn) verifyBtn.addEventListener('click', handleVerificationRequest);
+    if (verificationPhotoInput) verificationPhotoInput.addEventListener('change', handleVerificationPhotoUpload);
+    if (submitBtn) submitBtn.addEventListener('click', submitVerification);
+    if (cancelBtn) cancelBtn.addEventListener('click', cancelVerification);
+    if (retryBtn) retryBtn.addEventListener('click', retryVerification);
     
-    if (verificationPhotoInput) {
-      verificationPhotoInput.addEventListener('change', handleVerificationPhotoUpload);
-    }
-    
-    if (submitBtn) {
-      submitBtn.addEventListener('click', submitVerification);
-    }
-    
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', cancelVerification);
-    }
-    
-    if (retryBtn) {
-      retryBtn.addEventListener('click', retryVerification);
-    }
-    
-    // Обновляем UI
     updateVerificationUI();
   }
   
@@ -263,7 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = JSON.parse(saved);
         verificationStatus = data.status || 'not_verified';
         verificationPhoto = data.photo || null;
-        console.log('📂 Загружен статус верификации:', verificationStatus);
       }
     } catch (e) {
       console.error("❌ Ошибка загрузки статуса верификации:", e);
@@ -278,7 +513,6 @@ document.addEventListener('DOMContentLoaded', function() {
         timestamp: Date.now()
       };
       localStorage.setItem("siamatch_verification", JSON.stringify(data));
-      console.log('💾 Сохранен статус верификации:', verificationStatus);
     } catch (e) {
       console.error("❌ Ошибка сохранения статуса верификации:", e);
     }
@@ -294,16 +528,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!verifyBtn || !verificationStatusElem) return;
     
-    // Скрываем все секции сначала
     if (verificationSection) verificationSection.classList.add('hidden');
     if (verificationPendingSection) verificationPendingSection.classList.add('hidden');
     if (verificationVerifiedSection) verificationVerifiedSection.classList.add('hidden');
     if (verificationRejectedSection) verificationRejectedSection.classList.add('hidden');
     
-    // Настраиваем кнопку верификации
     verifyBtn.style.display = verificationStatus === 'not_verified' || verificationStatus === 'rejected' ? 'block' : 'none';
     
-    // Обновляем статус
     switch(verificationStatus) {
       case 'not_verified':
         verificationStatusElem.textContent = 'Анкета не верифицирована';
@@ -331,8 +562,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleVerificationRequest() {
-    console.log('🔐 Запрос верификации');
-    
     const verificationSection = document.getElementById('verification-section-content');
     const verifyBtn = document.getElementById('verifyProfileBtn');
     
@@ -340,11 +569,8 @@ document.addEventListener('DOMContentLoaded', function() {
       verificationSection.classList.remove('hidden');
       verifyBtn.style.display = 'none';
       
-      // Сброс превью
       const preview = document.getElementById('verification-preview');
-      if (preview) {
-        preview.style.display = 'none';
-      }
+      if (preview) preview.style.display = 'none';
     }
     
     if (tg?.HapticFeedback) {
@@ -367,14 +593,11 @@ document.addEventListener('DOMContentLoaded', function() {
     reader.onload = function(event) {
       verificationPhoto = event.target.result;
       
-      // Показываем превью
       const preview = document.getElementById('verification-preview');
       if (preview) {
         preview.src = verificationPhoto;
         preview.style.display = 'block';
       }
-      
-      console.log('📸 Фото для верификации загружено');
     };
     reader.readAsDataURL(file);
   }
@@ -384,11 +607,6 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Сначала загрузите селфи-фото');
       return;
     }
-    
-    console.log('📤 Отправка запроса на верификацию...');
-    
-    // В реальном приложении здесь будет отправка на сервер
-    // В демо-режиме меняем статус локально
     
     verificationStatus = 'pending';
     saveVerificationStatus();
@@ -404,8 +622,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function cancelVerification() {
-    console.log('❌ Отмена верификации');
-    
     verificationPhoto = null;
     verificationStatus = 'not_verified';
     saveVerificationStatus();
@@ -419,8 +635,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function retryVerification() {
-    console.log('🔄 Повторная попытка верификации');
-    
     verificationPhoto = null;
     verificationStatus = 'not_verified';
     saveVerificationStatus();
@@ -437,13 +651,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function setupStartButton() {
     if (!startBtn) return;
     
-    console.log('✅ Настраиваю кнопку "Начать знакомство"');
-    
-    startBtn.onclick = null;
-    startBtn.ontouchstart = null;
-    
     startBtn.addEventListener('click', handleStartClick, { passive: true });
-    
     startBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       handleStartClick();
@@ -451,8 +659,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleStartClick() {
-    console.log('🎯 Кнопка "Начать знакомство" нажата');
-    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
@@ -466,10 +672,8 @@ document.addEventListener('DOMContentLoaded', function() {
     profileData = loadProfile();
     
     if (profileData) {
-      console.log('📁 Профиль найден, переходим в ленту');
       showMainApp();
     } else {
-      console.log('📝 Профиля нет, показываем анкету');
       showOnboarding();
     }
   }
@@ -494,13 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function setupSaveButton() {
     if (!saveProfileBtn) return;
     
-    console.log('✅ Настраиваю кнопку "Сохранить профиль"');
-    
-    saveProfileBtn.onclick = null;
-    saveProfileBtn.ontouchstart = null;
-    
     saveProfileBtn.addEventListener('click', handleSaveProfile, { passive: true });
-    
     saveProfileBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       handleSaveProfile();
@@ -510,22 +708,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleSaveProfile() {
-    console.log('💾 Сохраняю профиль...');
-    
-    // Сначала скрываем клавиатуру если открыта
     document.activeElement?.blur();
     document.body.classList.remove('keyboard-open');
     if (card) card.style.transform = 'translateY(0)';
     
-    // Ждем немного чтобы клавиатура закрылась
     setTimeout(() => {
-      // Получаем значения
       const ageValue = Number(document.getElementById("age").value);
       const gender = document.getElementById("gender").value;
       const city = document.getElementById("city").value;
       const bio = document.getElementById("bio").value.trim();
       
-      // Валидация
       if (!ageValue || ageValue < 18 || ageValue > 99) {
         alert("Возраст должен быть от 18 до 99 лет");
         return;
@@ -543,7 +735,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // Создаем профиль
       const user = tg?.initDataUnsafe?.user || { id: 1, first_name: "Пользователь" };
       profileData = {
         tg_id: user.id,
@@ -560,19 +751,15 @@ document.addEventListener('DOMContentLoaded', function() {
         verification_status: 'not_verified'
       };
       
-      // Сохраняем
       if (saveProfile(profileData)) {
-        console.log('✅ Профиль сохранен');
-        
         if (tg?.HapticFeedback) {
           try {
             tg.HapticFeedback.impactOccurred('medium');
           } catch (e) {}
         }
         
-        // Инициализируем верификацию
         initVerification();
-        
+        initLikesSystem(); // Инициализируем систему лайков
         showMainApp();
         
         setTimeout(() => {
@@ -586,8 +773,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // ===== ПОКАЗАТЬ ОСНОВНОЕ ПРИЛОЖЕНИЕ =====
   function showMainApp() {
-    console.log('🚀 Показываю основное приложение');
-    
     if (welcomeScreen) welcomeScreen.classList.add("hidden");
     if (onboardingScreen) onboardingScreen.classList.add("hidden");
     
@@ -595,16 +780,14 @@ document.addEventListener('DOMContentLoaded', function() {
       tabBar.classList.remove("hidden");
     }
     
-    // Инициализируем верификацию
     initVerification();
+    initLikesSystem(); // Инициализируем систему лайков
     
     setActiveTab("feed");
   }
   
   // ===== УПРАВЛЕНИЕ ТАБАМИ =====
   function setActiveTab(tab) {
-    console.log('🔘 Активирую таб:', tab);
-    
     document.querySelectorAll('.screen').forEach(screen => {
       if (screen.id !== 'welcome-screen') {
         screen.classList.add('hidden');
@@ -625,6 +808,9 @@ document.addEventListener('DOMContentLoaded', function() {
       initFeed();
     } else if (tab === 'profile') {
       initProfile();
+    } else if (tab === 'chats') {
+      // При открытии экрана чатов обновляем счетчик лайков
+      updateLikesUI();
     }
     
     setTimeout(() => {
@@ -649,8 +835,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // ===== ЛЕНТА СВАЙПОВ =====
   function initFeed() {
-    console.log('🔄 Инициализирую ленту');
-    
     currentIndex = 0;
     showCurrentCandidate();
     
@@ -678,7 +862,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById("candidate-bio").textContent = "";
       document.getElementById("candidate-photo").src = "";
       
-      // Скрываем значок верификации
       const verifiedBadge = document.getElementById('candidate-verified');
       if (verifiedBadge) verifiedBadge.classList.add('hidden');
       
@@ -696,7 +879,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("candidate-photo").src = candidate.photo;
     document.getElementById("feed-status").textContent = "";
     
-    // Показываем/скрываем значок верификации
     const verifiedBadge = document.getElementById('candidate-verified');
     if (verifiedBadge) {
       if (candidate.verified) {
@@ -708,8 +890,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleLike() {
-    console.log('❤️ Лайк!');
-    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
@@ -721,12 +901,17 @@ document.addEventListener('DOMContentLoaded', function() {
       likedIds.push(filtered[currentIndex].id);
       currentIndex++;
       showCurrentCandidate();
+      
+      // Проверяем, является ли этот пользователь одним из тех, кто лайкнул нас
+      const likedUserId = filtered[currentIndex - 1]?.id;
+      if (likedUserId && usersWhoLikedMe.some(user => user.id === likedUserId)) {
+        // В реальном приложении здесь будет создание чата
+        alert('🎉 У вас мэтч! Вы понравились друг другу!');
+      }
     }
   }
   
   function handleDislike() {
-    console.log('✖️ Дизлайк!');
-    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
@@ -742,8 +927,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // ===== ПРОФИЛЬ =====
   function initProfile() {
-    console.log('👤 Инициализирую профиль');
-    
     profileData = loadProfile();
     
     if (profileData) {
@@ -781,14 +964,10 @@ document.addEventListener('DOMContentLoaded', function() {
       photoInput.addEventListener('change', handlePhotoUpload);
     }
     
-    // Обновляем UI верификации
     updateVerificationUI();
   }
   
   function handleUpdateProfile() {
-    console.log('📝 Обновляю профиль...');
-    
-    // Сначала скрываем клавиатуру если открыта
     document.activeElement?.blur();
     document.body.classList.remove('keyboard-open');
     if (card) card.style.transform = 'translateY(0)';
@@ -866,13 +1045,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     profileData = loadProfile();
     
-    // ВСЕГДА показываем приветственный экран первым
     if (welcomeScreen) {
       welcomeScreen.classList.remove("hidden");
-      console.log('👋 Показываю приветственный экран');
     }
     
-    // Скрываем все остальные экраны
     if (onboardingScreen) onboardingScreen.classList.add("hidden");
     document.querySelectorAll('.screen').forEach(screen => {
       if (screen.id !== 'welcome-screen') {
@@ -888,8 +1064,14 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     }
     
+    // Инициализируем систему лайков даже если профиль не создан
+    initLikesSystem();
+    
     console.log('✅ Приложение инициализировано');
   }
+  
+  // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ ОБРАБОТКИ СОБЫТИЙ =====
+  window.handleViewMatch = handleViewMatch;
   
   // ===== ЗАПУСК =====
   setTimeout(initApp, 100);
