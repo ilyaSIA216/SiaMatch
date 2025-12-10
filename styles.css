@@ -485,13 +485,13 @@ body.keyboard-open #updateProfileBtn {
 .likes-badge {
   background: linear-gradient(135deg, #fce7f3, #fbcfe8);
   border-radius: 20px;
-  padding: 20px;
+  padding: 22px;
   margin: 0 0 25px 0;
   border: 3px solid var(--like-pink);
   display: flex;
   align-items: center;
-  gap: 18px;
-  box-shadow: 0 8px 30px rgba(244, 114, 182, 0.2);
+  gap: 20px;
+  box-shadow: 0 10px 35px rgba(244, 114, 182, 0.25);
   animation: gentlePulse 3s infinite ease-in-out;
   position: relative;
   overflow: hidden;
@@ -500,8 +500,8 @@ body.keyboard-open #updateProfileBtn {
 }
 
 .likes-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(244, 114, 182, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(244, 114, 182, 0.35);
 }
 
 .likes-badge::before {
@@ -519,11 +519,11 @@ body.keyboard-open #updateProfileBtn {
 @keyframes gentlePulse {
   0%, 100% { 
     transform: scale(1); 
-    box-shadow: 0 8px 30px rgba(244, 114, 182, 0.2);
+    box-shadow: 0 10px 35px rgba(244, 114, 182, 0.25);
   }
   50% { 
     transform: scale(1.02); 
-    box-shadow: 0 12px 35px rgba(244, 114, 182, 0.3);
+    box-shadow: 0 15px 40px rgba(244, 114, 182, 0.35);
   }
 }
 
@@ -533,16 +533,16 @@ body.keyboard-open #updateProfileBtn {
 }
 
 .likes-badge-icon {
-  font-size: 40px;
+  font-size: 42px;
   color: var(--like-pink-dark);
   background: white;
-  width: 70px;
-  height: 70px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(219, 39, 119, 0.2);
+  box-shadow: 0 8px 25px rgba(219, 39, 119, 0.25);
   flex-shrink: 0;
   z-index: 2;
 }
@@ -553,30 +553,30 @@ body.keyboard-open #updateProfileBtn {
 }
 
 .likes-badge-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #831843;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .likes-badge-subtitle {
-  font-size: 14px;
+  font-size: 15px;
   color: #9d174d;
-  opacity: 0.9;
-  line-height: 1.4;
+  opacity: 0.95;
+  line-height: 1.5;
 }
 
 .likes-badge-count {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 900;
   color: var(--like-pink-dark);
   background: white;
-  padding: 8px 18px;
-  border-radius: 16px;
-  box-shadow: 0 6px 15px rgba(219, 39, 119, 0.25);
+  padding: 10px 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.3);
   flex-shrink: 0;
   z-index: 2;
   animation: countPulse 2s infinite;
@@ -600,12 +600,12 @@ body.keyboard-open #updateProfileBtn {
 .new-likes-notification {
   background: linear-gradient(135deg, #fce7f3, #fbcfe8);
   border-left: 5px solid var(--like-pink);
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 18px;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   animation: slideIn 0.5s ease-out;
 }
 
@@ -621,17 +621,17 @@ body.keyboard-open #updateProfileBtn {
 }
 
 .new-likes-notification-icon {
-  font-size: 28px;
+  font-size: 30px;
   color: var(--like-pink-dark);
   background: white;
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(219, 39, 119, 0.2);
+  box-shadow: 0 5px 15px rgba(219, 39, 119, 0.25);
 }
 
 .new-likes-notification-content {
@@ -639,71 +639,17 @@ body.keyboard-open #updateProfileBtn {
 }
 
 .new-likes-notification-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: #831843;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .new-likes-notification-text {
   font-size: 14px;
   color: #9d174d;
-  opacity: 0.9;
-  line-height: 1.4;
-}
-
-/* Мотивационное сообщение */
-.motivation-message {
-  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-  border: 2px solid #38bdf8;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 25px;
-  text-align: center;
-  animation: fadeIn 0.8s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.motivation-icon {
-  font-size: 32px;
-  margin-bottom: 10px;
-  color: #0ea5e9;
-}
-
-.motivation-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0369a1;
-  margin-bottom: 8px;
-}
-
-.motivation-text {
-  font-size: 14px;
-  color: #0c4a6e;
-  opacity: 0.9;
+  opacity: 0.95;
   line-height: 1.5;
-}
-
-/* Анимированный счетчик */
-.counter-animation {
-  display: inline-block;
-  animation: counterBounce 0.5s ease-out;
-}
-
-@keyframes counterBounce {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
 }
 
 /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
@@ -1054,18 +1000,18 @@ select:focus {
   }
   
   .likes-badge {
-    padding: 16px;
+    padding: 18px;
   }
   
   .likes-badge-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 34px;
+    width: 65px;
+    height: 65px;
+    font-size: 38px;
   }
   
   .likes-badge-count {
-    font-size: 28px;
-    padding: 6px 15px;
+    font-size: 32px;
+    padding: 8px 18px;
   }
 }
 
@@ -1090,21 +1036,26 @@ select:focus {
   }
   
   .likes-badge {
-    padding: 14px;
+    padding: 16px;
+    gap: 16px;
   }
   
   .likes-badge-icon {
-    width: 55px;
-    height: 55px;
-    font-size: 30px;
+    width: 60px;
+    height: 60px;
+    font-size: 34px;
   }
   
   .likes-badge-title {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .likes-badge-count {
-    font-size: 24px;
-    padding: 5px 12px;
+    font-size: 28px;
+    padding: 6px 16px;
+  }
+  
+  .likes-badge-subtitle {
+    font-size: 14px;
   }
 }
