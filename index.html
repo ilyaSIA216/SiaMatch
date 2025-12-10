@@ -73,6 +73,41 @@
       <div id="screen-chats" class="screen hidden">
         <div class="screen-content">
           <h2 class="screen-title">Чаты 💬</h2>
+          
+          <!-- БАДЖ С КОЛИЧЕСТВОМ ЛАЙКОВ -->
+          <div class="chats-header">
+            <div id="likes-badge" class="likes-badge">
+              <div class="likes-badge-icon">💗</div>
+              <div class="likes-badge-content">
+                <div class="likes-badge-title">Вас лайкнули <span id="likes-count">0</span> анкет</div>
+                <div class="likes-badge-subtitle">Это потенциальные мэтчи! Свайпайте вправо, чтобы познакомиться</div>
+              </div>
+              <div id="likes-count-badge" class="likes-badge-count">0</div>
+            </div>
+            
+            <!-- УВЕДОМЛЕНИЕ О НОВЫХ ЛАЙКАХ -->
+            <div id="new-likes-notification" class="new-likes-notification hidden">
+              <div class="new-likes-notification-icon">🎉</div>
+              <div class="new-likes-notification-content">
+                <div class="new-likes-notification-title">Новые лайки!</div>
+                <div class="new-likes-notification-text">Кто-то оценил вашу анкету</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- СЕКЦИЯ ПОТЕНЦИАЛЬНЫХ МЭТЧЕЙ -->
+          <div id="potential-matches-section" class="potential-matches-section hidden">
+            <h3 class="potential-matches-title">💕 Потенциальные мэтчи</h3>
+            <div id="potential-matches-list" class="potential-matches-list">
+              <!-- Потенциальные мэтчи будут добавлены динамически -->
+            </div>
+            
+            <button id="view-all-likes-btn" class="view-all-likes-btn">
+              👀 Посмотреть все лайки
+            </button>
+          </div>
+          
+          <!-- СТАНДАРТНЫЙ СПИСОК ЧАТОВ -->
           <div id="chats-empty" class="hint">Здесь пока пусто</div>
           <ul id="chats-list"></ul>
         </div>
