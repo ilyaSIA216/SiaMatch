@@ -15,7 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
   let verificationStatus = 'not_verified'; // 'not_verified', 'pending', 'verified', 'rejected'
   let verificationPhoto = null;
   
-  // Демо-данные кандидатов
+  // НОВОЕ: Система лайков (только счетчики, без показа анкет)
+  let usersWhoLikedMeCount = 0; // Только количество, без данных о пользователях
+  let lastLikesCount = 0; // Для отслеживания новых лайков
+  let newLikesReceived = false; // Флаг новых лайков
+  
+  // Демо-данные кандидатов (только для ленты)
   const candidates = [
     {
       id: 1,
@@ -23,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
       age: 24,
       gender: "female",
       city: "Москва",
-      bio: "Люблю кофе ☕ Москва ❤️",
+      bio: "Люблю кофе ☕ Москва ❤️. Ищу серьезные отношения.",
       photo: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: true,
       verification_status: 'verified'
@@ -34,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
       age: 28,
       gender: "male",
       city: "Санкт-Петербург",
-      bio: "Инженер СПб",
+      bio: "Инженер, люблю спорт и путешествия. Ищу активную девушку.",
       photo: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: false,
       verification_status: 'pending'
@@ -45,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
       age: 26,
       gender: "female",
       city: "Москва",
-      bio: "Фотограф ❤️",
+      bio: "Фотограф, люблю искусство и природу. Ищу творческого человека.",
       photo: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: true,
       verification_status: 'verified'
@@ -71,46 +76,39 @@ document.addEventListener('DOMContentLoaded', function() {
       photo: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: false,
       verification_status: 'pending'
-    }
-  ];
-  
-  // Демо-данные: кто лайкнул пользователя
-  let usersWhoLikedMe = [
-    {
-      id: 4,
-      name: "Иван",
-      age: 29,
-      city: "Казань",
-      photo: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true,
-      timestamp: Date.now() - 3600000 // 1 час назад
-    },
-    {
-      id: 5,
-      name: "София",
-      age: 25,
-      city: "Новосибирск",
-      photo: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: false,
-      timestamp: Date.now() - 7200000 // 2 часа назад
     },
     {
       id: 6,
-      name: "Александр",
+      name: "Максим",
       age: 31,
+      gender: "male",
       city: "Москва",
+      bio: "Программист, увлекаюсь настольными играми и кино.",
       photo: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: true,
-      timestamp: Date.now() - 86400000 // 1 день назад
+      verification_status: 'verified'
     },
     {
       id: 7,
       name: "Анна",
       age: 27,
+      gender: "female",
       city: "Санкт-Петербург",
+      bio: "Маркетолог, люблю театр и литературу. Ищу интеллигентного мужчину.",
       photo: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=800",
       verified: true,
-      timestamp: Date.now() - 172800000 // 2 дня назад
+      verification_status: 'verified'
+    },
+    {
+      id: 8,
+      name: "Артем",
+      age: 30,
+      gender: "male",
+      city: "Казань",
+      bio: "Врач, занимаюсь бегом. Ищу спутницу жизни.",
+      photo: "https://images.pexels.com/photos/2589653/pexels-photo-2589653.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: false,
+      verification_status: 'pending'
     }
   ];
   
@@ -124,14 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const appRoot = document.getElementById("app-root");
   const card = document.getElementById("card");
   
-  // Элементы для системы лайков
+  // Элементы для системы лайков (ТОЛЬКО СЧЕТЧИКИ)
   const likesBadge = document.getElementById('likes-badge');
   const likesCountElement = document.getElementById('likes-count');
   const likesCountBadge = document.getElementById('likes-count-badge');
   const newLikesNotification = document.getElementById('new-likes-notification');
-  const potentialMatchesSection = document.getElementById('potential-matches-section');
-  const potentialMatchesList = document.getElementById('potential-matches-list');
-  const viewAllLikesBtn = document.getElementById('view-all-likes-btn');
+  const motivationMessage = document.getElementById('motivation-message');
+  const motivationCount = document.getElementById('motivation-count');
+  const tabChatsBadge = document.getElementById('tab-chats-badge');
   
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
@@ -184,7 +182,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (heightDiff > 100) {
       keyboardHeight = heightDiff;
-      console.log('⌨️ Клавиатура открылась, высота:', keyboardHeight);
       
       document.body.classList.add('keyboard-open');
       
@@ -204,8 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } 
     else if (Math.abs(originalHeight - newHeight) < 50) {
-      console.log('⌨️ Клавиатура закрылась');
-      
       document.body.classList.remove('keyboard-open');
       
       if (card) {
@@ -225,8 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function handleFocusIn(e) {
     if (e.target.matches('input, textarea, select')) {
-      console.log('🎯 Фокус на поле ввода:', e.target.id || e.target.name);
-      
       if (isIOS) {
         setTimeout(() => {
           document.body.classList.add('keyboard-open');
@@ -237,13 +230,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function handleFocusOut(e) {
     if (e.target.matches('input, textarea, select')) {
-      console.log('🎯 Потеря фокуса с поля ввода');
-      
       if (isIOS) {
         setTimeout(() => {
           const activeElement = document.activeElement;
           if (!activeElement || !activeElement.matches('input, textarea, select')) {
-            console.log('✅ Все поля ввода потеряли фокус, закрываем клавиатуру');
             document.body.classList.remove('keyboard-open');
             if (card) card.style.transform = 'translateY(0)';
           }
@@ -279,9 +269,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // ===== СИСТЕМА ЛАЙКОВ =====
+  // ===== СИСТЕМА ЛАЙКОВ (ТОЛЬКО СЧЕТЧИКИ) =====
   function initLikesSystem() {
-    console.log('💗 Инициализирую систему лайков');
+    console.log('💗 Инициализирую систему лайков (только счетчики)');
     
     // Загружаем данные о лайках
     loadLikesData();
@@ -289,17 +279,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обновляем UI лайков
     updateLikesUI();
     
-    // Настраиваем кнопку просмотра всех лайков
-    if (viewAllLikesBtn) {
-      viewAllLikesBtn.addEventListener('click', showAllLikes);
+    // Настройка клика на бадж
+    if (likesBadge) {
+      likesBadge.addEventListener('click', handleLikesBadgeClick);
     }
     
     // Симуляция получения новых лайков (в демо-режиме)
-    if (usersWhoLikedMe.length > 0) {
-      setTimeout(() => {
-        showNewLikesNotification();
-      }, 2000);
-    }
+    simulateNewLikes();
   }
   
   function loadLikesData() {
@@ -307,10 +293,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const saved = localStorage.getItem("siamatch_likes");
       if (saved) {
         const data = JSON.parse(saved);
-        if (data.usersWhoLikedMe) {
-          usersWhoLikedMe = data.usersWhoLikedMe;
-        }
-        console.log('📂 Загружены данные о лайках:', usersWhoLikedMe.length);
+        usersWhoLikedMeCount = data.count || 0;
+        lastLikesCount = data.lastCount || 0;
+        console.log('📂 Загружено количество лайков:', usersWhoLikedMeCount);
       }
     } catch (e) {
       console.error("❌ Ошибка загрузки данных о лайках:", e);
@@ -320,7 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function saveLikesData() {
     try {
       const data = {
-        usersWhoLikedMe: usersWhoLikedMe,
+        count: usersWhoLikedMeCount,
+        lastCount: lastLikesCount,
         lastUpdated: Date.now()
       };
       localStorage.setItem("siamatch_likes", JSON.stringify(data));
@@ -331,93 +317,83 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function updateLikesUI() {
-    const count = usersWhoLikedMe.length;
+    const count = usersWhoLikedMeCount;
     
-    // Обновляем счетчики
+    // Обновляем счетчики с анимацией
     if (likesCountElement) {
-      likesCountElement.textContent = count;
+      const currentCount = parseInt(likesCountElement.textContent) || 0;
+      if (currentCount !== count) {
+        likesCountElement.classList.remove('counter-animation');
+        void likesCountElement.offsetWidth; // Trigger reflow
+        likesCountElement.classList.add('counter-animation');
+        likesCountElement.textContent = count;
+      }
     }
     
     if (likesCountBadge) {
-      likesCountBadge.textContent = count;
-      
-      // Анимация при изменении количества
-      if (count > 0) {
+      const currentBadgeCount = parseInt(likesCountBadge.textContent) || 0;
+      if (currentBadgeCount !== count) {
+        likesCountBadge.textContent = count;
+        
+        // Анимация при изменении количества
         likesCountBadge.style.animation = 'none';
         setTimeout(() => {
-          likesCountBadge.style.animation = 'pulse 0.5s ease-in-out';
+          likesCountBadge.style.animation = 'countPulse 2s infinite';
         }, 10);
       }
     }
     
-    // Показываем/скрываем секцию потенциальных мэтчей
-    if (potentialMatchesSection) {
+    // Обновляем счетчик в мотивационном сообщении
+    if (motivationCount) {
+      motivationCount.textContent = count;
+    }
+    
+    // Обновляем бейдж на табе чатов
+    updateTabChatsBadge();
+    
+    // Показываем/скрываем мотивационное сообщение
+    if (motivationMessage) {
       if (count > 0) {
-        potentialMatchesSection.classList.remove('hidden');
-        renderPotentialMatches();
+        motivationMessage.classList.remove('hidden');
       } else {
-        potentialMatchesSection.classList.add('hidden');
+        motivationMessage.classList.add('hidden');
       }
     }
     
-    // Обновляем уведомление о новых лайках
-    updateNewLikesNotification();
+    // Проверяем наличие новых лайков
+    checkForNewLikes();
   }
   
-  function renderPotentialMatches() {
-    if (!potentialMatchesList) return;
+  function updateTabChatsBadge() {
+    if (!tabChatsBadge) return;
     
-    // Очищаем список
-    potentialMatchesList.innerHTML = '';
+    const count = usersWhoLikedMeCount;
     
-    // Показываем только первые 3 мэтча
-    const displayCount = Math.min(3, usersWhoLikedMe.length);
-    
-    for (let i = 0; i < displayCount; i++) {
-      const user = usersWhoLikedMe[i];
-      const matchItem = document.createElement('div');
-      matchItem.className = 'potential-match-item';
+    if (count > 0) {
+      tabChatsBadge.textContent = count > 99 ? '99+' : count.toString();
+      tabChatsBadge.classList.remove('hidden');
       
-      const timeAgo = getTimeAgo(user.timestamp);
-      
-      matchItem.innerHTML = `
-        <img src="${user.photo}" alt="${user.name}" class="potential-match-photo">
-        <div class="potential-match-info">
-          <div class="potential-match-name">${user.name}, ${user.age}</div>
-          <div class="potential-match-details">
-            <span>${user.city}</span>
-            ${user.verified ? '<span class="potential-match-verified">✅</span>' : ''}
-            <span style="color: #999; font-size: 12px;">${timeAgo}</span>
-          </div>
-        </div>
-        <button class="potential-match-action" onclick="handleViewMatch(${user.id})">
-          Посмотреть
-        </button>
-      `;
-      
-      potentialMatchesList.appendChild(matchItem);
+      // Анимация для новых лайков
+      if (newLikesReceived) {
+        tabChatsBadge.style.animation = 'badgePulse 1.5s infinite';
+      }
+    } else {
+      tabChatsBadge.classList.add('hidden');
     }
   }
   
-  function getTimeAgo(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-    
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    
-    if (minutes < 60) {
-      return `${minutes} мин назад`;
-    } else if (hours < 24) {
-      return `${hours} ч назад`;
-    } else {
-      return `${days} дн назад`;
+  function checkForNewLikes() {
+    // Проверяем, появились ли новые лайки с последнего посещения
+    if (usersWhoLikedMeCount > lastLikesCount) {
+      newLikesReceived = true;
+      showNewLikesNotification();
+      lastLikesCount = usersWhoLikedMeCount;
+      saveLikesData();
     }
   }
   
   function showNewLikesNotification() {
-    if (!newLikesNotification || usersWhoLikedMe.length === 0) return;
+    if (!newLikesNotification || !newLikesReceived) return;
     
     // Показываем уведомление
     newLikesNotification.classList.remove('hidden');
@@ -432,19 +408,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Автоматически скрываем через 5 секунд
     setTimeout(() => {
       newLikesNotification.classList.add('hidden');
+      newLikesReceived = false;
     }, 5000);
   }
   
-  function updateNewLikesNotification() {
-    // В реальном приложении здесь будет логика проверки новых лайков
-    // с момента последнего посещения
-  }
-  
-  function showAllLikes() {
-    console.log('👀 Показываю все лайки');
+  function handleLikesBadgeClick() {
+    console.log('💗 Клик на бадж с лайками');
     
-    // В реальном приложении здесь будет переход на экран со всеми лайками
-    alert(`У вас ${usersWhoLikedMe.length} лайков!\n\nЭти люди уже оценили вашу анкету. Свайпайте вправо, чтобы познакомиться с ними в ленте.`);
+    // Показываем мотивационное сообщение
+    if (usersWhoLikedMeCount > 0) {
+      const messages = [
+        `🎯 У вас ${usersWhoLikedMeCount} тайных поклонников! Продолжайте свайпать, чтобы найти их в ленте.`,
+        `✨ ${usersWhoLikedMeCount} человек уже оценили вашу анкету. Они где-то рядом!`,
+        `💝 Кто-то уже заинтересовался вами! Продолжайте свайпать, чтобы найти взаимную симпатию.`,
+        `🌟 У вас ${usersWhoLikedMeCount} потенциальных мэтчей! Они появятся в ленте впереди.`
+      ];
+      
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      alert(randomMessage);
+    } else {
+      alert('Пока нет лайков, но это временно! Продолжайте активно использовать приложение, и скоро появятся первые симпатии! 💕');
+    }
     
     if (tg?.HapticFeedback) {
       try {
@@ -453,22 +437,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  function handleViewMatch(userId) {
-    console.log('👁️ Просмотр мэтча:', userId);
-    
-    // Переключаемся на ленту и ищем этого пользователя
-    setActiveTab('feed');
-    
-    // В реальном приложении здесь будет поиск пользователя в ленте
-    setTimeout(() => {
-      alert('Перейдите в ленту, чтобы посмотреть анкету этого пользователя 🍀');
-    }, 300);
-    
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.selectionChanged();
-      } catch (e) {}
+  function simulateNewLikes() {
+    // В демо-режиме симулируем получение лайков
+    if (usersWhoLikedMeCount === 0) {
+      // При первом запуске даем несколько лайков для мотивации
+      setTimeout(() => {
+        usersWhoLikedMeCount = Math.floor(Math.random() * 5) + 3; // 3-7 лайков
+        saveLikesData();
+        updateLikesUI();
+        console.log('🎲 Демо: добавлены лайки для мотивации');
+      }, 3000);
     }
+    
+    // Периодически добавляем новые лайки (симуляция активности)
+    setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance
+        const newLikes = Math.floor(Math.random() * 2) + 1; // 1-2 новых лайка
+        usersWhoLikedMeCount += newLikes;
+        newLikesReceived = true;
+        saveLikesData();
+        updateLikesUI();
+        console.log(`🎲 Демо: добавлено ${newLikes} новых лайков`);
+      }
+    }, 30000); // Каждые 30 секунд
   }
   
   // ===== СИСТЕМА ВЕРИФИКАЦИИ =====
@@ -898,16 +889,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const filtered = candidates.filter(c => !likedIds.includes(c.id));
     if (currentIndex < filtered.length) {
-      likedIds.push(filtered[currentIndex].id);
+      const likedUser = filtered[currentIndex];
+      likedIds.push(likedUser.id);
       currentIndex++;
       showCurrentCandidate();
       
-      // Проверяем, является ли этот пользователь одним из тех, кто лайкнул нас
-      const likedUserId = filtered[currentIndex - 1]?.id;
-      if (likedUserId && usersWhoLikedMe.some(user => user.id === likedUserId)) {
-        // В реальном приложении здесь будет создание чата
-        alert('🎉 У вас мэтч! Вы понравились друг другу!');
-      }
+      // Проверяем, был ли это один из тех, кто лайкнул нас
+      checkForMatch(likedUser.id);
+      
+      // В реальном приложении здесь будет отправка лайка на сервер
+      console.log(`❤️ Лайк пользователю ${likedUser.name} (ID: ${likedUser.id})`);
     }
   }
   
@@ -920,8 +911,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const filtered = candidates.filter(c => !likedIds.includes(c.id));
     if (currentIndex < filtered.length) {
+      const dislikedUser = filtered[currentIndex];
       currentIndex++;
       showCurrentCandidate();
+      
+      console.log(`✖️ Дизлайк пользователю ${dislikedUser.name} (ID: ${dislikedUser.id})`);
+    }
+  }
+  
+  function checkForMatch(likedUserId) {
+    // В демо-режиме с небольшой вероятностью создаем мэтч
+    if (Math.random() > 0.7) { // 30% chance
+      // Уменьшаем счетчик лайков (один из тайных поклонников найден!)
+      if (usersWhoLikedMeCount > 0) {
+        usersWhoLikedMeCount--;
+        saveLikesData();
+        updateLikesUI();
+        
+        // Показываем уведомление о мэтче
+        setTimeout(() => {
+          alert('🎉 У вас взаимная симпатия! Один из ваших тайных поклонников ответил вам взаимностью! Теперь вы можете начать общение в чатах.');
+        }, 500);
+      }
     }
   }
   
@@ -1069,9 +1080,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Приложение инициализировано');
   }
-  
-  // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ ОБРАБОТКИ СОБЫТИЙ =====
-  window.handleViewMatch = handleViewMatch;
   
   // ===== ЗАПУСК =====
   setTimeout(initApp, 100);
