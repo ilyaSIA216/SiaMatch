@@ -376,7 +376,309 @@ body.keyboard-open #saveProfileBtn {
   padding: 0 20px;
 }
 
-/* ===== ЭКРАН ПРОФИЛЯ ===== */
+/* ===== ПРОФИЛЬ ===== */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  color: var(--siamatch-green-dark);
+}
+
+.settings-btn:active {
+  background: rgba(34, 197, 94, 0.1);
+  transform: scale(0.95);
+}
+
+.profile-info-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 25px;
+  border: 2px solid #bbf7d0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.profile-photo-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-main-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--siamatch-green);
+  margin-bottom: 15px;
+  display: none;
+}
+
+.photo-upload-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--siamatch-green-dark);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-upload-label:active {
+  background: rgba(34, 197, 94, 0.2);
+  transform: scale(0.95);
+}
+
+.profile-details {
+  text-align: left;
+}
+
+.profile-name h3 {
+  margin: 0 0 20px 0;
+  font-size: 26px;
+  color: var(--siamatch-green-dark);
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 16px;
+  color: #666;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 16px;
+  color: #063b1f;
+  font-weight: 600;
+}
+
+.verification-btn {
+  width: 100%;
+  margin: 20px 0 30px 0;
+  padding: 18px;
+  font-size: 18px;
+  border-radius: 16px;
+}
+
+/* СЕКЦИИ ПРОФИЛЯ */
+.profile-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 2px solid #bbf7d0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--siamatch-green-dark);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ЗАДАНИЯ */
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(34, 197, 94, 0.05);
+  border-radius: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.1);
+}
+
+.task-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #063b1f;
+  margin-bottom: 4px;
+}
+
+.task-reward {
+  font-size: 14px;
+  color: var(--siamatch-green);
+  font-weight: 600;
+}
+
+.task-btn {
+  background: var(--siamatch-green);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-btn:active {
+  transform: scale(0.95);
+  background: var(--siamatch-green-dark);
+}
+
+/* МАГАЗИН */
+.shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.1));
+  border-radius: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.shop-item-icon {
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.shop-item-content {
+  flex: 1;
+}
+
+.shop-item-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--siamatch-green-dark);
+  margin-bottom: 4px;
+}
+
+.shop-item-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.shop-item-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #063b1f;
+}
+
+.shop-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+/* РЕДАКТИРОВАНИЕ ПРОФИЛЯ */
+.profile-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.save-edit-btn {
+  background: var(--siamatch-green);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-edit-btn:active {
+  transform: scale(0.95);
+  background: var(--siamatch-green-dark);
+}
+
+.cancel-edit-btn {
+  width: 100%;
+  background: #f3f4f6;
+  color: #666;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.2s;
+}
+
+.cancel-edit-btn:active {
+  background: #e5e7eb;
+  transform: scale(0.98);
+}
+
+.edit-photo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 10px;
+  border: 3px solid var(--siamatch-green);
+  object-fit: cover;
+  display: none;
+}
+
 .age-range {
   display: flex;
   align-items: center;
@@ -411,62 +713,6 @@ body.keyboard-open #saveProfileBtn {
   margin: 0;
   accent-color: var(--siamatch-green);
   flex-shrink: 0;
-}
-
-#distance-value {
-  color: var(--siamatch-green);
-  font-weight: 600;
-}
-
-#candidate-distance {
-  font-size: 16px;
-  color: var(--siamatch-green);
-  font-weight: 600;
-  margin: 10px 0;
-}
-
-/* ===== FIX: КНОПКА СОХРАНИТЬ ИЗМЕНЕНИЯ В ПРОФИЛЕ ===== */
-#updateProfileBtn {
-  position: fixed;
-  bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px));
-  left: 16px;
-  right: 16px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #ffffff;
-  border: none;
-  padding: 18px 24px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 16px;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: transform 0.1s ease, opacity 0.3s ease;
-  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
-  z-index: 1000;
-}
-
-/* FIX: При открытой клавиатуре полностью скрываем кнопку */
-body.keyboard-open #updateProfileBtn {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(100px);
-}
-
-#updateProfileBtn:active {
-  transform: scale(0.97);
-  opacity: 0.9;
-  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
-}
-
-/* ===== ФОТО ПРОФИЛЯ ===== */
-#photo-preview {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-top: 10px;
-  border: 3px solid var(--siamatch-green);
-  object-fit: cover;
-  display: none;
 }
 
 /* ===== ЧАТЫ ===== */
@@ -752,22 +998,13 @@ select:focus {
     padding-right: max(20px, env(safe-area-inset-right));
   }
   
-  #saveProfileBtn,
-  #updateProfileBtn {
+  #saveProfileBtn {
     left: max(16px, env(safe-area-inset-left));
     right: max(16px, env(safe-area-inset-right));
   }
 }
 
 /* ===== СТИЛИ ВЕРИФИКАЦИИ ===== */
-.verification-section {
-  margin-top: 20px;
-  padding: 16px;
-  background: rgba(34, 197, 94, 0.05);
-  border-radius: 14px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
 .verification-section-content {
   margin-top: 16px;
   padding: 16px;
@@ -987,8 +1224,7 @@ select:focus {
     height: 65px;
   }
   
-  #saveProfileBtn,
-  #updateProfileBtn {
+  #saveProfileBtn {
     padding: 14px 20px;
     font-size: 16px;
   }
@@ -1013,12 +1249,26 @@ select:focus {
     font-size: 32px;
     padding: 8px 18px;
   }
+  
+  .profile-main-photo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .shop-item {
+    padding: 15px;
+  }
+  
+  .shop-item-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+  }
 }
 
 /* Адаптив для очень маленьких экранов */
 @media (max-height: 600px) {
-  #saveProfileBtn,
-  #updateProfileBtn {
+  #saveProfileBtn {
     padding: 12px 16px;
     font-size: 15px;
   }
@@ -1029,10 +1279,6 @@ select:focus {
   
   .verification-step {
     margin-bottom: 8px;
-  }
-  
-  .verification-section {
-    padding: 12px;
   }
   
   .likes-badge {
@@ -1058,4 +1304,49 @@ select:focus {
   .likes-badge-subtitle {
     font-size: 14px;
   }
+  
+  .profile-info-card,
+  .profile-section {
+    padding: 18px;
+  }
+  
+  .task-item {
+    padding: 12px;
+  }
+  
+  .shop-item {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .shop-item-content {
+    font-size: 13px;
+  }
+  
+  .shop-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Первичная кнопка */
+.primary {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  border: none;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
+  width: 100%;
+}
+
+.primary:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
 }
