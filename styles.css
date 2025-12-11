@@ -1469,3 +1469,111 @@ select:focus {
 .filters-interests-list::-webkit-scrollbar-thumb:hover {
   background: var(--siamatch-green-dark);
 }
+
+/* ===== СТИЛИ ДЛЯ ПОЛЕЙ ВВОДА ВОЗРАСТА В ФИЛЬТРАХ ===== */
+.age-range-fields {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.age-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.age-input-group label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.age-input-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #bbf7d0;
+  background-color: #ffffff;
+  color: #000;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.age-input-group input:focus {
+  border-color: var(--siamatch-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  outline: none;
+}
+
+/* ===== СТИЛИ ДЛЯ ФИЛЬТРА ПО ПОЛУ ===== */
+.gender-filter {
+  margin-top: 10px;
+}
+
+.gender-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.gender-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: rgba(34, 197, 94, 0.05);
+  border-radius: 10px;
+  border: 2px solid rgba(34, 197, 94, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gender-option:hover {
+  border-color: var(--siamatch-green);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.gender-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  accent-color: var(--siamatch-green);
+}
+
+.gender-label {
+  font-size: 16px;
+  color: #063b1f;
+  font-weight: 500;
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-width: 380px) {
+  .age-range-fields {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .gender-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .gender-option {
+    width: 100%;
+  }
+}
+
+/* Адаптив для очень маленьких экранов */
+@media (max-height: 600px) {
+  .age-range-fields {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .age-input-group input {
+    padding: 10px;
+  }
+}
