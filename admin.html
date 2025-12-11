@@ -20,6 +20,7 @@
       --info: #3b82f6;
       --pending: #f59e0b;
       --boost: #f59e0b;
+      --reports: #ec4899;
     }
     * {
       box-sizing: border-box;
@@ -180,9 +181,26 @@
       background: rgba(148, 163, 184, 0.2);
     }
     .tab-btn.active {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       color: white;
       font-weight: 500;
+    }
+    .tab-btn[data-tab="all"].active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    }
+    .tab-btn[data-tab="new"].active {
+      background: linear-gradient(135deg, var(--info), #2563eb);
+    }
+    .tab-btn[data-tab="verification"].active {
+      background: linear-gradient(135deg, var(--warning), #d97706);
+    }
+    .tab-btn[data-tab="blocked"].active {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+    }
+    .tab-btn[data-tab="reports"].active {
+      background: linear-gradient(135deg, var(--reports), #db2777);
+    }
+    .tab-btn[data-tab="search"].active {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     }
 
     /* Статистика */
@@ -214,6 +232,7 @@
     .stat-number.pending { color: var(--pending); }
     .stat-number.verified { color: #10b981; }
     .stat-number.boosted { color: var(--boost); }
+    .stat-number.reports { color: var(--reports); }
     .stat-label {
       font-size: 12px;
       color: var(--muted);
@@ -295,6 +314,9 @@
     .user-item.boosted {
       border-left: 4px solid var(--boost);
     }
+    .user-item.report-item {
+      border-left: 4px solid var(--reports);
+    }
     .user-main {
       display: flex;
       flex-direction: column;
@@ -341,6 +363,17 @@
       font-weight: 600;
       background: rgba(245, 158, 11, 0.2);
       color: var(--boost);
+    }
+    .report-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(236, 72, 153, 0.2);
+      color: var(--reports);
     }
     .user-meta {
       color: var(--muted);
@@ -419,6 +452,15 @@
       padding: 0;
       text-align: right;
     }
+    .report-details-btn {
+      border: none;
+      background: none;
+      color: var(--reports);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+      text-align: right;
+    }
     .user-actions-row {
       display: flex;
       gap: 10px;
@@ -429,8 +471,11 @@
       padding: 16px;
       border-radius: 12px;
       margin-bottom: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .section-banner.all {
       background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
-      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.2);
     }
     .section-banner.new {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
@@ -448,6 +493,10 @@
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
       border-color: rgba(245, 158, 11, 0.2);
     }
+    .section-banner.reports {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.05));
+      border-color: rgba(236, 72, 153, 0.2);
+    }
     .section-banner h3 {
       margin: 0 0 6px;
       font-size: 16px;
@@ -458,7 +507,7 @@
       color: var(--muted);
     }
 
-    /* Модальное окно для верификации */
+    /* Модальные окна */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -476,7 +525,7 @@
       background: var(--card-bg);
       border-radius: 16px;
       padding: 20px;
-      max-width: 500px;
+      max-width: 800px;
       width: 100%;
       max-height: 80vh;
       overflow-y: auto;
@@ -499,34 +548,109 @@
       font-size: 20px;
       cursor: pointer;
     }
-    .photo-comparison {
+    
+    /* Модальное окно деталей жалобы */
+    .report-details-content {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .report-section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(2, 6, 23, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .report-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .report-user-info {
       display: flex;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
     }
-    .photo-container {
+    .report-user-card {
       flex: 1;
-      text-align: center;
+      min-width: 200px;
+      padding: 12px;
+      background: rgba(2, 6, 23, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
     }
-    .photo-label {
+    .report-user-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .report-user-details {
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.4;
+    }
+    .chat-messages-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 12px;
+      background: rgba(2, 6, 23, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .chat-message {
+      padding: 8px 12px;
       margin-bottom: 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
     }
-    .verification-photo {
-      width: 100%;
-      max-width: 200px;
-      border-radius: 12px;
-      border: 2px solid var(--accent);
-      margin: 0 auto;
+    .chat-message.reporter {
+      background: rgba(34, 197, 94, 0.1);
+      border-left: 3px solid var(--accent);
     }
-    .modal-actions {
+    .chat-message.reported {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--danger);
+    }
+    .chat-message-system {
+      background: rgba(148, 163, 184, 0.1);
+      border-left: 3px solid var(--muted);
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .message-sender {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .message-text {
+      margin-bottom: 4px;
+    }
+    .message-time {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: right;
+    }
+    .report-actions {
       display: flex;
       gap: 12px;
       margin-top: 20px;
     }
-    .modal-actions .primary {
+    .report-actions .primary {
       flex: 1;
+    }
+    .danger-btn {
+      background: linear-gradient(135deg, var(--danger), #dc2626) !important;
+    }
+    .warning-btn {
+      background: linear-gradient(135deg, var(--warning), #d97706) !important;
+    }
+    .reports-btn {
+      background: linear-gradient(135deg, var(--reports), #db2777) !important;
     }
 
     /* Стили для кнопок количества свайпов */
@@ -559,10 +683,6 @@
     .modal-actions .boost-btn {
       background: linear-gradient(135deg, var(--boost), #d97706) !important;
     }
-    
-    .modal-actions .danger-btn {
-      background: linear-gradient(135deg, var(--danger), #dc2626) !important;
-    }
   </style>
 </head>
 <body>
@@ -576,7 +696,7 @@
       <div class="field">
         <label for="password">Пароль</label>
         <input type="password" id="password" autocomplete="off" />
-        <div class="hint">Введите админ‑пароль: <strong> </strong></div>
+        <div class="hint">Введите админ‑пароль: <strong>s21i06a95</strong></div>
       </div>
 
       <button id="login-btn" class="primary">Войти</button>
@@ -599,6 +719,7 @@
         <button class="tab-btn" data-tab="new">Новые</button>
         <button class="tab-btn" data-tab="verification">Верификация ⏳</button>
         <button class="tab-btn" data-tab="blocked">Заблокированные</button>
+        <button class="tab-btn" data-tab="reports">Жалобы ⚠️</button>
         <button class="tab-btn" data-tab="search">Поиск</button>
       </div>
 
@@ -625,13 +746,13 @@
           <span class="stat-label">Заблокировано</span>
         </div>
         <div class="stat-card">
-          <span class="stat-number boosted" id="stat-boosted">0</span>
-          <span class="stat-label">С бустом</span>
+          <span class="stat-number reports" id="stat-reports">0</span>
+          <span class="stat-label">Жалоб ⚠️</span>
         </div>
       </div>
 
       <!-- Баннеры разделов -->
-      <div id="section-banner-all" class="section-banner">
+      <div id="section-banner-all" class="section-banner all">
         <h3>Все пользователи</h3>
         <p>Полный список зарегистрированных пользователей. Можно сортировать, фильтровать и выполнять модерацию.</p>
       </div>
@@ -649,6 +770,11 @@
       <div id="section-banner-blocked" class="section-banner blocked hidden">
         <h3>Заблокированные пользователи</h3>
         <p>Анкеты, временно или постоянно отключенные от показа в ленте.</p>
+      </div>
+
+      <div id="section-banner-reports" class="section-banner reports hidden">
+        <h3>Жалобы пользователей ⚠️</h3>
+        <p>Просмотр и обработка жалоб на пользователей. Здесь вы можете видеть диалоги, причины жалоб и принимать меры.</p>
       </div>
 
       <div id="section-banner-search" class="section-banner search hidden">
@@ -798,6 +924,19 @@
     </div>
   </div>
 
+  <!-- Модальное окно для просмотра жалобы -->
+  <div id="report-details-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>⚠️ Детали жалобы #<span id="report-details-id">0</span></h3>
+        <button class="close-btn" id="close-report-details-btn">×</button>
+      </div>
+      <div id="report-details-content" class="report-details-content">
+        <!-- Контент будет заполняться динамически -->
+      </div>
+    </div>
+  </div>
+
   <script>
     // Константы
     const ADMIN_PASSWORD = "s21i06a95";
@@ -835,6 +974,7 @@
     const statActive = document.getElementById("stat-active");
     const statBlocked = document.getElementById("stat-blocked");
     const statBoosted = document.getElementById("stat-boosted");
+    const statReports = document.getElementById("stat-reports");
 
     // DOM элементы - баннеры
     const sectionBanners = {
@@ -842,6 +982,7 @@
       new: document.getElementById("section-banner-new"),
       verification: document.getElementById("section-banner-verification"),
       blocked: document.getElementById("section-banner-blocked"),
+      reports: document.getElementById("section-banner-reports"),
       search: document.getElementById("section-banner-search")
     };
 
@@ -866,12 +1007,20 @@
     const customSwipesInput = document.getElementById('custom-swipes');
     const swipesReasonInput = document.getElementById('swipes-reason');
 
+    // DOM элементы - модальное окно деталей жалобы
+    const reportDetailsModal = document.getElementById('report-details-modal');
+    const closeReportDetailsBtn = document.getElementById('close-report-details-btn');
+    const reportDetailsContent = document.getElementById('report-details-content');
+    const reportDetailsId = document.getElementById('report-details-id');
+
     // Переменные состояния
     let currentTab = "all";
     let allUsers = [];
     let filteredUsers = [];
+    let allReports = []; // Новый массив для жалоб
     let currentUserForBoost = null;
     let currentUserForSwipes = null;
+    let currentReportForDetails = null;
 
     // Генерация демо-данных пользователей
     function generateDemoUsers(count = 50) {
@@ -945,6 +1094,86 @@
       return users;
     }
 
+    // Генерация демо-данных жалоб
+    function generateDemoReports(count = 8) {
+      const reports = [];
+      const reasons = ['spam', 'harassment', 'fake', 'scam', 'inappropriate', 'other'];
+      const statuses = ['pending', 'reviewing', 'resolved', 'rejected'];
+      const reasonTexts = {
+        'spam': 'Спам, реклама',
+        'harassment': 'Оскорбления, харассмент',
+        'fake': 'Фейковая анкета',
+        'scam': 'Мошенничество',
+        'inappropriate': 'Неуместный контент',
+        'other': 'Неуважительное поведение'
+      };
+      
+      // Берем пользователей из allUsers для демо
+      const demoUsers = allUsers.slice(0, 15);
+      
+      for (let i = 1; i <= count; i++) {
+        const reporter = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+        const reported = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+        
+        const reason = reasons[Math.floor(Math.random() * reasons.length)];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        
+        // Генерируем демо сообщения
+        const demoChatMessages = [];
+        const messageCount = Math.floor(Math.random() * 8) + 3;
+        
+        for (let j = 0; j < messageCount; j++) {
+          const sender = Math.random() > 0.5 ? 'reporter' : 'reported';
+          const messages = [
+            "Привет! Как дела?",
+            "Всё отлично, а у тебя?",
+            "Хорошо! Чем занимаешься?",
+            "Ничего особенного, просто отдыхаю",
+            "Давай встретимся как-нибудь",
+            "Мне нравится твоя анкета",
+            "Спасибо! Твоя тоже интересная",
+            "Пока, хорошего дня!",
+            "До свидания, будем на связи"
+          ];
+          
+          const now = new Date(Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000);
+          const timeString = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          const dateString = now.toISOString().split('T')[0];
+          
+          demoChatMessages.push({
+            id: j + 1,
+            sender: sender,
+            text: messages[Math.floor(Math.random() * messages.length)],
+            time: timeString,
+            date: dateString
+          });
+        }
+        
+        const createdAt = new Date(Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000);
+        
+        reports.push({
+          id: i,
+          reporterId: reporter.id,
+          reporterName: reporter.name,
+          reporterProfile: reporter,
+          reportedUserId: reported.id,
+          reportedUserName: reported.name,
+          reportedUserProfile: reported,
+          reason: reasonTexts[reason],
+          additionalInfo: reason === 'other' ? 'Пользователь вел себя неподобающим образом в чате' : '',
+          chatMessages: demoChatMessages,
+          createdAt: createdAt.toISOString(),
+          status: status,
+          adminResponse: status === 'resolved' ? 'Пользователь предупрежден о правилах поведения' : 
+                       status === 'rejected' ? 'Жалоба не подтвердилась' : null,
+          resolvedAt: status === 'resolved' || status === 'rejected' ? 
+                     new Date(createdAt.getTime() + Math.floor(Math.random() * 24) * 60 * 60 * 1000).toISOString() : null
+        });
+      }
+      
+      return reports;
+    }
+
     // Обновление статистики
     function updateStats() {
       const total = allUsers.length;
@@ -953,6 +1182,7 @@
       const pendingVerification = allUsers.filter(u => u.verification_status === 'pending').length;
       const active = total - blocked;
       const boosted = allUsers.filter(u => u.boosted).length;
+      const pendingReports = allReports.filter(r => r.status === 'pending').length;
       
       statTotal.textContent = total;
       statNew.textContent = newUsers;
@@ -960,6 +1190,7 @@
       statActive.textContent = active;
       statBlocked.textContent = blocked;
       statBoosted.textContent = boosted;
+      statReports.textContent = pendingReports;
     }
 
     // Фильтрация пользователей по текущей вкладке
@@ -1031,6 +1262,27 @@
       
       filteredUsers = filtered;
       return filtered;
+    }
+
+    // Загрузка жалоб
+    function loadReports() {
+      try {
+        // Пытаемся загрузить из localStorage (из приложения)
+        const saved = localStorage.getItem('siamatch_admin_reports');
+        if (saved) {
+          allReports = JSON.parse(saved);
+          console.log('📂 Загружено жалоб из localStorage:', allReports.length);
+        }
+        
+        // Если нет жалоб, генерируем демо
+        if (allReports.length === 0) {
+          allReports = generateDemoReports(8);
+          console.log('✅ Сгенерировано демо-жалоб:', allReports.length);
+        }
+      } catch (e) {
+        console.error('❌ Ошибка загрузки жалоб:', e);
+        allReports = generateDemoReports(5);
+      }
     }
 
     // Показать модальное окно верификации
@@ -1132,6 +1384,217 @@
       });
       
       swipesModal.classList.remove('hidden');
+    }
+
+    // Показать модальное окно деталей жалобы
+    function showReportDetails(report) {
+      currentReportForDetails = report;
+      
+      reportDetailsId.textContent = report.id;
+      
+      // Определяем статус и цвет
+      const statusInfo = {
+        'pending': { text: 'На рассмотрении', color: 'var(--warning)', icon: '⚠️' },
+        'reviewing': { text: 'В процессе проверки', color: 'var(--info)', icon: '🔍' },
+        'resolved': { text: 'Решено', color: '#10b981', icon: '✅' },
+        'rejected': { text: 'Отклонено', color: 'var(--danger)', icon: '❌' }
+      }[report.status];
+      
+      // Генерируем HTML для деталей жалобы
+      let messagesHtml = '';
+      if (report.chatMessages && report.chatMessages.length > 0) {
+        report.chatMessages.forEach(msg => {
+          const isReporter = msg.sender === 'reporter';
+          messagesHtml += `
+            <div class="chat-message ${isReporter ? 'reporter' : 'reported'}">
+              <div class="message-sender">${isReporter ? report.reporterName : report.reportedUserName}</div>
+              <div class="message-text">${msg.text}</div>
+              <div class="message-time">${msg.date} ${msg.time}</div>
+            </div>
+          `;
+        });
+      } else {
+        messagesHtml = `<div class="chat-message-system">Нет сообщений в диалоге</div>`;
+      }
+      
+      reportDetailsContent.innerHTML = `
+        <div class="report-section">
+          <div class="report-section-title">
+            ${statusInfo.icon} Статус: <span style="color: ${statusInfo.color}">${statusInfo.text}</span>
+          </div>
+          <div style="font-size: 13px; color: var(--muted);">
+            Дата создания: ${new Date(report.createdAt).toLocaleString()}<br>
+            ${report.resolvedAt ? `Дата решения: ${new Date(report.resolvedAt).toLocaleString()}<br>` : ''}
+            ${report.adminResponse ? `Ответ администратора: ${report.adminResponse}` : ''}
+          </div>
+        </div>
+        
+        <div class="report-section">
+          <div class="report-section-title">👥 Участники жалобы</div>
+          <div class="report-user-info">
+            <div class="report-user-card">
+              <div class="report-user-name">${report.reporterName} (Инициатор)</div>
+              <div class="report-user-details">
+                ID: ${report.reporterId}<br>
+                Возраст: ${report.reporterProfile?.age || 'не указан'}<br>
+                Город: ${report.reporterProfile?.city || 'не указан'}<br>
+                Пол: ${report.reporterProfile?.gender === 'male' ? 'Мужской' : 'Женский'}<br>
+                Верификация: ${report.reporterProfile?.verified ? '✅' : '❌'}
+              </div>
+            </div>
+            <div class="report-user-card">
+              <div class="report-user-name">${report.reportedUserName} (На кого пожаловались)</div>
+              <div class="report-user-details">
+                ID: ${report.reportedUserId}<br>
+                Возраст: ${report.reportedUserProfile?.age || 'не указан'}<br>
+                Город: ${report.reportedUserProfile?.city || 'не указан'}<br>
+                Пол: ${report.reportedUserProfile?.gender === 'male' ? 'Мужской' : 'Женский'}<br>
+                Верификация: ${report.reportedUserProfile?.verified ? '✅' : '❌'}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="report-section">
+          <div class="report-section-title">📝 Причина жалобы</div>
+          <div style="padding: 12px; background: rgba(2, 6, 23, 0.7); border-radius: 8px;">
+            <strong>Тип:</strong> ${report.reason}<br>
+            ${report.additionalInfo ? `<strong>Дополнительно:</strong> ${report.additionalInfo}` : ''}
+          </div>
+        </div>
+        
+        <div class="report-section">
+          <div class="report-section-title">💬 Диалог (${report.chatMessages?.length || 0} сообщений)</div>
+          <div class="chat-messages-list">
+            ${messagesHtml}
+          </div>
+        </div>
+        
+        <div class="report-actions">
+          ${report.status === 'pending' ? `
+            <button id="start-review-btn" class="primary">🔍 Начать проверку</button>
+            <button id="reject-report-btn" class="primary danger-btn">❌ Отклонить</button>
+          ` : ''}
+          
+          ${report.status === 'reviewing' ? `
+            <button id="resolve-report-btn" class="primary">✅ Решить</button>
+            <button id="reject-report-btn" class="primary danger-btn">❌ Отклонить</button>
+          ` : ''}
+          
+          ${report.status === 'resolved' || report.status === 'rejected' ? `
+            <button id="reopen-report-btn" class="primary">🔄 Переоткрыть</button>
+          ` : ''}
+          
+          <button id="block-reported-btn" class="primary danger-btn">🚫 Заблокировать пользователя</button>
+        </div>
+      `;
+      
+      reportDetailsModal.classList.remove('hidden');
+      
+      // Обработчики кнопок
+      if (document.getElementById('start-review-btn')) {
+        document.getElementById('start-review-btn').onclick = () => {
+          startReviewReport(report.id);
+        };
+      }
+      
+      if (document.getElementById('resolve-report-btn')) {
+        document.getElementById('resolve-report-btn').onclick = () => {
+          resolveReport(report.id);
+        };
+      }
+      
+      if (document.getElementById('reject-report-btn')) {
+        document.getElementById('reject-report-btn').onclick = () => {
+          rejectReport(report.id);
+        };
+      }
+      
+      if (document.getElementById('reopen-report-btn')) {
+        document.getElementById('reopen-report-btn').onclick = () => {
+          reopenReport(report.id);
+        };
+      }
+      
+      document.getElementById('block-reported-btn').onclick = () => {
+        blockReportedUser(report.reportedUserId);
+      };
+    }
+
+    // Начать проверку жалобы
+    function startReviewReport(reportId) {
+      const report = allReports.find(r => r.id === reportId);
+      if (report) {
+        report.status = 'reviewing';
+        reportDetailsModal.classList.add('hidden');
+        switchTab('reports');
+        showNotification(`🔍 Проверка жалобы #${reportId} начата`);
+      }
+    }
+
+    // Решить жалобу
+    function resolveReport(reportId) {
+      const report = allReports.find(r => r.id === reportId);
+      if (report) {
+        const response = prompt('Введите ответ для пользователя (опционально):', 'Жалоба рассмотрена, пользователь предупрежден');
+        report.status = 'resolved';
+        report.adminResponse = response || 'Жалоба рассмотрена, пользователь предупрежден';
+        report.resolvedAt = new Date().toISOString();
+        reportDetailsModal.classList.add('hidden');
+        switchTab('reports');
+        showNotification(`✅ Жалоба #${reportId} решена`);
+      }
+    }
+
+    // Отклонить жалобу
+    function rejectReport(reportId) {
+      const report = allReports.find(r => r.id === reportId);
+      if (report) {
+        const response = prompt('Введите причину отклонения (опционально):', 'Жалоба не подтвердилась');
+        report.status = 'rejected';
+        report.adminResponse = response || 'Жалоба не подтвердилась';
+        report.resolvedAt = new Date().toISOString();
+        reportDetailsModal.classList.add('hidden');
+        switchTab('reports');
+        showNotification(`❌ Жалоба #${reportId} отклонена`);
+      }
+    }
+
+    // Переоткрыть жалобу
+    function reopenReport(reportId) {
+      const report = allReports.find(r => r.id === reportId);
+      if (report) {
+        report.status = 'pending';
+        report.adminResponse = null;
+        report.resolvedAt = null;
+        reportDetailsModal.classList.add('hidden');
+        switchTab('reports');
+        showNotification(`🔄 Жалоба #${reportId} переоткрыта`);
+      }
+    }
+
+    // Заблокировать пользователя из жалобы
+    function blockReportedUser(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (user) {
+        user.blocked = true;
+        user.is_new = false;
+        
+        // Обновляем все жалобы на этого пользователя
+        allReports.forEach(report => {
+          if (report.reportedUserId === userId && report.status !== 'resolved' && report.status !== 'rejected') {
+            report.status = 'resolved';
+            report.adminResponse = 'Пользователь заблокирован';
+            report.resolvedAt = new Date().toISOString();
+          }
+        });
+        
+        reportDetailsModal.classList.add('hidden');
+        switchTab('reports');
+        updateStats();
+        
+        showNotification(`🚫 Пользователь ${user.name} заблокирован!\n\nВсе активные жалобы на него автоматически решены.`);
+      }
     }
 
     // Применить буст
@@ -1349,6 +1812,175 @@
       });
     }
 
+    // Рендеринг жалоб
+    function renderReports() {
+      usersList.innerHTML = "";
+      
+      if (!allReports.length) {
+        resultsInfo.textContent = "Нет жалоб на рассмотрении";
+        return;
+      }
+      
+      // Сортируем по дате (новые сверху)
+      const sortedReports = [...allReports].sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      
+      const pendingCount = sortedReports.filter(r => r.status === 'pending').length;
+      resultsInfo.textContent = `Жалобы: ${sortedReports.length} шт. (${pendingCount} новых)`;
+      
+      sortedReports.forEach((report) => {
+        const li = document.createElement("li");
+        
+        // Классы для стилизации по статусу
+        const classes = ['user-item', 'report-item'];
+        if (report.status === 'pending') classes.push('new');
+        if (report.status === 'reviewing') classes.push('pending');
+        if (report.status === 'resolved') classes.push('verified');
+        if (report.status === 'rejected') classes.push('blocked');
+        
+        li.className = classes.join(' ');
+
+        const main = document.createElement("div");
+        main.className = "user-main";
+        
+        // Определяем иконку статуса
+        const statusIcon = {
+          'pending': '⚠️',
+          'reviewing': '🔍',
+          'resolved': '✅',
+          'rejected': '❌'
+        }[report.status];
+        
+        const statusText = {
+          'pending': 'На рассмотрении',
+          'reviewing': 'В процессе проверки',
+          'resolved': 'Решено',
+          'rejected': 'Отклонено'
+        }[report.status];
+        
+        // Определяем цвет статуса
+        const statusColor = {
+          'pending': 'var(--warning)',
+          'reviewing': 'var(--info)',
+          'resolved': '#10b981',
+          'rejected': 'var(--danger)'
+        }[report.status];
+        
+        const messageCount = report.chatMessages?.length || 0;
+        const createdAt = new Date(report.createdAt);
+        const timeAgo = getTimeAgo(createdAt);
+        
+        main.innerHTML = `
+          <div class="user-name">
+            ${statusIcon} Жалоба #${report.id}
+            <span class="report-badge" style="background: ${statusColor + '20'}; color: ${statusColor};">
+              ${statusText}
+            </span>
+          </div>
+          <div class="user-meta">
+            <span>👤 От: ${report.reporterName} (ID: ${report.reporterId})</span>
+            <span>🎯 На: ${report.reportedUserName} (ID: ${report.reportedUserId})</span>
+            <span>📝 Причина: ${report.reason}</span>
+            <span>💬 Сообщений: ${messageCount}</span>
+            <span>📅 ${timeAgo}</span>
+            ${report.adminResponse ? `<span>📋 Ответ: ${report.adminResponse.substring(0, 50)}...</span>` : ''}
+          </div>
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "user-actions";
+        
+        const actionsRow1 = document.createElement("div");
+        actionsRow1.className = "user-actions-row";
+        
+        const actionsRow2 = document.createElement("div");
+        actionsRow2.className = "user-actions-row";
+
+        // Кнопка просмотра деталей
+        const viewBtn = document.createElement("button");
+        viewBtn.className = "report-details-btn";
+        viewBtn.textContent = "👁️ Подробнее";
+        viewBtn.onclick = () => {
+          showReportDetails(report);
+        };
+        actionsRow1.appendChild(viewBtn);
+        
+        // Кнопки действий в зависимости от статуса
+        if (report.status === 'pending') {
+          const reviewBtn = document.createElement("button");
+          reviewBtn.className = "verify-btn";
+          reviewBtn.textContent = "🔍 Начать проверку";
+          reviewBtn.onclick = () => {
+            startReviewReport(report.id);
+          };
+          actionsRow2.appendChild(reviewBtn);
+        }
+        
+        if (report.status === 'reviewing') {
+          const resolveBtn = document.createElement("button");
+          resolveBtn.className = "verify-btn";
+          resolveBtn.textContent = "✅ Решить";
+          resolveBtn.onclick = () => {
+            resolveReport(report.id);
+          };
+          actionsRow2.appendChild(resolveBtn);
+          
+          const rejectBtn = document.createElement("button");
+          rejectBtn.className = "reject-btn";
+          rejectBtn.textContent = "❌ Отклонить";
+          rejectBtn.onclick = () => {
+            rejectReport(report.id);
+          };
+          actionsRow2.appendChild(rejectBtn);
+        }
+        
+        if (report.status === 'resolved' || report.status === 'rejected') {
+          const reopenBtn = document.createElement("button");
+          reopenBtn.className = "link-btn";
+          reopenBtn.textContent = "🔄 Переоткрыть";
+          reopenBtn.onclick = () => {
+            reopenReport(report.id);
+          };
+          actionsRow2.appendChild(reopenBtn);
+        }
+        
+        // Кнопка блокировки пользователя
+        if (report.status !== 'rejected') {
+          const blockBtn = document.createElement("button");
+          blockBtn.className = "block-btn";
+          blockBtn.textContent = "🚫 Заблокировать";
+          blockBtn.onclick = () => {
+            blockReportedUser(report.reportedUserId);
+          };
+          actionsRow2.appendChild(blockBtn);
+        }
+
+        actions.appendChild(actionsRow1);
+        actions.appendChild(actionsRow2);
+        li.appendChild(main);
+        li.appendChild(actions);
+        usersList.appendChild(li);
+      });
+    }
+
+    // Вспомогательная функция для форматирования времени
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 60) {
+        return `${diffMins} мин. назад`;
+      } else if (diffHours < 24) {
+        return `${diffHours} ч. назад`;
+      } else {
+        return `${diffDays} дн. назад`;
+      }
+    }
+
     // Переключение вкладок
     function switchTab(tabName) {
       currentTab = tabName;
@@ -1370,15 +2002,25 @@
       // Показываем/скрываем баннеры
       Object.keys(sectionBanners).forEach(key => {
         if (key === tabName) {
-          sectionBanners[key].classList.remove('hidden');
+          sectionBanners[key]?.classList.remove('hidden');
         } else {
-          sectionBanners[key].classList.add('hidden');
+          sectionBanners[key]?.classList.add('hidden');
         }
       });
       
       // Фильтруем и рендерим
-      const users = filterUsersByTab();
-      renderUsers(users);
+      if (tabName === 'reports') {
+        renderReports();
+      } else {
+        const users = filterUsersByTab();
+        renderUsers(users);
+      }
+    }
+
+    // Показать уведомление
+    function showNotification(message) {
+      // В демо-режиме просто используем alert
+      alert(message);
     }
 
     // Логин
@@ -1408,6 +2050,7 @@
       verificationModal.classList.add('hidden');
       boostModal.classList.add('hidden');
       swipesModal.classList.add('hidden');
+      reportDetailsModal.classList.add('hidden');
     }
 
     // Инициализация при загрузке страницы
@@ -1417,6 +2060,10 @@
       // Генерация демо-данных
       allUsers = generateDemoUsers(50);
       console.log('✅ Сгенерировано демо-пользователей:', allUsers.length);
+      
+      // Загрузка жалоб
+      loadReports();
+      console.log('✅ Загружено жалоб:', allReports.length);
       
       // Обработчики для логина
       loginBtn.onclick = handleLogin;
@@ -1441,6 +2088,11 @@
       closeSwipesModalBtn.onclick = () => {
         swipesModal.classList.add('hidden');
         currentUserForSwipes = null;
+      };
+
+      closeReportDetailsBtn.onclick = () => {
+        reportDetailsModal.classList.add('hidden');
+        currentReportForDetails = null;
       };
 
       // Применить буст
@@ -1512,6 +2164,13 @@
         if (e.target === swipesModal) {
           swipesModal.classList.add('hidden');
           currentUserForSwipes = null;
+        }
+      };
+
+      reportDetailsModal.onclick = (e) => {
+        if (e.target === reportDetailsModal) {
+          reportDetailsModal.classList.add('hidden');
+          currentReportForDetails = null;
         }
       };
 
