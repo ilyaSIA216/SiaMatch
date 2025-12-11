@@ -607,10 +607,24 @@ body.keyboard-open #saveProfileBtn {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-top: 10px;
+  overflow-y: auto;
+  max-height: 300px;
+  padding-right: 5px;
+}
+
+/* Специальные стили для списка интересов в фильтрах */
+.filters-interests-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 10px;
+  overflow-y: auto;
+  max-height: 350px;
+  padding-right: 5px;
 }
 
 @media (max-width: 400px) {
-  .interests-list {
+  .interests-list:not(.filters-interests-list) {
     grid-template-columns: 1fr;
   }
 }
@@ -626,6 +640,8 @@ body.keyboard-open #saveProfileBtn {
   border-radius: 10px;
   border: 1px solid rgba(34, 197, 94, 0.1);
   transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .checkbox-field:hover {
@@ -643,60 +659,6 @@ body.keyboard-open #saveProfileBtn {
 
 .checkbox-field input[type="checkbox"]:checked {
   background-color: var(--siamatch-green);
-}
-
-/* СТИЛИ ДЛЯ ФИЛЬТРОВ ПОИСКА */
-#search-filters {
-  margin-bottom: 25px;
-}
-
-#search-filters .interests-list {
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 10px;
-  background: rgba(34, 197, 94, 0.05);
-  border-radius: 12px;
-}
-
-.age-range {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.age-range input {
-  width: 80px !important;
-  padding: 12px;
-  text-align: center;
-}
-
-.age-range span {
-  color: var(--siamatch-green-dark);
-  font-weight: 600;
-  font-size: 20px;
-}
-
-/* КНОПКИ СОХРАНЕНИЯ ИНТЕРЕСОВ И ЦЕЛИ */
-#save-interests,
-#save-dating-goal {
-  margin-top: 15px;
-}
-
-/* ЦЕЛЬ ЗНАКОМСТВА В ФИЛЬТРАХ */
-#search-filters select {
-  margin-top: 5px;
-}
-
-/* АНИМАЦИЯ ПРИ ПРИМЕНЕНИИ ФИЛЬТРОВ */
-@keyframes filterApplied {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-
-.filter-applied {
-  animation: filterApplied 0.5s ease;
 }
 
 /* ===== ЧАТЫ ===== */
@@ -1190,7 +1152,7 @@ select:focus {
     height: 100px;
   }
   
-  .interests-list {
+  .interests-list:not(.filters-interests-list) {
     grid-template-columns: 1fr;
   }
 }
@@ -1275,9 +1237,7 @@ select:focus {
   100% { transform: scale(1); }
 }
 
-/* Добавить в конец файла styles.css */
-
-/* ===== НОВЫЕ СТИЛИ ДЛЯ ФИЛЬТРОВ ===== */
+/* ===== НОВЫЕ СТИЛИ ДЛЯ ЭКРАНА ФИЛЬТРОВ ===== */
 .feed-header {
   display: flex;
   justify-content: space-between;
@@ -1287,7 +1247,14 @@ select:focus {
   gap: 15px;
 }
 
-.filters-toggle-btn {
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.save-filters-btn {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
   border: none;
@@ -1301,39 +1268,48 @@ select:focus {
   gap: 8px;
   box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
   transition: all 0.2s;
-  flex-shrink: 0;
 }
 
-.filters-toggle-btn:active {
+.save-filters-btn:active {
   transform: scale(0.95);
   box-shadow: 0 2px 10px rgba(22, 163, 74, 0.4);
 }
 
-.filters-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.filters-note {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 25px;
+  text-align: center;
+  color: #063b1f;
+  font-size: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
-.close-filters-btn {
-  background: #f3f4f6;
-  color: #666;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.filters-note p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Стили для селекта в фильтрах */
+.filters-select {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  border-radius: 14px;
+  border: 2px solid #bbf7d0;
+  background-color: #ffffff;
+  color: #000;
   transition: all 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: 10px;
 }
 
-.close-filters-btn:active {
-  background: #e5e7eb;
-  transform: scale(0.95);
+.filters-select:focus {
+  border-color: var(--siamatch-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  outline: none;
 }
 
 /* ===== СТИЛИ ДЛЯ БУСТА ===== */
@@ -1372,100 +1348,6 @@ select:focus {
 .boost-status.not-boosted {
   background: rgba(107, 114, 128, 0.15);
   color: #6b7280;
-}
-
-.boost-btn {
-  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-  color: white !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3) !important;
-}
-
-.boost-btn:active {
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4) !important;
-}
-
-.boost-form-section {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 25px;
-  border: 2px solid rgba(245, 158, 11, 0.3);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-}
-
-.boost-instruction {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.boost-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.boost-option {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 16px;
-  border-radius: 12px;
-  border: 2px solid #e5e7eb;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.boost-option:hover {
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.05);
-}
-
-.boost-option input[type="radio"] {
-  width: 20px;
-  height: 20px;
-  accent-color: #f59e0b;
-  flex-shrink: 0;
-}
-
-.boost-option label {
-  flex: 1;
-  cursor: pointer;
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.boost-option-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
-}
-
-.boost-option-price {
-  font-weight: 700;
-  font-size: 16px;
-  color: #f59e0b;
-}
-
-.boost-option input[type="radio"]:checked + label .boost-option {
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-}
-
-.boost-timer {
-  font-size: 14px;
-  font-weight: 600;
-  color: #d97706;
-  background: rgba(245, 158, 11, 0.1);
-  padding: 8px 16px;
-  border-radius: 20px;
-  margin-top: 10px;
-  display: inline-block;
 }
 
 /* ===== СТИЛИ ДЛЯ СИСТЕМЫ СВАЙПОВ ===== */
@@ -1557,16 +1439,6 @@ select:focus {
   .screen-title {
     text-align: center;
   }
-  
-  .boost-option label {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-  
-  .boost-option-price {
-    align-self: flex-end;
-  }
 }
 
 @media (max-height: 600px) {
@@ -1574,15 +1446,26 @@ select:focus {
     height: 250px;
   }
   
-  .boost-options {
-    gap: 8px;
-  }
-  
-  .boost-option {
-    padding: 12px;
-  }
-  
   .swipes-info {
     padding: 12px;
   }
+}
+
+/* Убираем скроллбар для списка интересов в фильтрах */
+.filters-interests-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filters-interests-list::-webkit-scrollbar-track {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 10px;
+}
+
+.filters-interests-list::-webkit-scrollbar-thumb {
+  background: var(--siamatch-green);
+  border-radius: 10px;
+}
+
+.filters-interests-list::-webkit-scrollbar-thumb:hover {
+  background: var(--siamatch-green-dark);
 }
