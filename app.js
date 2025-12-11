@@ -32,7 +32,15 @@ document.addEventListener('DOMContentLoaded', function() {
   let userInterests = [];
   let datingGoal = '';
   
-  // Демо-данные кандидатов (с интересами)
+  // Система буста
+  let boostActive = false;
+  let boostEndTime = null;
+  
+  // Система свайпов
+  let remainingSwipes = 20;
+  let maxSwipesPerDay = 20;
+  
+  // Демо-данные кандидатов (с интересами и статусом буста)
   const candidates = [
     {
       id: 1,
@@ -45,7 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
       verified: true,
       verification_status: 'verified',
       interests: ["travel", "movies", "photography"],
-      dating_goal: "marriage"
+      dating_goal: "marriage",
+      boosted: true,
+      boost_end: Date.now() + 24 * 60 * 60 * 1000 // Буст на 24 часа
     },
     {
       id: 2,
@@ -58,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
       verified: false,
       verification_status: 'pending',
       interests: ["sport", "travel", "cars"],
-      dating_goal: "dating"
+      dating_goal: "dating",
+      boosted: false
     },
     {
       id: 3,
@@ -71,7 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
       verified: true,
       verification_status: 'verified',
       interests: ["art", "photography", "travel"],
-      dating_goal: "friendship"
+      dating_goal: "friendship",
+      boosted: false
     },
     {
       id: 4,
@@ -84,7 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
       verified: true,
       verification_status: 'verified',
       interests: ["business", "travel", "sport"],
-      dating_goal: "marriage"
+      dating_goal: "marriage",
+      boosted: true,
+      boost_end: Date.now() + 12 * 60 * 60 * 1000 // Буст на 12 часов
     },
     {
       id: 5,
@@ -97,72 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
       verified: false,
       verification_status: 'pending',
       interests: ["art", "music", "cooking"],
-      dating_goal: "dating"
-    },
-    {
-      id: 6,
-      name: "Максим",
-      age: 31,
-      gender: "male",
-      city: "Москва",
-      bio: "Программист, увлекаюсь настольными играми и кино.",
-      photo: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true,
-      verification_status: 'verified',
-      interests: ["gaming", "movies", "music"],
-      dating_goal: "virtual"
-    },
-    {
-      id: 7,
-      name: "Анна",
-      age: 27,
-      gender: "female",
-      city: "Санкт-Петербург",
-      bio: "Маркетолог, люблю театр и литературу. Ищу интеллигентного мужчину.",
-      photo: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true,
-      verification_status: 'verified',
-      interests: ["art", "movies", "music"],
-      dating_goal: "marriage"
-    },
-    {
-      id: 8,
-      name: "Артем",
-      age: 30,
-      gender: "male",
-      city: "Казань",
-      bio: "Врач, занимаюсь бегом. Ищу спутницу жизни.",
-      photo: "https://images.pexels.com/photos/2589653/pexels-photo-2589653.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: false,
-      verification_status: 'pending',
-      interests: ["sport", "travel", "photography"],
-      dating_goal: "marriage"
-    },
-    {
-      id: 9,
-      name: "Ольга",
-      age: 22,
-      gender: "female",
-      city: "Екатеринбург",
-      bio: "Студентка, увлекаюсь танцами и музыкой. Ищу друзей для общения.",
-      photo: "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: false,
-      verification_status: 'not_verified',
-      interests: ["dancing", "music", "movies"],
-      dating_goal: "friendship"
-    },
-    {
-      id: 10,
-      name: "Сергей",
-      age: 33,
-      gender: "male",
-      city: "Нижний Новгород",
-      bio: "Бизнесмен, люблю автомобили и путешествия. Ищу девушку для серьезных отношений.",
-      photo: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=800",
-      verified: true,
-      verification_status: 'verified',
-      interests: ["cars", "travel", "business"],
-      dating_goal: "marriage"
+      dating_goal: "dating",
+      boosted: false
     }
   ];
   
@@ -184,6 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabChatsBadge = document.getElementById('tab-chats-badge');
   
   // Фильтры поиска
+  const searchFiltersContainer = document.getElementById('search-filters');
+  const openFiltersBtn = document.getElementById('open-filters-btn');
+  const closeFiltersBtn = document.getElementById('close-filters-btn');
   const searchMinAge = document.getElementById('search-min-age');
   const searchMaxAge = document.getElementById('search-max-age');
   const applyFiltersBtn = document.getElementById('apply-filters');
@@ -192,6 +145,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const saveInterestsBtn = document.getElementById('save-interests');
   const datingGoalSelect = document.getElementById('dating-goal');
   const saveDatingGoalBtn = document.getElementById('save-dating-goal');
+  
+  // Буст профиля
+  const boostProfileBtn = document.getElementById('boostProfileBtn');
+  const boostFormSection = document.getElementById('boost-form-section');
+  const submitBoostBtn = document.getElementById('submit-boost');
+  const cancelBoostBtn = document.getElementById('cancel-boost');
+  const boostActiveSection = document.getElementById('boost-active-section');
+  const boostTimerElement = document.getElementById('boost-timer');
+  const boostStatusElement = document.getElementById('boost-status');
+  
+  // Система свайпов
+  const swipesInfo = document.getElementById('swipes-info');
+  const remainingSwipesElement = document.getElementById('remaining-swipes');
+  const buySwipesBtn = document.getElementById('buy-swipes-btn');
   
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
@@ -328,6 +295,398 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {
       console.error("❌ Ошибка сохранения профиля:", e);
       return false;
+    }
+  }
+  
+  // ===== СИСТЕМА ФИЛЬТРОВ =====
+  function initFiltersSystem() {
+    console.log('🔍 Инициализирую систему фильтров');
+    
+    loadSearchFilters();
+    
+    if (openFiltersBtn) {
+      openFiltersBtn.addEventListener('click', openFilters);
+    }
+    
+    if (closeFiltersBtn) {
+      closeFiltersBtn.addEventListener('click', closeFilters);
+    }
+    
+    initSearchFilters();
+  }
+  
+  function openFilters() {
+    searchFiltersContainer.classList.remove('hidden');
+    openFiltersBtn.classList.add('hidden');
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
+  function closeFilters() {
+    searchFiltersContainer.classList.add('hidden');
+    openFiltersBtn.classList.remove('hidden');
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
+  function initSearchFilters() {
+    loadSearchFilters();
+    
+    if (searchMinAge) {
+      searchMinAge.value = searchFilters.minAge;
+      searchMinAge.addEventListener('change', function() {
+        searchFilters.minAge = parseInt(this.value) || 18;
+      });
+    }
+    
+    if (searchMaxAge) {
+      searchMaxAge.value = searchFilters.maxAge;
+      searchMaxAge.addEventListener('change', function() {
+        searchFilters.maxAge = parseInt(this.value) || 35;
+      });
+    }
+    
+    document.querySelectorAll('.search-interest').forEach(checkbox => {
+      checkbox.checked = searchFilters.interests.includes(checkbox.value);
+      
+      checkbox.addEventListener('change', function() {
+        const interest = this.value;
+        if (this.checked) {
+          if (!searchFilters.interests.includes(interest)) {
+            searchFilters.interests.push(interest);
+          }
+        } else {
+          const index = searchFilters.interests.indexOf(interest);
+          if (index > -1) {
+            searchFilters.interests.splice(index, 1);
+          }
+        }
+      });
+    });
+    
+    const searchDatingGoalSelect = document.getElementById('search-dating-goal');
+    if (searchDatingGoalSelect) {
+      searchDatingGoalSelect.value = searchFilters.datingGoal;
+      searchDatingGoalSelect.addEventListener('change', function() {
+        searchFilters.datingGoal = this.value;
+      });
+    }
+    
+    if (applyFiltersBtn) {
+      applyFiltersBtn.addEventListener('click', function() {
+        saveSearchFilters();
+        closeFilters();
+        alert('✅ Фильтры применены!\n\nТеперь в ленте будут показываться только подходящие анкеты. 🎯');
+        initFeed();
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.impactOccurred('medium');
+          } catch (e) {}
+        }
+      });
+    }
+  }
+  
+  function loadSearchFilters() {
+    try {
+      const saved = localStorage.getItem("siamatch_search_filters");
+      if (saved) {
+        const data = JSON.parse(saved);
+        searchFilters.minAge = data.minAge || 18;
+        searchFilters.maxAge = data.maxAge || 35;
+        searchFilters.interests = data.interests || [];
+        searchFilters.datingGoal = data.datingGoal || '';
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки фильтров:", e);
+    }
+  }
+  
+  function saveSearchFilters() {
+    try {
+      localStorage.setItem("siamatch_search_filters", JSON.stringify(searchFilters));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения фильтров:", e);
+    }
+  }
+  
+  // ===== СИСТЕМА БУСТА =====
+  function initBoostSystem() {
+    console.log('🚀 Инициализирую систему буста');
+    
+    loadBoostStatus();
+    updateBoostUI();
+    
+    if (boostProfileBtn) {
+      boostProfileBtn.addEventListener('click', handleBoostRequest);
+    }
+    
+    if (submitBoostBtn) {
+      submitBoostBtn.addEventListener('click', activateBoost);
+    }
+    
+    if (cancelBoostBtn) {
+      cancelBoostBtn.addEventListener('click', cancelBoost);
+    }
+    
+    // Запускаем таймер обновления
+    setInterval(updateBoostTimer, 1000);
+  }
+  
+  function loadBoostStatus() {
+    try {
+      const saved = localStorage.getItem("siamatch_boost");
+      if (saved) {
+        const data = JSON.parse(saved);
+        boostActive = data.active || false;
+        boostEndTime = data.endTime || null;
+        
+        if (boostActive && boostEndTime) {
+          if (Date.now() > boostEndTime) {
+            boostActive = false;
+            saveBoostStatus();
+          }
+        }
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки статуса буста:", e);
+    }
+  }
+  
+  function saveBoostStatus() {
+    try {
+      const data = {
+        active: boostActive,
+        endTime: boostEndTime,
+        timestamp: Date.now()
+      };
+      localStorage.setItem("siamatch_boost", JSON.stringify(data));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения статуса буста:", e);
+    }
+  }
+  
+  function updateBoostUI() {
+    if (!boostStatusElement) return;
+    
+    if (boostActive && boostEndTime) {
+      boostStatusElement.textContent = 'Активен';
+      boostStatusElement.className = 'boost-status boosted';
+      
+      if (boostActiveSection) {
+        boostActiveSection.classList.remove('hidden');
+      }
+      if (boostProfileBtn) {
+        boostProfileBtn.style.display = 'none';
+      }
+      if (boostFormSection) {
+        boostFormSection.classList.add('hidden');
+      }
+    } else {
+      boostStatusElement.textContent = 'Не активен';
+      boostStatusElement.className = 'boost-status not-boosted';
+      
+      if (boostActiveSection) {
+        boostActiveSection.classList.add('hidden');
+      }
+      if (boostProfileBtn) {
+        boostProfileBtn.style.display = 'block';
+      }
+    }
+  }
+  
+  function updateBoostTimer() {
+    if (!boostActive || !boostEndTime) return;
+    
+    const now = Date.now();
+    if (now >= boostEndTime) {
+      boostActive = false;
+      saveBoostStatus();
+      updateBoostUI();
+      return;
+    }
+    
+    const timeLeft = boostEndTime - now;
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    
+    if (boostTimerElement) {
+      boostTimerElement.textContent = `Осталось: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+  
+  function handleBoostRequest() {
+    if (boostFormSection) {
+      boostFormSection.classList.remove('hidden');
+      boostProfileBtn.style.display = 'none';
+    }
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
+  function activateBoost() {
+    const selectedDuration = document.querySelector('input[name="boost-duration"]:checked');
+    if (!selectedDuration) {
+      alert('Выберите продолжительность буста');
+      return;
+    }
+    
+    const durationHours = parseInt(selectedDuration.value);
+    boostActive = true;
+    boostEndTime = Date.now() + (durationHours * 60 * 60 * 1000);
+    saveBoostStatus();
+    updateBoostUI();
+    
+    if (boostFormSection) {
+      boostFormSection.classList.add('hidden');
+    }
+    
+    let message = '';
+    if (durationHours === 24) {
+      message = '✅ Бесплатный буст на 24 часа активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
+    } else if (durationHours === 72) {
+      message = '✅ Буст на 72 часа активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
+    } else if (durationHours === 168) {
+      message = '✅ Буст на 7 дней активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
+    }
+    
+    alert(message);
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.impactOccurred('heavy');
+      } catch (e) {}
+    }
+  }
+  
+  function cancelBoost() {
+    if (boostFormSection) {
+      boostFormSection.classList.add('hidden');
+    }
+    if (boostProfileBtn) {
+      boostProfileBtn.style.display = 'block';
+    }
+  }
+  
+  // ===== СИСТЕМА СВАЙПОВ =====
+  function initSwipesSystem() {
+    console.log('🔄 Инициализирую систему свайпов');
+    
+    loadSwipesCount();
+    updateSwipesUI();
+    
+    if (buySwipesBtn) {
+      buySwipesBtn.addEventListener('click', handleBuySwipes);
+    }
+  }
+  
+  function loadSwipesCount() {
+    try {
+      const saved = localStorage.getItem("siamatch_swipes");
+      if (saved) {
+        const data = JSON.parse(saved);
+        const today = new Date().toDateString();
+        
+        if (data.date === today) {
+          remainingSwipes = data.remaining || maxSwipesPerDay;
+        } else {
+          remainingSwipes = maxSwipesPerDay;
+          saveSwipesCount();
+        }
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки количества свайпов:", e);
+    }
+  }
+  
+  function saveSwipesCount() {
+    try {
+      const data = {
+        date: new Date().toDateString(),
+        remaining: remainingSwipes,
+        totalUsed: maxSwipesPerDay - remainingSwipes
+      };
+      localStorage.setItem("siamatch_swipes", JSON.stringify(data));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения количества свайпов:", e);
+    }
+  }
+  
+  function updateSwipesUI() {
+    if (remainingSwipesElement) {
+      remainingSwipesElement.textContent = remainingSwipes;
+    }
+    
+    if (swipesInfo) {
+      if (remainingSwipes <= 5) {
+        swipesInfo.classList.remove('hidden');
+      } else {
+        swipesInfo.classList.add('hidden');
+      }
+    }
+  }
+  
+  function useSwipe() {
+    if (remainingSwipes > 0) {
+      remainingSwipes--;
+      saveSwipesCount();
+      updateSwipesUI();
+      
+      if (remainingSwipes === 0) {
+        setTimeout(() => {
+          alert('🎯 Свайпы на сегодня закончились!\n\nВы можете:\n1. Подождать до завтра\n2. Купить дополнительные свайпы\n3. Активировать буст для увеличения лимита');
+        }, 300);
+      }
+      
+      return true;
+    } else {
+      alert('🚫 Свайпы на сегодня закончились!\n\nКупите дополнительные свайпы или подождите до завтра.');
+      return false;
+    }
+  }
+  
+  function handleBuySwipes() {
+    const options = [
+      { count: 10, price: 99 },
+      { count: 25, price: 199 },
+      { count: 50, price: 349 },
+      { count: 100, price: 599 }
+    ];
+    
+    let message = '🛒 Купить дополнительные свайпы:\n\n';
+    options.forEach((option, index) => {
+      message += `${index + 1}. ${option.count} свайпов - ${option.price} ₽\n`;
+    });
+    message += '\nВыберите пакет:';
+    
+    const choice = prompt(message);
+    if (choice && ['1', '2', '3', '4'].includes(choice)) {
+      const selected = options[parseInt(choice) - 1];
+      remainingSwipes += selected.count;
+      saveSwipesCount();
+      updateSwipesUI();
+      
+      alert(`✅ Успешно!\n\nВы купили ${selected.count} дополнительных свайпов за ${selected.price} ₽.\nТеперь у вас ${remainingSwipes} свайпов.`);
+      
+      if (tg?.HapticFeedback) {
+        try {
+          tg.HapticFeedback.impactOccurred('medium');
+        } catch (e) {}
+      }
     }
   }
   
@@ -681,82 +1040,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (verifyBtn) verifyBtn.style.display = 'block';
   }
   
-  // ===== ФУНКЦИИ ФИЛЬТРОВ ПОИСКА =====
-  function initSearchFilters() {
-    loadSearchFilters();
-    
-    if (searchMinAge) {
-      searchMinAge.value = searchFilters.minAge;
-      searchMinAge.addEventListener('change', function() {
-        searchFilters.minAge = parseInt(this.value) || 18;
-      });
-    }
-    
-    if (searchMaxAge) {
-      searchMaxAge.value = searchFilters.maxAge;
-      searchMaxAge.addEventListener('change', function() {
-        searchFilters.maxAge = parseInt(this.value) || 35;
-      });
-    }
-    
-    document.querySelectorAll('.search-interest').forEach(checkbox => {
-      checkbox.checked = searchFilters.interests.includes(checkbox.value);
-      
-      checkbox.addEventListener('change', function() {
-        const interest = this.value;
-        if (this.checked) {
-          if (!searchFilters.interests.includes(interest)) {
-            searchFilters.interests.push(interest);
-          }
-        } else {
-          const index = searchFilters.interests.indexOf(interest);
-          if (index > -1) {
-            searchFilters.interests.splice(index, 1);
-          }
-        }
-      });
-    });
-    
-    const searchDatingGoalSelect = document.getElementById('search-dating-goal');
-    if (searchDatingGoalSelect) {
-      searchDatingGoalSelect.value = searchFilters.datingGoal;
-      searchDatingGoalSelect.addEventListener('change', function() {
-        searchFilters.datingGoal = this.value;
-      });
-    }
-    
-    if (applyFiltersBtn) {
-      applyFiltersBtn.addEventListener('click', function() {
-        saveSearchFilters();
-        alert('Фильтры применены! 🎯\n\nИщем анкеты по вашим критериям...');
-        initFeed();
-      });
-    }
-  }
-  
-  function loadSearchFilters() {
-    try {
-      const saved = localStorage.getItem("siamatch_search_filters");
-      if (saved) {
-        const data = JSON.parse(saved);
-        searchFilters.minAge = data.minAge || 18;
-        searchFilters.maxAge = data.maxAge || 35;
-        searchFilters.interests = data.interests || [];
-        searchFilters.datingGoal = data.datingGoal || '';
-      }
-    } catch (e) {
-      console.error("❌ Ошибка загрузки фильтров:", e);
-    }
-  }
-  
-  function saveSearchFilters() {
-    try {
-      localStorage.setItem("siamatch_search_filters", JSON.stringify(searchFilters));
-    } catch (e) {
-      console.error("❌ Ошибка сохранения фильтров:", e);
-    }
-  }
-  
   // ===== СИСТЕМА ИНТЕРЕСОВ =====
   function initInterestsSystem() {
     console.log('🎯 Инициализирую систему интересов');
@@ -957,11 +1240,13 @@ document.addEventListener('DOMContentLoaded', function() {
         initVerification();
         initLikesSystem();
         initInterestsSystem();
-        initSearchFilters();
+        initFiltersSystem();
+        initBoostSystem();
+        initSwipesSystem();
         showMainApp();
         
         setTimeout(() => {
-          alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀\n\nТеперь вы можете:\n1. Пройти верификацию анкеты\n2. Выбрать свои интересы\n3. Настроить фильтры поиска");
+          alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀\n\nТеперь вы можете:\n1. Пройти верификацию анкеты\n2. Выбрать свои интересы\n3. Настроить фильтры поиска\n4. Активировать буст анкеты");
         }, 300);
       } else {
         alert("❌ Ошибка при сохранении профиля");
@@ -981,7 +1266,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initVerification();
     initLikesSystem();
     initInterestsSystem();
-    initSearchFilters();
+    initFiltersSystem();
+    initBoostSystem();
+    initSwipesSystem();
     
     setActiveTab("feed");
   }
@@ -1035,6 +1322,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== ЛЕНТА СВАЙПОВ С ФИЛЬТРАЦИЕЙ =====
   function initFeed() {
     currentIndex = 0;
+    closeFilters(); // Закрываем фильтры по умолчанию
     initSearchFilters();
     showCurrentCandidate();
     
@@ -1055,6 +1343,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function getFilteredCandidates() {
     let filtered = candidates.filter(c => !likedIds.includes(c.id));
     
+    // Применяем фильтры
     filtered = filtered.filter(c => {
       return c.age >= searchFilters.minAge && c.age <= searchFilters.maxAge;
     });
@@ -1073,6 +1362,13 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
+    // Сортируем: сначала бустированные анкеты
+    filtered.sort((a, b) => {
+      if (a.boosted && !b.boosted) return -1;
+      if (!a.boosted && b.boosted) return 1;
+      return 0;
+    });
+    
     return filtered;
   }
   
@@ -1089,6 +1385,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const verifiedBadge = document.getElementById('candidate-verified');
       if (verifiedBadge) verifiedBadge.classList.add('hidden');
       
+      const boostBadge = document.getElementById('candidate-boost');
+      if (boostBadge) boostBadge.classList.add('hidden');
+      
       document.getElementById("feed-status").textContent = 
         "Нет подходящих анкет по вашим фильтрам. Попробуйте изменить параметры поиска 🍀";
       return;
@@ -1103,6 +1402,9 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const verifiedBadge = document.getElementById('candidate-verified');
       if (verifiedBadge) verifiedBadge.classList.add('hidden');
+      
+      const boostBadge = document.getElementById('candidate-boost');
+      if (boostBadge) boostBadge.classList.add('hidden');
       
       document.getElementById("feed-status").textContent = 
         "На сегодня всё! Загляните позже 🍀";
@@ -1126,9 +1428,20 @@ document.addEventListener('DOMContentLoaded', function() {
         verifiedBadge.classList.add('hidden');
       }
     }
+    
+    const boostBadge = document.getElementById('candidate-boost');
+    if (boostBadge) {
+      if (candidate.boosted) {
+        boostBadge.classList.remove('hidden');
+      } else {
+        boostBadge.classList.add('hidden');
+      }
+    }
   }
   
   function handleLike() {
+    if (!useSwipe()) return;
+    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
@@ -1149,6 +1462,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function handleDislike() {
+    if (!useSwipe()) return;
+    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
@@ -1189,6 +1504,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     updateVerificationUI();
+    updateBoostUI();
     initInterestsSystem();
   }
   
@@ -1271,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (tg?.HapticFeedback) {
           try {
-            tg.HapticFeedback.impactOccurred('light');
+          tg.HapticFeedback.impactOccurred('light');
         } catch (e) {}
         }
       } else {
@@ -1381,7 +1697,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initLikesSystem();
     initInterestsSystem();
-    initSearchFilters();
+    initFiltersSystem();
+    initBoostSystem();
+    initSwipesSystem();
     
     console.log('✅ Приложение инициализировано');
   }
