@@ -134,26 +134,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabChatsBadge = document.getElementById('tab-chats-badge');
   
   // Фильтры поиска
-  const searchFiltersContainer = document.getElementById('search-filters');
-  const openFiltersBtn = document.getElementById('open-filters-btn');
-  const closeFiltersBtn = document.getElementById('close-filters-btn');
+  const saveFiltersBtn = document.getElementById('save-filters-btn');
   const searchMinAge = document.getElementById('search-min-age');
   const searchMaxAge = document.getElementById('search-max-age');
-  const applyFiltersBtn = document.getElementById('apply-filters');
   
   // Интересы пользователя
   const saveInterestsBtn = document.getElementById('save-interests');
   const datingGoalSelect = document.getElementById('dating-goal');
   const saveDatingGoalBtn = document.getElementById('save-dating-goal');
-  
-  // Буст профиля
-  const boostProfileBtn = document.getElementById('boostProfileBtn');
-  const boostFormSection = document.getElementById('boost-form-section');
-  const submitBoostBtn = document.getElementById('submit-boost');
-  const cancelBoostBtn = document.getElementById('cancel-boost');
-  const boostActiveSection = document.getElementById('boost-active-section');
-  const boostTimerElement = document.getElementById('boost-timer');
-  const boostStatusElement = document.getElementById('boost-status');
   
   // Система свайпов
   const swipesInfo = document.getElementById('swipes-info');
@@ -304,37 +292,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     loadSearchFilters();
     
+    // Удаляем старую кнопку открытия фильтров
+    const openFiltersBtn = document.getElementById("open-filters-btn");
     if (openFiltersBtn) {
-      openFiltersBtn.addEventListener('click', openFilters);
-    }
-    
-    if (closeFiltersBtn) {
-      closeFiltersBtn.addEventListener('click', closeFilters);
+      openFiltersBtn.parentNode.removeChild(openFiltersBtn);
     }
     
     initSearchFilters();
-  }
-  
-  function openFilters() {
-    searchFiltersContainer.classList.remove('hidden');
-    openFiltersBtn.classList.add('hidden');
-    
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.selectionChanged();
-      } catch (e) {}
-    }
-  }
-  
-  function closeFilters() {
-    searchFiltersContainer.classList.add('hidden');
-    openFiltersBtn.classList.remove('hidden');
-    
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.selectionChanged();
-      } catch (e) {}
-    }
   }
   
   function initSearchFilters() {
@@ -380,12 +344,13 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
-    if (applyFiltersBtn) {
-      applyFiltersBtn.addEventListener('click', function() {
+    if (saveFiltersBtn) {
+      saveFiltersBtn.addEventListener('click', function() {
         saveSearchFilters();
-        closeFilters();
-        alert('✅ Фильтры применены!\n\nТеперь в ленте будут показываться только подходящие анкеты. 🎯');
-        initFeed();
+        setActiveTab("feed");
+        
+        // Просто показываем уведомление без alert
+        showNotification('✅ Фильтры применены!\n\nТеперь в ленте будут показываться только подходящие анкеты. 🎯');
         
         if (tg?.HapticFeedback) {
           try {
@@ -426,16 +391,27 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBoostStatus();
     updateBoostUI();
     
+    // Удаляем кнопку покупки буста
+    const boostProfileBtn = document.getElementById('boostProfileBtn');
     if (boostProfileBtn) {
-      boostProfileBtn.addEventListener('click', handleBoostRequest);
+      boostProfileBtn.parentNode.removeChild(boostProfileBtn);
     }
     
-    if (submitBoostBtn) {
-      submitBoostBtn.addEventListener('click', activateBoost);
+    // Удаляем форму буста
+    const boostFormSection = document.getElementById('boost-form-section');
+    if (boostFormSection) {
+      boostFormSection.parentNode.removeChild(boostFormSection);
     }
     
-    if (cancelBoostBtn) {
-      cancelBoostBtn.addEventListener('click', cancelBoost);
+    // Обновляем секцию буста
+    const boostInfoRow = document.querySelector('.profile-info-row:nth-child(5)');
+    if (boostInfoRow) {
+      boostInfoRow.innerHTML = `
+        <span class="info-label">Буст:</span>
+        <span id="boost-status" class="boost-status not-boosted">
+          Доступен только из админ-панели
+        </span>
+      `;
     }
     
     // Запускаем таймер обновления
@@ -485,21 +461,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (boostActiveSection) {
         boostActiveSection.classList.remove('hidden');
       }
-      if (boostProfileBtn) {
-        boostProfileBtn.style.display = 'none';
-      }
-      if (boostFormSection) {
-        boostFormSection.classList.add('hidden');
-      }
     } else {
-      boostStatusElement.textContent = 'Не активен';
+      boostStatusElement.textContent = 'Доступен только из админ-панели';
       boostStatusElement.className = 'boost-status not-boosted';
       
       if (boostActiveSection) {
         boostActiveSection.classList.add('hidden');
-      }
-      if (boostProfileBtn) {
-        boostProfileBtn.style.display = 'block';
       }
     }
   }
@@ -522,63 +489,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (boostTimerElement) {
       boostTimerElement.textContent = `Осталось: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-  }
-  
-  function handleBoostRequest() {
-    if (boostFormSection) {
-      boostFormSection.classList.remove('hidden');
-      boostProfileBtn.style.display = 'none';
-    }
-    
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.selectionChanged();
-      } catch (e) {}
-    }
-  }
-  
-  function activateBoost() {
-    const selectedDuration = document.querySelector('input[name="boost-duration"]:checked');
-    if (!selectedDuration) {
-      alert('Выберите продолжительность буста');
-      return;
-    }
-    
-    const durationHours = parseInt(selectedDuration.value);
-    boostActive = true;
-    boostEndTime = Date.now() + (durationHours * 60 * 60 * 1000);
-    saveBoostStatus();
-    updateBoostUI();
-    
-    if (boostFormSection) {
-      boostFormSection.classList.add('hidden');
-    }
-    
-    let message = '';
-    if (durationHours === 24) {
-      message = '✅ Бесплатный буст на 24 часа активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
-    } else if (durationHours === 72) {
-      message = '✅ Буст на 72 часа активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
-    } else if (durationHours === 168) {
-      message = '✅ Буст на 7 дней активирован!\n\nВаша анкета будет показываться чаще в ленте других пользователей. 🚀';
-    }
-    
-    alert(message);
-    
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.impactOccurred('heavy');
-      } catch (e) {}
-    }
-  }
-  
-  function cancelBoost() {
-    if (boostFormSection) {
-      boostFormSection.classList.add('hidden');
-    }
-    if (boostProfileBtn) {
-      boostProfileBtn.style.display = 'block';
     }
   }
   
@@ -648,13 +558,13 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (remainingSwipes === 0) {
         setTimeout(() => {
-          alert('🎯 Свайпы на сегодня закончились!\n\nВы можете:\n1. Подождать до завтра\n2. Купить дополнительные свайпы\n3. Активировать буст для увеличения лимита');
+          showNotification('🎯 Свайпы на сегодня закончились!\n\nВы можете:\n1. Подождать до завтра\n2. Купить дополнительные свайпы');
         }, 300);
       }
       
       return true;
     } else {
-      alert('🚫 Свайпы на сегодня закончились!\n\nКупите дополнительные свайпы или подождите до завтра.');
+      showNotification('🚫 Свайпы на сегодня закончились!\n\nКупите дополнительные свайпы или подождите до завтра.');
       return false;
     }
   }
@@ -680,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
       saveSwipesCount();
       updateSwipesUI();
       
-      alert(`✅ Успешно!\n\nВы купили ${selected.count} дополнительных свайпов за ${selected.price} ₽.\nТеперь у вас ${remainingSwipes} свайпов.`);
+      showNotification(`✅ Успешно!\n\nВы купили ${selected.count} дополнительных свайпов за ${selected.price} ₽.\nТеперь у вас ${remainingSwipes} свайпов.`);
       
       if (tg?.HapticFeedback) {
         try {
@@ -815,9 +725,9 @@ document.addEventListener('DOMContentLoaded', function() {
       ];
       
       const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-      alert(randomMessage);
+      showNotification(randomMessage);
     } else {
-      alert('Пока нет лайков, но это временно! Продолжайте активно использовать приложение, и скоро появятся первые симпатии! 💕');
+      showNotification('Пока нет лайков, но это временно! Продолжайте активно использовать приложение, и скоро появятся первые симпатии! 💕');
     }
     
     if (tg?.HapticFeedback) {
@@ -963,7 +873,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('Фото слишком большое (максимум 5MB)');
+      showNotification('Фото слишком большое (максимум 5MB)');
       return;
     }
     
@@ -982,7 +892,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function submitVerification() {
     if (!verificationPhoto) {
-      alert('Сначала загрузите селфи фото');
+      showNotification('Сначала загрузите селфи фото');
       return;
     }
     
@@ -999,7 +909,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } catch (e) {}
     }
     
-    alert('✅ Запрос на верификацию отправлен!\n\nАнкета будет проверена администратором в течение 24 часов.\n\nВы получите уведомление, когда проверка будет завершена.');
+    showNotification('✅ Запрос на верификацию отправлен!\n\nАнкета будет проверена администратором в течение 24 часов.\n\nВы получите уведомление, когда проверка будет завершена.');
   }
   
   function cancelVerification() {
@@ -1090,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       localStorage.setItem("siamatch_interests", JSON.stringify(data));
       
-      alert('✅ Интересы сохранены!');
+      showNotification('✅ Интересы сохранены!');
       
       if (tg?.HapticFeedback) {
         try {
@@ -1099,19 +1009,19 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch (e) {
       console.error("❌ Ошибка сохранения интересов:", e);
-      alert('❌ Ошибка при сохранении интересов');
+      showNotification('❌ Ошибка при сохранении интересов');
     }
   }
   
   function saveDatingGoal() {
     if (!datingGoal) {
-      alert('Выберите цель знакомства');
+      showNotification('Выберите цель знакомства');
       return;
     }
     
     saveUserInterests();
     
-    alert('✅ Цель знакомства сохранена!');
+    showNotification('✅ Цель знакомства сохранена!');
     
     if (tg?.HapticFeedback) {
       try {
@@ -1202,19 +1112,19 @@ document.addEventListener('DOMContentLoaded', function() {
       const bio = document.getElementById("bio").value.trim();
       
       if (!ageValue || ageValue < 18 || ageValue > 99) {
-        alert("Возраст должен быть от 18 до 99 лет");
+        showNotification("Возраст должен быть от 18 до 99 лет");
         return;
       }
       if (!gender) {
-        alert("Выберите пол");
+        showNotification("Выберите пол");
         return;
       }
       if (!city) {
-        alert("Выберите город");
+        showNotification("Выберите город");
         return;
       }
       if (bio.length < 10) {
-        alert("О себе минимум 10 символов");
+        showNotification("О себе минимум 10 символов");
         return;
       }
       
@@ -1246,10 +1156,10 @@ document.addEventListener('DOMContentLoaded', function() {
         showMainApp();
         
         setTimeout(() => {
-          alert("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀\n\nТеперь вы можете:\n1. Пройти верификацию анкеты\n2. Выбрать свои интересы\n3. Настроить фильтры поиска\n4. Активировать буст анкеты");
+          showNotification("✅ Профиль сохранён! Добро пожаловать в SiaMatch 🍀\n\nТеперь вы можете:\n1. Пройти верификацию анкеты\n2. Выбрать свои интересы\n3. Настроить фильтры поиска");
         }, 300);
       } else {
-        alert("❌ Ошибка при сохранении профиля");
+        showNotification("❌ Ошибка при сохранении профиля");
       }
     }, 300);
   }
@@ -1295,6 +1205,8 @@ document.addEventListener('DOMContentLoaded', function() {
       initFeed();
     } else if (tab === 'profile') {
       initProfile();
+    } else if (tab === 'filters') {
+      initFiltersTab();
     } else if (tab === 'chats') {
       updateLikesUI();
     }
@@ -1322,7 +1234,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== ЛЕНТА СВАЙПОВ С ФИЛЬТРАЦИЕЙ =====
   function initFeed() {
     currentIndex = 0;
-    closeFilters(); // Закрываем фильтры по умолчанию
     initSearchFilters();
     showCurrentCandidate();
     
@@ -1338,6 +1249,11 @@ document.addEventListener('DOMContentLoaded', function() {
       btnDislike.onclick = null;
       btnDislike.addEventListener('click', handleDislike);
     }
+  }
+  
+  function initFiltersTab() {
+    // Просто инициализируем фильтры
+    initSearchFilters();
   }
   
   function getFilteredCandidates() {
@@ -1488,7 +1404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateLikesUI();
         
         setTimeout(() => {
-          alert('🎉 У вас взаимная симпатия! Один из ваших тайных поклонников ответил вам взаимностью! Теперь вы можете начать общение в чатах.');
+          showNotification('🎉 У вас взаимная симпатия! Один из ваших тайных поклонников ответил вам взаимностью! Теперь вы можете начать общение в чатах.');
         }, 500);
       }
     }
@@ -1568,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setTimeout(() => {
       if (!profileData) {
-        alert("Сначала создайте профиль!");
+        showNotification("Сначала создайте профиль!");
         return;
       }
       
@@ -1583,15 +1499,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('profile-display').classList.remove('hidden');
         document.getElementById('profile-edit').classList.add('hidden');
         
-        alert("✅ Профиль обновлён!");
+        showNotification("✅ Профиль обновлён!");
         
         if (tg?.HapticFeedback) {
           try {
-          tg.HapticFeedback.impactOccurred('light');
-        } catch (e) {}
+            tg.HapticFeedback.impactOccurred('light');
+          } catch (e) {}
         }
       } else {
-        alert("❌ Ошибка при обновлении профиля");
+        showNotification("❌ Ошибка при обновлении профиля");
       }
     }, 300);
   }
@@ -1606,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('Фото слишком большое (максимум 5MB)');
+      showNotification('Фото слишком большое (максимум 5MB)');
       return;
     }
     
@@ -1631,10 +1547,98 @@ document.addEventListener('DOMContentLoaded', function() {
         
         profileData.custom_photo_url = event.target.result;
         saveProfile(profileData);
-        alert('Фото загружено! 📸');
+        showNotification('Фото загружено! 📸');
       }
     };
     reader.readAsDataURL(file);
+  }
+  
+  // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+  function showNotification(message) {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+      <div class="notification-content">
+        <div class="notification-text">${message.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+    
+    // Добавляем стили
+    notification.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 20px 25px;
+      border-radius: 15px;
+      z-index: 9999;
+      text-align: center;
+      max-width: 80%;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    const content = notification.querySelector('.notification-content');
+    content.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    const text = notification.querySelector('.notification-text');
+    text.style.cssText = `
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    `;
+    
+    // Добавляем анимацию
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -60%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translate(-50%, -50%); }
+        to { opacity: 0; transform: translate(-50%, -40%); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Добавляем уведомление в DOM
+    document.body.appendChild(notification);
+    
+    // Автоматически скрываем через 3 секунды
+    setTimeout(() => {
+      notification.style.animation = 'fadeOut 0.3s ease forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
+    }, 3000);
+    
+    // Также позволяем закрыть по клику
+    notification.addEventListener('click', () => {
+      notification.style.animation = 'fadeOut 0.3s ease forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
+    });
   }
   
   // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
