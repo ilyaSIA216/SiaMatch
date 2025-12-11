@@ -132,91 +132,6 @@
             </button>
           </div>
           
-          <!-- ФИЛЬТРЫ ПОИСКА (СКРЫТЫ ПО УМОЛЧАНИЮ) -->
-          <div id="search-filters" class="profile-section hidden">
-            <div class="filters-header">
-              <h3 class="section-title">🔍 Фильтры поиска</h3>
-              <button id="close-filters-btn" class="close-filters-btn">✖️</button>
-            </div>
-            
-            <div class="field">
-              <label>Возрастной диапазон</label>
-              <div class="age-range">
-                <input type="number" id="search-min-age" min="18" max="60" value="18" placeholder="От" />
-                <span>—</span>
-                <input type="number" id="search-max-age" min="18" max="60" value="35" placeholder="До" />
-              </div>
-            </div>
-            
-            <div class="field">
-              <label>Интересы для поиска</label>
-              <div class="interests-list">
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="travel" />
-                  Путешествия
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="movies" />
-                  Кино
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="art" />
-                  Искусство
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="sport" />
-                  Спорт
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="photography" />
-                  Фотография
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="dancing" />
-                  Танцы
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="music" />
-                  Музыка
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="cooking" />
-                  Кулинария
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="business" />
-                  Бизнес
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="gaming" />
-                  Гейминг
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="cars" />
-                  Автомобили
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="search-interest" value="anime" />
-                  Аниме
-                </label>
-              </div>
-            </div>
-            
-            <!-- ЦЕЛЬ ЗНАКОМСТВА В ФИЛЬТРАХ -->
-            <div class="field">
-              <label>Цель знакомства</label>
-              <select id="search-dating-goal">
-                <option value="">Любая цель</option>
-                <option value="marriage">Брак и создание семьи</option>
-                <option value="dating">Встречи и свидания</option>
-                <option value="friendship">Дружба и общение</option>
-                <option value="virtual">Виртуальное общение и флирт</option>
-              </select>
-            </div>
-            
-            <button id="apply-filters" class="primary" style="margin-top: 15px;">💾 Применить фильтры</button>
-          </div>
-          
           <!-- АНКЕТА ДЛЯ СВАЙПОВ -->
           <div id="candidate-card">
             <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
@@ -257,6 +172,95 @@
               </div>
             </div>
             <button id="buy-swipes-btn" class="buy-swipes-btn">+ Купить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ЭКРАН ФИЛЬТРОВ -->
+      <div id="screen-filters" class="screen hidden">
+        <div class="screen-content">
+          <div class="filters-header">
+            <h2 class="screen-title">🔍 Фильтры поиска</h2>
+            <button id="save-filters-btn" class="save-filters-btn">💾 Сохранить</button>
+          </div>
+          
+          <div class="profile-section">
+            <h3 class="section-title">Возрастной диапазон</h3>
+            <div class="age-range">
+              <input type="number" id="search-min-age" min="18" max="60" value="18" placeholder="От" />
+              <span>—</span>
+              <input type="number" id="search-max-age" min="18" max="60" value="35" placeholder="До" />
+            </div>
+          </div>
+          
+          <div class="profile-section">
+            <h3 class="section-title">Интересы для поиска</h3>
+            <div class="interests-list filters-interests-list">
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="travel" />
+                Путешествия
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="movies" />
+                Кино
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="art" />
+                Искусство
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="sport" />
+                Спорт
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="photography" />
+                Фотография
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="dancing" />
+                Танцы
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="music" />
+                Музыка
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="cooking" />
+                Кулинария
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="business" />
+                Бизнес
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="gaming" />
+                Гейминг
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="cars" />
+                Автомобили
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="anime" />
+                Аниме
+              </label>
+            </div>
+          </div>
+          
+          <!-- ЦЕЛЬ ЗНАКОМСТВА В ФИЛЬТРАХ -->
+          <div class="profile-section">
+            <h3 class="section-title">Цель знакомства</h3>
+            <select id="search-dating-goal" class="filters-select">
+              <option value="">Любая цель</option>
+              <option value="marriage">Брак и создание семьи</option>
+              <option value="dating">Встречи и свидания</option>
+              <option value="friendship">Дружба и общение</option>
+              <option value="virtual">Виртуальное общение и флирт</option>
+            </select>
+          </div>
+          
+          <div class="filters-note">
+            <p>После сохранения фильтров вы автоматически вернетесь в ленту свайпов.</p>
           </div>
         </div>
       </div>
@@ -321,11 +325,6 @@
               🔐 Верифицировать анкету
             </button>
             
-            <!-- КНОПКА БУСТА -->
-            <button id="boostProfileBtn" class="primary boost-btn" style="margin-top: 10px;">
-              🚀 Буст анкеты
-            </button>
-            
             <!-- ФОРМА ВЕРИФИКАЦИИ (скрыта по умолчанию) -->
             <div id="verification-form-section" class="verification-form-section hidden">
               <h3 class="section-title">🔐 Верификация анкеты</h3>
@@ -381,49 +380,6 @@
               <button id="retry-verification" class="primary">
                 Попробовать снова
               </button>
-            </div>
-            
-            <!-- ФОРМА БУСТА (скрыта по умолчанию) -->
-            <div id="boost-form-section" class="boost-form-section hidden">
-              <h3 class="section-title">🚀 Буст анкеты</h3>
-              <div class="boost-instruction">
-                Буст повышает видимость вашей анкеты в ленте других пользователей на 24 часа.
-              </div>
-              
-              <div class="boost-options">
-                <div class="boost-option">
-                  <input type="radio" id="boost-24h" name="boost-duration" value="24" checked>
-                  <label for="boost-24h">
-                    <div class="boost-option-title">24 часа</div>
-                    <div class="boost-option-price">Бесплатно (демо)</div>
-                  </label>
-                </div>
-                <div class="boost-option">
-                  <input type="radio" id="boost-72h" name="boost-duration" value="72">
-                  <label for="boost-72h">
-                    <div class="boost-option-title">72 часа</div>
-                    <div class="boost-option-price">299 ₽</div>
-                  </label>
-                </div>
-                <div class="boost-option">
-                  <input type="radio" id="boost-7d" name="boost-duration" value="168">
-                  <label for="boost-7d">
-                    <div class="boost-option-title">7 дней</div>
-                    <div class="boost-option-price">499 ₽</div>
-                  </label>
-                </div>
-              </div>
-              
-              <button id="submit-boost" class="primary">Активировать буст</button>
-              <button id="cancel-boost" class="secondary-btn">Отмена</button>
-            </div>
-            
-            <!-- Секция "Буст активен" -->
-            <div id="boost-active-section" class="verification-status-section verified hidden">
-              <div class="verification-status-icon">🚀</div>
-              <h4>Буст активен</h4>
-              <p>Ваша анкета показывается чаще в ленте других пользователей.</p>
-              <div class="boost-timer" id="boost-timer">Осталось: 23:59:59</div>
             </div>
             
             <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
@@ -570,6 +526,7 @@
         <div id="tab-chats-badge" class="tab-notification-badge hidden">0</div>
       </button>
       <button class="tab-btn active" data-tab="feed">🍀</button>
+      <button class="tab-btn" data-tab="filters">🔍</button>
       <button class="tab-btn" data-tab="profile">✏️</button>
     </div>
   </div>
