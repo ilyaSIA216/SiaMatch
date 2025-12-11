@@ -124,11 +124,20 @@
       <!-- ЭКРАН ЛЕНТЫ -->
       <div id="screen-feed" class="screen hidden">
         <div class="screen-content">
-          <h2 class="screen-title">Познакомьтесь 🍀</h2>
+          <!-- ЗАГОЛОВОК С КНОПКОЙ ФИЛЬТРОВ -->
+          <div class="feed-header">
+            <h2 class="screen-title">Познакомьтесь 🍀</h2>
+            <button id="open-filters-btn" class="filters-toggle-btn">
+              🔍 Фильтры
+            </button>
+          </div>
           
-          <!-- ФИЛЬТРЫ ПОИСКА -->
-          <div id="search-filters" class="profile-section">
-            <h3 class="section-title">🔍 Фильтры поиска</h3>
+          <!-- ФИЛЬТРЫ ПОИСКА (СКРЫТЫ ПО УМОЛЧАНИЮ) -->
+          <div id="search-filters" class="profile-section hidden">
+            <div class="filters-header">
+              <h3 class="section-title">🔍 Фильтры поиска</h3>
+              <button id="close-filters-btn" class="close-filters-btn">✖️</button>
+            </div>
             
             <div class="field">
               <label>Возрастной диапазон</label>
@@ -205,12 +214,16 @@
               </select>
             </div>
             
-            <button id="apply-filters" class="primary" style="margin-top: 15px;">Применить фильтры</button>
+            <button id="apply-filters" class="primary" style="margin-top: 15px;">💾 Применить фильтры</button>
           </div>
           
+          <!-- АНКЕТА ДЛЯ СВАЙПОВ -->
           <div id="candidate-card">
             <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
             <div id="candidate-verified" class="candidate-verified hidden">✅</div>
+            
+            <!-- ЗНАЧОК БУСТА (если анкета бустирована) -->
+            <div id="candidate-boost" class="candidate-boost hidden">🚀 Буст</div>
             
             <div class="candidate-photo-wrapper">
               <img id="candidate-photo" src="" alt="Фото" />
@@ -225,12 +238,26 @@
             </div>
           </div>
           
+          <!-- КНОПКИ ДЕЙСТВИЙ -->
           <div class="actions">
             <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
             <button id="btn-like" class="btn-circle btn-like">❤️</button>
           </div>
           
+          <!-- СТАТУС ЛЕНТЫ -->
           <div id="feed-status" class="feed-status"></div>
+          
+          <!-- ИНФОРМАЦИЯ О СВАЙПАХ -->
+          <div id="swipes-info" class="swipes-info hidden">
+            <div class="swipes-info-content">
+              <div class="swipes-info-icon">🔄</div>
+              <div class="swipes-info-text">
+                <div class="swipes-info-title">Свайпы на сегодня</div>
+                <div class="swipes-info-count">Осталось: <span id="remaining-swipes">20</span></div>
+              </div>
+            </div>
+            <button id="buy-swipes-btn" class="buy-swipes-btn">+ Купить</button>
+          </div>
         </div>
       </div>
 
@@ -278,12 +305,25 @@
                     Анкета не верифицирована
                   </span>
                 </div>
+                
+                <!-- СТАТУС БУСТА -->
+                <div class="profile-info-row">
+                  <span class="info-label">Буст:</span>
+                  <span id="boost-status" class="boost-status not-boosted">
+                    Не активен
+                  </span>
+                </div>
               </div>
             </div>
             
             <!-- КНОПКА ВЕРИФИКАЦИИ -->
             <button id="verifyProfileBtn" class="primary verification-btn">
               🔐 Верифицировать анкету
+            </button>
+            
+            <!-- КНОПКА БУСТА -->
+            <button id="boostProfileBtn" class="primary boost-btn" style="margin-top: 10px;">
+              🚀 Буст анкеты
             </button>
             
             <!-- ФОРМА ВЕРИФИКАЦИИ (скрыта по умолчанию) -->
@@ -341,6 +381,49 @@
               <button id="retry-verification" class="primary">
                 Попробовать снова
               </button>
+            </div>
+            
+            <!-- ФОРМА БУСТА (скрыта по умолчанию) -->
+            <div id="boost-form-section" class="boost-form-section hidden">
+              <h3 class="section-title">🚀 Буст анкеты</h3>
+              <div class="boost-instruction">
+                Буст повышает видимость вашей анкеты в ленте других пользователей на 24 часа.
+              </div>
+              
+              <div class="boost-options">
+                <div class="boost-option">
+                  <input type="radio" id="boost-24h" name="boost-duration" value="24" checked>
+                  <label for="boost-24h">
+                    <div class="boost-option-title">24 часа</div>
+                    <div class="boost-option-price">Бесплатно (демо)</div>
+                  </label>
+                </div>
+                <div class="boost-option">
+                  <input type="radio" id="boost-72h" name="boost-duration" value="72">
+                  <label for="boost-72h">
+                    <div class="boost-option-title">72 часа</div>
+                    <div class="boost-option-price">299 ₽</div>
+                  </label>
+                </div>
+                <div class="boost-option">
+                  <input type="radio" id="boost-7d" name="boost-duration" value="168">
+                  <label for="boost-7d">
+                    <div class="boost-option-title">7 дней</div>
+                    <div class="boost-option-price">499 ₽</div>
+                  </label>
+                </div>
+              </div>
+              
+              <button id="submit-boost" class="primary">Активировать буст</button>
+              <button id="cancel-boost" class="secondary-btn">Отмена</button>
+            </div>
+            
+            <!-- Секция "Буст активен" -->
+            <div id="boost-active-section" class="verification-status-section verified hidden">
+              <div class="verification-status-icon">🚀</div>
+              <h4>Буст активен</h4>
+              <p>Ваша анкета показывается чаще в ленте других пользователей.</p>
+              <div class="boost-timer" id="boost-timer">Осталось: 23:59:59</div>
             </div>
             
             <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
