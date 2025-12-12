@@ -186,14 +186,14 @@
       color: white;
       font-weight: 500;
     }
-    .tab-btn[data-tab="all"].active {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    }
     .tab-btn[data-tab="new"].active {
       background: linear-gradient(135deg, var(--info), #2563eb);
     }
     .tab-btn[data-tab="verification"].active {
       background: linear-gradient(135deg, var(--warning), #d97706);
+    }
+    .tab-btn[data-tab="bonus-verification"].active {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     }
     .tab-btn[data-tab="blocked"].active {
       background: linear-gradient(135deg, var(--danger), #dc2626);
@@ -201,14 +201,8 @@
     .tab-btn[data-tab="reports"].active {
       background: linear-gradient(135deg, var(--reports), #db2777);
     }
-    .tab-btn[data-tab="bonus-verification"].active {
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    }
     .tab-btn[data-tab="bonuses"].active {
       background: linear-gradient(135deg, var(--invite), #1d4ed8);
-    }
-    .tab-btn[data-tab="search"].active {
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     }
 
     /* Статистика */
@@ -250,7 +244,7 @@
       color: var(--muted);
     }
 
-    /* Поисковая строка */
+    /* Поисковая строка и фильтры (только для вкладки "Бонусы") */
     #search-row {
       display: flex;
       gap: 8px;
@@ -267,9 +261,8 @@
       white-space: nowrap;
     }
 
-    /* Фильтры */
     #filters-row {
-      display: none;
+      display: flex;
       gap: 8px;
       margin-bottom: 16px;
       flex-wrap: wrap;
@@ -531,19 +524,7 @@
       margin-bottom: 20px;
       border: 1px solid rgba(148, 163, 184, 0.2);
     }
-    .section-banner.all {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
-      border-color: rgba(34, 197, 94, 0.2);
-    }
     .section-banner.new {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
-      border-color: rgba(59, 130, 246, 0.2);
-    }
-    .section-banner.blocked {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
-      border-color: rgba(239, 68, 68, 0.2);
-    }
-    .section-banner.search {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
       border-color: rgba(59, 130, 246, 0.2);
     }
@@ -551,13 +532,17 @@
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
       border-color: rgba(245, 158, 11, 0.2);
     }
-    .section-banner.reports {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.05));
-      border-color: rgba(236, 72, 153, 0.2);
-    }
     .section-banner.bonus-verification {
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05));
       border-color: rgba(139, 92, 246, 0.2);
+    }
+    .section-banner.blocked {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .section-banner.reports {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.05));
+      border-color: rgba(236, 72, 153, 0.2);
     }
     .section-banner.bonuses {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.05));
@@ -827,6 +812,44 @@
       color: var(--muted);
       line-height: 1.4;
     }
+
+    /* Стили для быстрых действий с бонусами */
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .quick-action-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--invite);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .quick-action-btn:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--invite);
+    }
+    
+    .quick-action-btn.boost {
+      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--boost);
+    }
+    
+    .quick-action-btn.boost:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--boost);
+    }
   </style>
 </head>
 <body>
@@ -840,7 +863,7 @@
       <div class="field">
         <label for="password">Пароль</label>
         <input type="password" id="password" autocomplete="off" />
-        <div class="hint">Введите админ‑пароль: <strong></strong></div>
+        <div class="hint">Введите админ‑пароль: <strong>s21i06a95</strong></div>
       </div>
 
       <button id="login-btn" class="primary">Войти</button>
@@ -857,16 +880,14 @@
         <button id="logout-btn">Выйти</button>
       </div>
 
-      <!-- Табы -->
+      <!-- Табы (УБРАЛИ "Все пользователи" и "Поиск") -->
       <div id="admin-tabs">
-        <button class="tab-btn active" data-tab="all">Все пользователи</button>
-        <button class="tab-btn" data-tab="new">Новые</button>
+        <button class="tab-btn active" data-tab="new">Новые</button>
         <button class="tab-btn" data-tab="verification">Верификация ⏳</button>
         <button class="tab-btn" data-tab="bonus-verification">Проверка бонусов ⏳</button>
         <button class="tab-btn" data-tab="blocked">Заблокированные</button>
         <button class="tab-btn" data-tab="reports">Жалобы ⚠️</button>
         <button class="tab-btn" data-tab="bonuses">Бонусы 🎁</button>
-        <button class="tab-btn" data-tab="search">Поиск</button>
       </div>
 
       <!-- Статистика -->
@@ -918,12 +939,7 @@
       </div>
 
       <!-- Баннеры разделов -->
-      <div id="section-banner-all" class="section-banner all">
-        <h3>Все пользователи</h3>
-        <p>Полный список зарегистрированных пользователей. Можно сортировать, фильтровать и выполнять модерацию.</p>
-      </div>
-
-      <div id="section-banner-new" class="section-banner new hidden">
+      <div id="section-banner-new" class="section-banner new">
         <h3>Новые пользователи</h3>
         <p>Пользователи, зарегистрировавшиеся за последние 24 часа. Отслеживайте активность приложения.</p>
       </div>
@@ -948,48 +964,53 @@
         <p>Просмотр и обработка жалоб на пользователей. Здесь вы можете видеть диалоги, причины жалоб и принимать меры.</p>
       </div>
 
+      <!-- НОВЫЙ БАННЕР ДЛЯ БОНУСОВ С ПОИСКОМ -->
       <div id="section-banner-bonuses" class="section-banner bonuses hidden">
-        <h3>Бонусные активности пользователей 🎁</h3>
-        <p>Отслеживание активности пользователей по приглашению друзей, шерингу в Stories и другим бонусным действиям. Начисляйте бонусы вручную.</p>
-      </div>
+        <h3>Начисление бонусов 🎁</h3>
+        <p>Найдите любого пользователя по ID, имени или username и начислите ему бонусные свайпы, буст анкеты или другие награды.</p>
+        
+        <!-- Поисковая строка и фильтры (только для вкладки "Бонусы") -->
+        <div id="search-row">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Поиск по ID, имени, username, городу..."
+          />
+          <button id="search-btn" class="primary">Найти</button>
+        </div>
 
-      <div id="section-banner-search" class="section-banner search hidden">
-        <h3>Расширенный поиск</h3>
-        <p>Поиск по всем полям анкеты. Используйте фильтры для точных результатов.</p>
-      </div>
+        <div id="filters-row">
+          <select id="filter-gender" class="filter-select">
+            <option value="">Все полы</option>
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+          </select>
+          <select id="filter-city" class="filter-select">
+            <option value="">Все города</option>
+            <option value="Москва">Москва</option>
+            <option value="Санкт-Петербург">Санкт-Петербург</option>
+            <option value="Казань">Казань</option>
+          </select>
+          <select id="filter-verification" class="filter-select">
+            <option value="">Все статусы</option>
+            <option value="not_verified">Не верифицированы</option>
+            <option value="pending">На проверке</option>
+            <option value="verified">Верифицированы</option>
+            <option value="rejected">Отклонены</option>
+          </select>
+          <input type="number" id="filter-age-min" class="filter-select" placeholder="Возраст от" min="18" max="99">
+          <input type="number" id="filter-age-max" class="filter-select" placeholder="до" min="18" max="99">
+        </div>
 
-      <!-- Поисковая строка (только для вкладки "Поиск") -->
-      <div id="search-row" class="hidden">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Поиск по ID, имени, username, городу..."
-        />
-        <button id="search-btn" class="primary">Найти</button>
-      </div>
-
-      <!-- Фильтры (только для вкладки "Поиск") -->
-      <div id="filters-row" class="hidden">
-        <select id="filter-gender" class="filter-select">
-          <option value="">Все полы</option>
-          <option value="male">Мужской</option>
-          <option value="female">Женский</option>
-        </select>
-        <select id="filter-city" class="filter-select">
-          <option value="">Все города</option>
-          <option value="Москва">Москва</option>
-          <option value="Санкт-Петербург">Санкт-Петербург</option>
-          <option value="Казань">Казань</option>
-        </select>
-        <select id="filter-verification" class="filter-select">
-          <option value="">Все статусы</option>
-          <option value="not_verified">Не верифицированы</option>
-          <option value="pending">На проверке</option>
-          <option value="verified">Верифицированы</option>
-          <option value="rejected">Отклонены</option>
-        </select>
-        <input type="number" id="filter-age-min" class="filter-select" placeholder="Возраст от" min="18" max="99">
-        <input type="number" id="filter-age-max" class="filter-select" placeholder="до" min="18" max="99">
+        <!-- Быстрые действия -->
+        <div class="quick-actions">
+          <button class="quick-action-btn" data-action="swipes" data-amount="50">🎁 +50 свайпов</button>
+          <button class="quick-action-btn" data-action="swipes" data-amount="100">🎁 +100 свайпов</button>
+          <button class="quick-action-btn boost" data-action="boost" data-hours="24">🚀 Буст 24ч</button>
+          <button class="quick-action-btn boost" data-action="boost" data-hours="72">🚀 Буст 3 дня</button>
+          <button class="quick-action-btn" data-action="verify">✅ Верификация</button>
+          <button class="quick-action-btn" data-action="history">📋 История бонусов</button>
+        </div>
       </div>
 
       <!-- Результаты -->
@@ -1005,9 +1026,7 @@
         <h3>Проверка верификации</h3>
         <button class="close-btn" id="close-modal-btn">×</button>
       </div>
-      <div id="modal-content">
-        <!-- Контент будет заполняться динамически -->
-      </div>
+      <div id="modal-content"></div>
     </div>
   </div>
 
@@ -1017,9 +1036,7 @@
         <h3>📱 Проверка бонусного запроса</h3>
         <button class="close-btn" id="close-bonus-verification-modal-btn">×</button>
       </div>
-      <div id="bonus-verification-modal-content">
-        <!-- Контент будет заполняться динамически -->
-      </div>
+      <div id="bonus-verification-modal-content"></div>
     </div>
   </div>
 
@@ -1181,9 +1198,7 @@
         <h3>⚠️ Детали жалобы #<span id="report-details-id">0</span></h3>
         <button class="close-btn" id="close-report-details-btn">×</button>
       </div>
-      <div id="report-details-content" class="report-details-content">
-        <!-- Контент будет заполняться динамически -->
-      </div>
+      <div id="report-details-content" class="report-details-content"></div>
     </div>
   </div>
 
@@ -1193,9 +1208,7 @@
         <h3>📋 История бонусов пользователя</h3>
         <button class="close-btn" id="close-bonus-history-btn">×</button>
       </div>
-      <div id="bonus-history-content">
-        <!-- Контент будет заполняться динамически -->
-      </div>
+      <div id="bonus-history-content"></div>
     </div>
   </div>
 
@@ -1203,39 +1216,11 @@
     // ================ КОНСТАНТЫ И ПЕРЕМЕННЫЕ ================
     const ADMIN_PASSWORD = "s21i06a95";
     
-    // DOM элементы
-    const loginCard = document.getElementById("login-card");
-    const adminCard = document.getElementById("admin-card");
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const passwordInput = document.getElementById("password");
-    const loginError = document.getElementById("login-error");
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const searchRow = document.getElementById("search-row");
-    const filtersRow = document.getElementById("filters-row");
-    const searchInput = document.getElementById("search-input");
-    const searchBtn = document.getElementById("search-btn");
-    const resultsInfo = document.getElementById("results-info");
-    const usersList = document.getElementById("users-list");
-    
-    // Переменные состояния
-    let currentTab = "all";
+    let currentTab = "new";
     let allUsers = [];
     let allBonusVerifications = [];
-
-    // ================ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ================
-    
-    function getTimeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMs / 3600000);
-      const diffDays = Math.floor(diffMs / 86400000);
-      
-      if (diffMins < 60) return `${diffMins} мин. назад`;
-      else if (diffHours < 24) return `${diffHours} ч. назад`;
-      else return `${diffDays} дн. назад`;
-    }
+    let currentSelectedUser = null;
+    let bonusHistory = [];
 
     // ================ ГЕНЕРАЦИЯ ДЕМО-ДАННЫХ ================
     
@@ -1343,9 +1328,7 @@
     function loadBonusVerifications() {
       try {
         const saved = localStorage.getItem('siamatch_admin_bonus_verifications');
-        if (saved) {
-          allBonusVerifications = JSON.parse(saved);
-        }
+        if (saved) allBonusVerifications = JSON.parse(saved);
         if (allBonusVerifications.length === 0) {
           allBonusVerifications = generateDemoBonusVerifications(10);
         }
@@ -1357,9 +1340,59 @@
     function saveBonusVerifications() {
       try {
         localStorage.setItem('siamatch_admin_bonus_verifications', JSON.stringify(allBonusVerifications));
+      } catch (e) {}
+    }
+
+    function loadBonusHistory() {
+      try {
+        const saved = localStorage.getItem('siamatch_admin_bonus_history');
+        if (saved) bonusHistory = JSON.parse(saved);
       } catch (e) {
-        console.error('Ошибка сохранения запросов:', e);
+        bonusHistory = [];
       }
+    }
+
+    function saveBonusHistory() {
+      try {
+        localStorage.setItem('siamatch_admin_bonus_history', JSON.stringify(bonusHistory));
+      } catch (e) {}
+    }
+
+    function addBonusRecord(userId, type, amount, reason = '', comment = '') {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+      
+      const record = {
+        id: bonusHistory.length + 1,
+        userId: userId,
+        userName: user.name,
+        type: type,
+        amount: amount,
+        reason: reason,
+        comment: comment,
+        adminName: 'Администратор',
+        createdAt: new Date().toISOString()
+      };
+      
+      bonusHistory.push(record);
+      saveBonusHistory();
+      
+      // Обновляем статистику пользователя
+      if (type === 'swipes') {
+        user.remaining_swipes = (user.remaining_swipes || 0) + amount;
+        user.bonus_swipes = (user.bonus_swipes || 0) + amount;
+      } else if (type === 'boost') {
+        user.boosted = true;
+        user.boost_end = new Date(Date.now() + (amount * 60 * 60 * 1000)).toISOString();
+      } else if (type === 'verification') {
+        user.verified = true;
+        user.verification_status = 'verified';
+        user.remaining_swipes = (user.remaining_swipes || 0) + 20;
+        user.bonus_swipes = (user.bonus_swipes || 0) + 20;
+      }
+      
+      updateStats();
+      return record;
     }
 
     // ================ СТАТИСТИКА ================
@@ -1395,9 +1428,6 @@
       let filtered = [...allUsers];
       
       switch(currentTab) {
-        case "all":
-          filtered.sort((a, b) => b.id - a.id);
-          break;
         case "new":
           filtered = allUsers.filter(u => u.is_new);
           filtered.sort((a, b) => b.id - a.id);
@@ -1410,8 +1440,9 @@
           filtered = allUsers.filter(u => u.blocked);
           filtered.sort((a, b) => b.id - a.id);
           break;
-        case "search":
-          const searchTerm = searchInput.value.trim().toLowerCase();
+        case "bonuses":
+          // Для вкладки бонусов используем поисковые фильтры
+          const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
           const genderFilter = document.getElementById('filter-gender').value;
           const cityFilter = document.getElementById('filter-city').value;
           const verificationFilter = document.getElementById('filter-verification').value;
@@ -1441,22 +1472,24 @@
     }
 
     function renderUsers(users) {
+      const usersList = document.getElementById('users-list');
+      const resultsInfo = document.getElementById('results-info');
+      
       usersList.innerHTML = "";
       
       if (!users.length) {
         const emptyMsg = {
-          "all": "Нет зарегистрированных пользователей",
           "new": "Нет новых пользователей за последние 24 часа",
           "verification": "Нет заявок на верификации",
           "blocked": "Нет заблокированных пользователей",
-          "search": "По вашему запросу ничего не найдено"
+          "bonuses": "По вашему запросу ничего не найдено"
         }[currentTab];
         
         resultsInfo.textContent = emptyMsg;
         return;
       }
       
-      resultsInfo.textContent = `Найдено: ${users.length} анкет`;
+      resultsInfo.textContent = `Найдено: ${users.length} ${getUserWord(users.length)}`;
       
       users.forEach((u) => {
         const li = document.createElement("li");
@@ -1465,6 +1498,7 @@
         if (u.is_new) classes.push('new');
         classes.push(u.verification_status);
         if (u.boosted) classes.push('boosted');
+        if (currentTab === 'bonuses') classes.push('bonus-item');
         li.className = classes.join(' ');
 
         const main = document.createElement("div");
@@ -1493,6 +1527,7 @@
             <span>${u.gender === 'male' ? '♂ Мужской' : '♀ Женский'}</span>
             <span>Рег.: ${u.registration_date}</span>
             <span>🔄 ${u.remaining_swipes || 0} свайпов</span>
+            ${u.bonus_swipes ? `<span style="color:#10b981">🎁 ${u.bonus_swipes} бонусных</span>` : ''}
             ${u.blocked ? '<span style="color:var(--danger)">🚫 Заблокирован</span>' : ''}
             ${u.is_new ? '<span style="color:var(--info)">🆕 Новый</span>' : ''}
           </div>
@@ -1503,20 +1538,41 @@
         const actionsRow = document.createElement("div");
         actionsRow.className = "user-actions-row";
 
-        if (u.username && u.username !== 'undefined') {
-          const openBtn = document.createElement("button");
-          openBtn.className = "link-btn";
-          openBtn.textContent = "Открыть в TG";
-          openBtn.onclick = () => window.open("https://t.me/" + u.username, "_blank");
-          actionsRow.appendChild(openBtn);
-        }
-
-        if (u.verification_status === 'pending') {
-          const verifyBtn = document.createElement("button");
-          verifyBtn.className = "verify-btn";
-          verifyBtn.textContent = "🔍 Проверить";
-          verifyBtn.onclick = () => showVerificationModal(u);
-          actionsRow.appendChild(verifyBtn);
+        if (currentTab === 'bonuses') {
+          // Кнопки для вкладки бонусов
+          const quickSwipesBtn = document.createElement("button");
+          quickSwipesBtn.className = "swipes-btn-admin";
+          quickSwipesBtn.textContent = "🔄 +50 свайпов";
+          quickSwipesBtn.onclick = () => quickAddSwipes(u.id, 50);
+          actionsRow.appendChild(quickSwipesBtn);
+          
+          const quickBoostBtn = document.createElement("button");
+          quickBoostBtn.className = "boost-btn-admin";
+          quickBoostBtn.textContent = "🚀 Буст 24ч";
+          quickBoostBtn.onclick = () => quickAddBoost(u.id, 24);
+          actionsRow.appendChild(quickBoostBtn);
+          
+          const historyBtn = document.createElement("button");
+          historyBtn.className = "bonus-btn-admin";
+          historyBtn.textContent = "📋 История";
+          historyBtn.onclick = () => showBonusHistory(u.id);
+          actionsRow.appendChild(historyBtn);
+        } else if (currentTab === 'verification') {
+          if (u.verification_status === 'pending') {
+            const verifyBtn = document.createElement("button");
+            verifyBtn.className = "verify-btn";
+            verifyBtn.textContent = "🔍 Проверить";
+            verifyBtn.onclick = () => showVerificationModal(u);
+            actionsRow.appendChild(verifyBtn);
+          }
+        } else {
+          if (u.username && u.username !== 'undefined') {
+            const openBtn = document.createElement("button");
+            openBtn.className = "link-btn";
+            openBtn.textContent = "Открыть в TG";
+            openBtn.onclick = () => window.open("https://t.me/" + u.username, "_blank");
+            actionsRow.appendChild(openBtn);
+          }
         }
 
         actions.appendChild(actionsRow);
@@ -1527,6 +1583,9 @@
     }
 
     function renderBonusVerifications() {
+      const usersList = document.getElementById('users-list');
+      const resultsInfo = document.getElementById('results-info');
+      
       usersList.innerHTML = "";
       
       const pendingVerifications = allBonusVerifications.filter(bv => bv.status === 'pending');
@@ -1550,7 +1609,6 @@
         main.className = "user-main";
         
         const user = allUsers.find(u => u.id === verification.userId);
-        const timeAgo = getTimeAgo(new Date(verification.createdAt));
         
         main.innerHTML = `
           <div class="user-name">
@@ -1562,7 +1620,6 @@
             <span>🆔 ID: ${verification.userId}</span>
             <span>🏙️ ${user?.city || verification.userCity}</span>
             <span>🎁 Награда: ${verification.reward}</span>
-            <span>📅 ${timeAgo}</span>
             <span>📝 ${verification.additionalInfo || 'Без дополнительной информации'}</span>
           </div>
         `;
@@ -1593,24 +1650,21 @@
       });
     }
 
+    function getUserWord(count) {
+      if (count % 10 === 1 && count % 100 !== 11) return 'анкета';
+      if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) return 'анкеты';
+      return 'анкет';
+    }
+
     // ================ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ================
     
     function switchTab(tabName) {
       currentTab = tabName;
       
       // Обновляем активные кнопки
-      tabButtons.forEach(btn => {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tabName);
       });
-      
-      // Показываем/скрываем поиск и фильтры
-      if (tabName === 'search') {
-        searchRow.classList.remove('hidden');
-        filtersRow.classList.remove('hidden');
-      } else {
-        searchRow.classList.add('hidden');
-        filtersRow.classList.add('hidden');
-      }
       
       // Показываем/скрываем баннеры
       document.querySelectorAll('.section-banner').forEach(banner => {
@@ -1618,11 +1672,22 @@
       });
       document.getElementById(`section-banner-${tabName}`)?.classList.remove('hidden');
       
+      // Показываем/скрываем поиск и фильтры (только для бонусов)
+      const searchRow = document.getElementById('search-row');
+      const filtersRow = document.getElementById('filters-row');
+      if (tabName === 'bonuses') {
+        searchRow.style.display = 'flex';
+        filtersRow.style.display = 'flex';
+      } else {
+        searchRow.style.display = 'none';
+        filtersRow.style.display = 'none';
+      }
+      
       // Фильтруем и рендерим
       if (tabName === 'bonus-verification') {
         renderBonusVerifications();
-      } else if (tabName === 'reports' || tabName === 'bonuses') {
-        resultsInfo.textContent = "Этот раздел в разработке";
+      } else if (tabName === 'reports') {
+        resultsInfo.textContent = "Раздел 'Жалобы' в разработке";
         usersList.innerHTML = "";
       } else {
         const users = filterUsersByTab();
@@ -1630,184 +1695,96 @@
       }
     }
 
-    // ================ МОДАЛЬНЫЕ ОКНА ================
+    // ================ БЫСТРЫЕ ДЕЙСТВИЯ С БОНУСАМИ ================
     
-    function showVerificationModal(user) {
-      const modalContent = document.getElementById('modal-content');
-      modalContent.innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 14px; color: var(--muted); margin-bottom: 10px;">
-            <strong>Информация о пользователе:</strong><br>
-            ID: ${user.id}<br>
-            Имя: ${user.name}, ${user.age} лет<br>
-            Username: @${user.username}<br>
-            Город: ${user.city}
-          </div>
-          
-          <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-            <div style="flex: 1;">
-              <div style="font-weight: 600; margin-bottom: 8px;">Фото в профиле</div>
-              <img src="${user.profile_photo}" alt="Фото профиля" style="width: 100%; border-radius: 8px; border: 1px solid #1f2937;" />
-            </div>
-            <div style="flex: 1;">
-              <div style="font-weight: 600; margin-bottom: 8px;">Селфи для верификации</div>
-              <img src="${user.verification_photo || user.profile_photo}" alt="Селфи" style="width: 100%; border-radius: 8px; border: 1px solid #1f2937;" />
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-actions">
-          <button id="approve-verification-btn" class="primary">✅ Подтвердить верификацию</button>
-          <button id="reject-verification-btn" class="primary danger-btn">❌ Отклонить</button>
-        </div>
-      `;
+    function quickAddSwipes(userId, amount) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
       
-      document.getElementById('verification-modal').classList.remove('hidden');
+      const reason = prompt(`Начислить ${amount} свайпов пользователю ${user.name}?\nВведите причину (опционально):`, "Бонус от администратора");
       
-      document.getElementById('approve-verification-btn').onclick = () => {
-        user.verified = true;
-        user.verification_status = 'verified';
-        user.remaining_swipes = (user.remaining_swipes || 0) + 20;
-        user.bonus_swipes = (user.bonus_swipes || 0) + 20;
-        alert(`✅ Верификация для ${user.name} подтверждена! Пользователь получил +20 свайпов.`);
-        document.getElementById('verification-modal').classList.add('hidden');
-        switchTab(currentTab);
-        updateStats();
-      };
+      const record = addBonusRecord(userId, 'swipes', amount, reason || 'Бонус от администратора', 'Быстрое начисление через панель');
       
-      document.getElementById('reject-verification-btn').onclick = () => {
-        user.verified = false;
-        user.verification_status = 'rejected';
-        alert(`❌ Верификация для ${user.name} отклонена.`);
-        document.getElementById('verification-modal').classList.add('hidden');
-        switchTab(currentTab);
-        updateStats();
-      };
+      alert(`✅ Пользователю ${user.name} начислено ${amount} свайпов!\nТеперь у него ${user.remaining_swipes} свайпов.`);
+      
+      if (currentTab === 'bonuses') {
+        const users = filterUsersByTab();
+        renderUsers(users);
+      }
     }
 
-    function showBonusVerificationModal(verification) {
-      const user = allUsers.find(u => u.id === verification.userId);
+    function quickAddBoost(userId, hours) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
       
-      let photosHtml = '';
-      if (verification.verificationPhotos && verification.verificationPhotos.length > 0) {
-        verification.verificationPhotos.forEach((photo, index) => {
-          photosHtml += `
-            <div style="background: rgba(2, 6, 23, 0.7); border-radius: 10px; padding: 12px; border: 1px solid rgba(148, 163, 184, 0.1);">
-              <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Скриншот ${index + 1}</div>
-              <img src="${photo}" alt="Скриншот" style="width: 100%; border-radius: 8px; margin-bottom: 8px;" />
-              <div style="font-size: 12px; color: var(--muted);">
-                ${index === 0 ? 'Основной скриншот' : 'Дополнительный скриншот'}
+      const reason = prompt(`Активировать буст на ${hours} часов для ${user.name}?\nВведите причину (опционально):`, "Промо-акция");
+      
+      const record = addBonusRecord(userId, 'boost', hours, reason || 'Промо-акция', 'Быстрая активация через панель');
+      
+      alert(`✅ Буст активирован для ${user.name} на ${hours} часов!\nАнкета будет показываться чаще.`);
+      
+      if (currentTab === 'bonuses') {
+        const users = filterUsersByTab();
+        renderUsers(users);
+      }
+    }
+
+    function showBonusHistory(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+      
+      const userBonuses = bonusHistory.filter(b => b.userId === userId);
+      
+      let historyHtml = '';
+      if (userBonuses.length === 0) {
+        historyHtml = `<div style="text-align: center; padding: 30px; color: var(--muted);">
+          <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
+          <div>У пользователя нет истории бонусов</div>
+        </div>`;
+      } else {
+        userBonuses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        userBonuses.forEach(bonus => {
+          let amountText = '';
+          if (bonus.type === 'swipes') amountText = `+${bonus.amount} свайпов`;
+          else if (bonus.type === 'boost') amountText = `Буст ${bonus.amount}ч`;
+          else if (bonus.type === 'verification') amountText = `Верификация +20 свайпов`;
+          
+          historyHtml += `
+            <div class="bonus-record">
+              <div class="bonus-record-header">
+                <div class="bonus-record-type">
+                  ${bonus.type === 'swipes' ? '🔄' : bonus.type === 'boost' ? '🚀' : '✅'} 
+                  ${bonus.type === 'swipes' ? 'Свайпы' : bonus.type === 'boost' ? 'Буст' : 'Верификация'}
+                </div>
+                <div class="bonus-record-date">
+                  ${new Date(bonus.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div class="bonus-record-details">
+                ${amountText}<br>
+                Причина: ${bonus.reason || 'Не указана'}<br>
+                ${bonus.comment ? `Комментарий: ${bonus.comment}<br>` : ''}
+                Начислил: ${bonus.adminName}
               </div>
             </div>
           `;
         });
       }
       
-      document.getElementById('bonus-verification-modal-content').innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 14px; color: var(--muted); margin-bottom: 10px;">
-            <strong>Информация о запросе:</strong><br>
-            ID запроса: ${verification.id}<br>
-            Тип бонуса: ${verification.bonusTypeName} ${verification.icon}<br>
-            Награда: ${verification.reward}<br>
-            Дата подачи: ${new Date(verification.createdAt).toLocaleString()}<br>
-            ${verification.additionalInfo ? `Дополнительно: ${verification.additionalInfo}<br>` : ''}
-          </div>
-          
-          <div style="font-size: 14px; color: var(--muted); margin-bottom: 10px; padding: 12px; background: rgba(2, 6, 23, 0.5); border-radius: 8px;">
-            <strong>Информация о пользователе:</strong><br>
-            ID: ${user?.id || 'Не найден'}<br>
-            Имя: ${user?.name || 'Не найден'}, ${user?.age || 'Не указан'} лет<br>
-            Город: ${user?.city || 'Не указан'}<br>
-            Верификация: ${user?.verified ? '✅ Верифицирован' : '❌ Не верифицирован'}<br>
-            Статус: ${user?.blocked ? '🚫 Заблокирован' : '✅ Активен'}
-          </div>
+      document.getElementById('bonus-history-content').innerHTML = `
+        <div style="margin-bottom: 16px;">
+          <strong>Пользователь:</strong> ${user.name}, ${user.age} лет (ID: ${user.id})<br>
+          <strong>Всего бонусов:</strong> ${userBonuses.length}<br>
+          <strong>Бонусных свайпов:</strong> ${user.bonus_swipes || 0}<br>
+          <strong>Текущий буст:</strong> ${user.boosted ? 'Активен' : 'Не активен'}
         </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px;">
-          ${photosHtml}
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <label>Комментарий к проверке (опционально)</label>
-          <textarea id="bonus-verification-comment" rows="3" placeholder="Например: Скриншот подтвержден, приглашение проверено..." style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #1f2937; background: #020617; color: var(--text); font-size: 13px;"></textarea>
-        </div>
-        
-        <div class="modal-actions">
-          <button id="approve-bonus-btn" class="primary" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;">✅ Подтвердить и начислить</button>
-          <button id="reject-bonus-btn" class="primary danger-btn">❌ Отклонить</button>
+        <div style="max-height: 400px; overflow-y: auto;">
+          ${historyHtml}
         </div>
       `;
       
-      document.getElementById('bonus-verification-modal').classList.remove('hidden');
-      
-      document.getElementById('approve-bonus-btn').onclick = () => {
-        const comment = document.getElementById('bonus-verification-comment').value.trim();
-        
-        if (verification.bonusType === 'share_stories') {
-          user.boosted = true;
-          user.boost_end = new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString();
-          user.shared_stories = (user.shared_stories || 0) + 1;
-        } else if (verification.bonusType === 'invite_friend') {
-          const bonusSwipes = 20;
-          user.remaining_swipes = (user.remaining_swipes || 0) + bonusSwipes;
-          user.bonus_swipes = (user.bonus_swipes || 0) + bonusSwipes;
-          user.invited_friends = (user.invited_friends || 0) + 1;
-        }
-        
-        verification.status = 'approved';
-        verification.reviewedAt = new Date().toISOString();
-        verification.reviewerComment = comment || 'Проверка пройдена успешно';
-        saveBonusVerifications();
-        
-        alert(`✅ Бонус подтвержден! Пользователь ${user?.name || 'Неизвестный'} получил награду.`);
-        document.getElementById('bonus-verification-modal').classList.add('hidden');
-        updateStats();
-        if (currentTab === 'bonus-verification') renderBonusVerifications();
-      };
-      
-      document.getElementById('reject-bonus-btn').onclick = () => {
-        const comment = document.getElementById('bonus-verification-comment').value.trim() || 'Скриншот не подтвержден';
-        verification.status = 'rejected';
-        verification.reviewedAt = new Date().toISOString();
-        verification.reviewerComment = comment;
-        saveBonusVerifications();
-        
-        alert(`❌ Бонус отклонен. Причина: ${comment}`);
-        document.getElementById('bonus-verification-modal').classList.add('hidden');
-        updateStats();
-        if (currentTab === 'bonus-verification') renderBonusVerifications();
-      };
-    }
-
-    // ================ ЛОГИКА АВТОРИЗАЦИИ ================
-    
-    function handleLogin() {
-      const value = passwordInput.value;
-      if (value === ADMIN_PASSWORD) {
-        loginError.textContent = "";
-        loginCard.classList.add("hidden");
-        adminCard.classList.remove("hidden");
-        localStorage.setItem("siamatch_admin_logged_in", "1");
-        
-        updateStats();
-        switchTab("all");
-      } else {
-        loginError.textContent = "Неверный пароль.";
-      }
-    }
-
-    function handleLogout() {
-      localStorage.removeItem("siamatch_admin_logged_in");
-      adminCard.classList.add("hidden");
-      loginCard.classList.remove("hidden");
-      passwordInput.value = "";
-      currentTab = "all";
-      
-      // Закрываем все модальные окна
-      document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.classList.add('hidden');
-      });
+      document.getElementById('bonus-history-modal').classList.remove('hidden');
     }
 
     // ================ ИНИЦИАЛИЗАЦИЯ ================
@@ -1818,52 +1795,34 @@
       // Генерация демо-данных
       allUsers = generateDemoUsers(50);
       loadBonusVerifications();
+      loadBonusHistory();
       
       console.log('✅ Загружено пользователей:', allUsers.length);
       console.log('✅ Загружено запросов на проверку бонусов:', allBonusVerifications.length);
+      console.log('✅ Загружено истории бонусов:', bonusHistory.length);
       
       // Обработчики для логина
-      loginBtn.onclick = handleLogin;
-      passwordInput.addEventListener("keydown", (e) => {
+      document.getElementById('login-btn').onclick = handleLogin;
+      document.getElementById('password').addEventListener("keydown", (e) => {
         if (e.key === "Enter") handleLogin();
       });
 
       // Обработчик для логаута
-      logoutBtn.onclick = handleLogout;
-
-      // Закрыть модальные окна
-      document.getElementById('close-modal-btn').onclick = () => {
-        document.getElementById('verification-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-bonus-verification-modal-btn').onclick = () => {
-        document.getElementById('bonus-verification-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-boost-modal-btn').onclick = () => {
-        document.getElementById('boost-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-swipes-modal-btn').onclick = () => {
-        document.getElementById('swipes-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-bonus-modal-btn').onclick = () => {
-        document.getElementById('bonus-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-bonus-history-btn').onclick = () => {
-        document.getElementById('bonus-history-modal').classList.add('hidden');
-      };
-
-      document.getElementById('close-report-details-btn').onclick = () => {
-        document.getElementById('report-details-modal').classList.add('hidden');
-      };
+      document.getElementById('logout-btn').onclick = handleLogout;
 
       // Поиск
-      searchBtn.onclick = () => switchTab("search");
-      searchInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") switchTab("search");
+      document.getElementById('search-btn').onclick = () => {
+        if (currentTab === 'bonuses') {
+          const users = filterUsersByTab();
+          renderUsers(users);
+        }
+      };
+      
+      document.getElementById('search-input').addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && currentTab === 'bonuses') {
+          const users = filterUsersByTab();
+          renderUsers(users);
+        }
       });
 
       // Фильтры
@@ -1871,7 +1830,7 @@
         const filter = document.getElementById(id);
         if (filter) {
           filter.addEventListener("change", () => {
-            if (currentTab === 'search') {
+            if (currentTab === 'bonuses') {
               const users = filterUsersByTab();
               renderUsers(users);
             }
@@ -1879,34 +1838,70 @@
         }
       });
 
-      // Обработчики табов
-      tabButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          switchTab(btn.dataset.tab);
+      // Быстрые действия
+      document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const action = this.dataset.action;
+          const amount = this.dataset.amount || this.dataset.hours;
+          
+          if (action === 'swipes' || action === 'boost') {
+            // Для быстрых действий нужен выбранный пользователь
+            alert('Сначала выберите пользователя из списка результатов поиска');
+          } else if (action === 'verify') {
+            alert('Для верификации перейдите во вкладку "Верификация"');
+          } else if (action === 'history') {
+            alert('Для просмотра истории выберите пользователя из списка');
+          }
         });
       });
 
-      // Закрытие модальных окон при клике вне их
-      document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            modal.classList.add('hidden');
-          }
+      // Обработчики табов
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener("click", () => {
+          switchTab(btn.dataset.tab);
         });
       });
 
       // Проверка авто-логина
       if (localStorage.getItem("siamatch_admin_logged_in") === "1") {
         console.log('🔑 Автоматический логин...');
-        loginCard.classList.add("hidden");
-        adminCard.classList.remove("hidden");
+        document.getElementById('login-card').classList.add("hidden");
+        document.getElementById('admin-card').classList.remove("hidden");
         updateStats();
-        switchTab("all");
+        switchTab("new");
       } else {
         console.log('🔒 Требуется логин');
       }
       
       console.log('✅ Админ-панель инициализирована');
+    }
+
+    function handleLogin() {
+      const password = document.getElementById('password').value;
+      if (password === ADMIN_PASSWORD) {
+        document.getElementById('login-error').textContent = "";
+        document.getElementById('login-card').classList.add("hidden");
+        document.getElementById('admin-card').classList.remove("hidden");
+        localStorage.setItem("siamatch_admin_logged_in", "1");
+        
+        updateStats();
+        switchTab("new");
+      } else {
+        document.getElementById('login-error').textContent = "Неверный пароль.";
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("siamatch_admin_logged_in");
+      document.getElementById('admin-card').classList.add("hidden");
+      document.getElementById('login-card').classList.remove("hidden");
+      document.getElementById('password').value = "";
+      currentTab = "new";
+      
+      // Закрываем все модальные окна
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.classList.add('hidden');
+      });
     }
 
     // Запуск инициализации при загрузке страницы
