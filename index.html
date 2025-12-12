@@ -267,6 +267,27 @@
                 <input type="checkbox" class="search-interest" value="anime" />
                 Аниме
               </label>
+              <!-- НОВЫЕ ИНТЕРЕСЫ -->
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="tattoos" />
+                Татуировки
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="piercing" />
+                Пирсинг
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="workout" />
+                Тренировки
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="wine" />
+                Вино
+              </label>
+              <label class="checkbox-field">
+                <input type="checkbox" class="search-interest" value="boardgames" />
+                Настольные игры
+              </label>
             </div>
           </div>
           
@@ -348,16 +369,32 @@
               </div>
             </div>
             
-            <!-- КНОПКА ВЕРИФИКАЦИИ -->
-            <button id="verifyProfileBtn" class="primary verification-btn">
-              🔐 Верифицировать анкету
-            </button>
+            <!-- КНОПКИ ДОПОЛНИТЕЛЬНЫХ СВАЙПОВ И БУСТОВ -->
+            <div class="profile-section">
+              <h3 class="section-title">🎁 Получить больше возможностей</h3>
+              
+              <!-- ВЕРИФИКАЦИЯ С БОНУСОМ -->
+              <button id="verifyProfileBtn" class="primary verification-btn">
+                🔐 Верифицировать анкету (+20 свайпов)
+              </button>
+              
+              <!-- ПРИГЛАСИТЬ ДРУГА -->
+              <button id="inviteFriendBtn" class="secondary-btn invite-btn" style="margin-top: 10px;">
+                👥 Пригласить друга (+20 свайпов)
+              </button>
+              
+              <!-- ПОДЕЛИТЬСЯ В STORIES -->
+              <button id="shareStoriesBtn" class="secondary-btn share-btn" style="margin-top: 10px;">
+                📱 Поделиться в Stories (+24ч буст)
+              </button>
+            </div>
             
             <!-- ФОРМА ВЕРИФИКАЦИИ (скрыта по умолчанию) -->
             <div id="verification-form-section" class="verification-form-section hidden">
-              <h3 class="section-title">🔐 Верификация анкеты</h3>
+              <h3 class="section-title">🔐 Верификация анкеты (+20 свайпов)</h3>
               <div class="verification-instruction">
-                Для верификации необходимо отправить селфи-фото. Администратор сравнит его с фото в вашем профиле.
+                Для верификации необходимо отправить селфи-фото. Администратор сравнит его с фото в вашем профиле.<br>
+                <strong>Бонус: +20 свайпов после успешной верификации!</strong>
               </div>
               
               <div class="verification-steps">
@@ -372,6 +409,10 @@
                 <div class="verification-step">
                   <div class="step-number">3</div>
                   <div class="step-text">Фото будет проверено в течение 24 часов</div>
+                </div>
+                <div class="verification-step">
+                  <div class="step-number">🎁</div>
+                  <div class="step-text">После верификации получите +20 свайпов!</div>
                 </div>
               </div>
               
@@ -391,6 +432,7 @@
               <div class="verification-status-icon">⏳</div>
               <h4>На проверке</h4>
               <p>Ваша анкета отправлена на верификацию. Проверка занимает до 24 часов.</p>
+              <p><strong>После успешной верификации вы получите +20 свайпов!</strong></p>
             </div>
             
             <!-- Секция "Верифицирована" -->
@@ -398,6 +440,7 @@
               <div class="verification-status-icon">✅</div>
               <h4>Анкета верифицирована</h4>
               <p>Ваша личность подтверждена. На вашем профиле отображается значок верификации.</p>
+              <p><strong>Вы получили +20 свайпов! 🎁</strong></p>
             </div>
             
             <!-- Секция "Отклонена" -->
@@ -412,58 +455,19 @@
             
             <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
             <div class="profile-section">
-              <h3 class="section-title">🎯 Мои интересы</h3>
-              <div class="interests-list">
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="travel" />
-                  Путешествия
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="movies" />
-                  Кино
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="art" />
-                  Искусство
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="sport" />
-                  Спорт
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="photography" />
-                  Фотография
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="dancing" />
-                  Танцы
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="music" />
-                  Музыка
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="cooking" />
-                  Кулинария
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="business" />
-                  Бизнес
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="gaming" />
-                  Гейминг
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="cars" />
-                  Автомобили
-                </label>
-                <label class="checkbox-field">
-                  <input type="checkbox" class="user-interest" value="anime" />
-                  Аниме
-                </label>
+              <div class="profile-section-header">
+                <h3 class="section-title">🎯 Мои интересы</h3>
+                <button id="edit-interests-btn" class="edit-interests-btn">✏️</button>
               </div>
-              <button id="save-interests" class="primary" style="margin-top: 15px;">Сохранить интересы</button>
+              
+              <!-- ОТОБРАЖЕНИЕ ВЫБРАННЫХ ИНТЕРЕСОВ -->
+              <div id="selected-interests-display" class="selected-interests-display">
+                <div class="hint" id="no-interests-hint">Вы еще не выбрали интересы</div>
+                <div id="selected-interests-list" class="selected-interests-list"></div>
+                <div id="interests-counter" class="interests-counter hidden">
+                  Выбрано: <span id="selected-count">0</span>/5 интересов
+                </div>
+              </div>
             </div>
             
             <!-- ЦЕЛЬ ЗНАКОМСТВА -->
@@ -540,6 +544,101 @@
             </div>
             
             <button id="cancel-profile-edit" class="cancel-edit-btn">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ЭКРАН ВЫБОРА ИНТЕРЕСОВ -->
+      <div id="screen-interests" class="screen hidden">
+        <div class="screen-content">
+          <div class="interests-header">
+            <button id="back-to-profile-btn" class="back-btn">←</button>
+            <h2 class="screen-title">🎯 Выбор интересов</h2>
+            <button id="save-interests-btn" class="save-interests-btn">💾</button>
+          </div>
+          
+          <div class="interests-instruction">
+            <p>Выберите до 5 интересов, которые вас характеризуют:</p>
+            <div id="interests-counter-editor" class="interests-counter">
+              Выбрано: <span id="selected-count-editor">0</span>/5 интересов
+            </div>
+          </div>
+          
+          <div class="interests-grid">
+            <!-- СУЩЕСТВУЮЩИЕ ИНТЕРЕСЫ -->
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="travel" />
+              <span class="interest-label">Путешествия</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="movies" />
+              <span class="interest-label">Кино</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="art" />
+              <span class="interest-label">Искусство</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="sport" />
+              <span class="interest-label">Спорт</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="photography" />
+              <span class="interest-label">Фотография</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="dancing" />
+              <span class="interest-label">Танцы</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="music" />
+              <span class="interest-label">Музыка</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="cooking" />
+              <span class="interest-label">Кулинария</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="business" />
+              <span class="interest-label">Бизнес</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="gaming" />
+              <span class="interest-label">Гейминг</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="cars" />
+              <span class="interest-label">Автомобили</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="anime" />
+              <span class="interest-label">Аниме</span>
+            </label>
+            <!-- НОВЫЕ ИНТЕРЕСЫ -->
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="tattoos" />
+              <span class="interest-label">Татуировки</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="piercing" />
+              <span class="interest-label">Пирсинг</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="workout" />
+              <span class="interest-label">Тренировки</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="wine" />
+              <span class="interest-label">Вино</span>
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="interest-checkbox" value="boardgames" />
+              <span class="interest-label">Настольные игры</span>
+            </label>
+          </div>
+          
+          <div class="interests-note">
+            <p>Выберите до 5 интересов. Это поможет найти более подходящих людей.</p>
           </div>
         </div>
       </div>
