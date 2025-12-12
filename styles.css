@@ -1952,3 +1952,301 @@ select:focus {
     padding: 10px;
   }
 }
+
+/* ===== СТИЛИ ДЛЯ КНОПОК БОНУСОВ ===== */
+.invite-btn, .share-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white !important;
+  border: none !important;
+  padding: 16px 24px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 14px !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  transition: all 0.2s !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3) !important;
+  width: 100% !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+.invite-btn {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.share-btn {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3) !important;
+}
+
+.invite-btn:active, .share-btn:active {
+  transform: scale(0.97) !important;
+  opacity: 0.9 !important;
+}
+
+/* ===== СТИЛИ ДЛЯ РЕДАКТИРОВАНИЯ ИНТЕРЕСОВ ===== */
+.profile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.edit-interests-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-interests-btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.selected-interests-display {
+  min-height: 60px;
+  padding: 15px;
+  background: rgba(34, 197, 94, 0.05);
+  border-radius: 12px;
+  border: 2px solid rgba(34, 197, 94, 0.1);
+}
+
+.selected-interests-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.interest-tag {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.2);
+}
+
+.interests-counter {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  font-weight: 600;
+  padding: 8px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 10px;
+  border: 2px solid rgba(34, 197, 94, 0.2);
+}
+
+.interests-counter span {
+  color: var(--siamatch-green-dark);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* ===== ЭКРАН ВЫБОРА ИНТЕРЕСОВ ===== */
+#screen-interests {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #f4fff7;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.interests-header {
+  display: flex;
+  align-items: center;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 16px 16px;
+  background: white;
+  border-bottom: 2px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.interests-header .screen-title {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 22px;
+}
+
+.save-interests-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+  transition: all 0.2s;
+}
+
+.save-interests-btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.save-interests-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.interests-instruction {
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.interests-instruction p {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #063b1f;
+}
+
+.interests-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.interests-note {
+  padding: 16px;
+  text-align: center;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 12px;
+  margin: 0 16px 20px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.interests-note p {
+  margin: 0;
+  font-size: 14px;
+  color: #063b1f;
+  line-height: 1.5;
+}
+
+/* АДАПТИВ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ */
+@media (max-width: 380px) {
+  .interests-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .interest-tag {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+  
+  .invite-btn, .share-btn {
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+  }
+}
+
+@media (max-height: 600px) {
+  .interests-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .interests-instruction {
+    padding: 15px 16px;
+  }
+  
+  .interests-instruction p {
+    font-size: 15px;
+  }
+  
+  .interests-counter {
+    font-size: 13px;
+  }
+  
+  .interests-counter span {
+    font-size: 15px;
+  }
+}
+
+/* Ограничение выбора интересов */
+.interest-checkbox:checked ~ .interest-label {
+  font-weight: 700;
+  color: var(--siamatch-green-dark);
+}
+
+/* Стили для достигнутого лимита */
+.interests-counter.limit-reached {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.interests-counter.limit-reached span {
+  color: #dc2626;
+}
+
+/* Бонусные уведомления */
+.bonus-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 25px 30px;
+  border-radius: 20px;
+  z-index: 2000;
+  text-align: center;
+  max-width: 85%;
+  box-shadow: 0 20px 60px rgba(245, 158, 11, 0.5);
+  animation: bonusAppear 0.5s ease;
+  border: 3px solid white;
+}
+
+@keyframes bonusAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.bonus-notification h3 {
+  margin: 0 0 10px 0;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.bonus-notification p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
