@@ -2237,60 +2237,103 @@ function showAnimatedWelcomeScreen() {
   animatedWelcomeScreen.classList.remove('hidden');
   
   // Сбрасываем все анимации
-  const elements = animatedWelcomeScreen.querySelectorAll('[class*="animated"]');
-  elements.forEach(el => {
-    el.style.animation = 'none';
-    void el.offsetWidth; // Trigger reflow
-    el.style.animation = '';
-  });
+  const heartText = document.querySelector('.heart-text');
+  const heartPath = document.querySelector('.heart-path');
+  const animatedClover = document.getElementById('animated-clover');
+  const animatedTitle = document.getElementById('animated-title');
+  const heartContainer = document.querySelector('.heart-container');
   
-  // Запускаем таймер для перехода к основному приложению
-  console.log('⏱️ Запускаем таймер перехода через 6 секунд');
-  setTimeout(hideAnimatedWelcomeScreen, 6000);
-}
+  // Сбрасываем анимации
+  if (heartText) heartText.style.animation = 'none';
+  if (heartPath) heartPath.style.animation = 'none';
+  if (animatedClover) animatedClover.style.animation = 'none';
+  if (animatedTitle) animatedTitle.style.animation = 'none';
+  if (heartContainer) heartContainer.style.animation = 'none';
   
-// ===== ФУНКЦИЯ: СКРЫТЬ АНИМИРОВАННЫЙ ЭКРАН И ПОКАЗАТЬ ПРИЛОЖЕНИЕ =====
-function hideAnimatedWelcomeScreen() {
-  if (!animatedWelcomeScreen) return;
+  // Принудительный рефлоу для сброса
+  void animatedClover.offsetWidth;
+  void animatedTitle.offsetWidth;
+  void heartContainer.offsetWidth;
+  void heartText.offsetWidth;
+  void heartPath.offsetWidth;
+  
+  // Запускаем анимации по новой
+  if (animatedClover) {
+    animatedClover.style.animation = 'cloverAppear 1.5s ease forwards';
+  }
+  
+  // Заголовок SiaMatch с задержкой
+  setTimeout(() => {
+    if (animatedTitle) {
+      animatedTitle.style.animation = 'titleAppear 1s ease forwards';
+    }
+  }, 1500);
+  
+  // Контейнер с сердцем с задержкой
+  setTimeout(() => {
+    if (heartContainer) {
+      heartContainer.style.animation = 'heartContainerAppear 0.5s ease forwards';
+    }
+    
+    // Текст появляется сразу с контейнером
+    setTimeout(() => {
+      if (heartText) {
+        heartText.style.animation = 'textAppear 0.3s ease forwards';
+      }
+    }, 100);
+    
+    // Сердце рисуется через 300мс после появления текста
+    setTimeout(() => {
+      if (heartPath) {
+        heartPath.style.animation = 'drawHeart 2.5s ease forwards';
+      }
+    }, 400);
+    
+  }, 2500);
   
   // Общая последовательность анимаций:
   // 0-1.5 сек: Клевер
   // 1.5-2.5 сек: Заголовок SiaMatch
   // 2.5 сек: Появляется контейнер с текстом
-  // 3-5.5 сек: Рисуется сердце (2.5 сек)
-  // 5.5-6 сек: Пауза
+  // 2.6 сек: Появляется текст
+  // 2.9 сек: Начинает рисоваться сердце (2.5 сек)
+  // 5.4 сек: Завершается рисование сердца
+  // 5.4-6 сек: Пауза
   // ИТОГО: 6 секунд
   
-  console.log('🎬 Начинаем анимацию приветственного экрана...');
+  console.log('⏱️ Запускаем таймер перехода через 6 секунд');
+  setTimeout(hideAnimatedWelcomeScreen, 6000);
+}
+
+// ===== ФУНКЦИЯ: СКРЫТЬ АНИМИРОВАННЫЙ ЭКРАН И ПОКАЗАТЬ ПРИЛОЖЕНИЕ =====
+function hideAnimatedWelcomeScreen() {
+  if (!animatedWelcomeScreen) return;
   
+  console.log('✅ Анимация завершена, переходим к основному приложению');
+  
+  // Сначала просто скрываем экран
+  animatedWelcomeScreen.classList.add('hidden');
+  
+  // Показываем главное приложение
+  showMainApp();
+  
+  // Включаем все системы
+  initVerification();
+  initLikesSystem();
+  initInterestsSystem();
+  initFiltersSystem();
+  initBoostSystem();
+  initSwipesSystem();
+  initChatsSystem();
+  initBonusSystem();
+  
+  // Устанавливаем активную вкладку
+  setActiveTab("feed");
+  
+  // Показываем приветственное уведомление
   setTimeout(() => {
-    console.log('✅ Анимация завершена, переходим к основному приложению');
-    
-    // Сначала просто скрываем экран
-    animatedWelcomeScreen.classList.add('hidden');
-    
-    // Показываем главное приложение
-    showMainApp();
-    
-    // Включаем все системы
-    initVerification();
-    initLikesSystem();
-    initInterestsSystem();
-    initFiltersSystem();
-    initBoostSystem();
-    initSwipesSystem();
-    initChatsSystem();
-    initBonusSystem();
-    
-    // Устанавливаем активную вкладку
-    setActiveTab("feed");
-    
-    // Показываем приветственное уведомление
-    setTimeout(() => {
-      showNotification("🍀 Добро пожаловать в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
-    }, 500);
-    
-  }, 6000); // 6 секунд - общее время анимации
+    showNotification("🍀 Добро пожаловать в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
+  }, 500);
 }
   
   // ===== ПОКАЗАТЬ АНКЕТУ =====
