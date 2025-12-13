@@ -26,26 +26,29 @@
         <button id="startBtn" class="primary">Начать знакомство</button>
       </div>
 
-<div id="welcome-screen">
-  <div class="welcome-header">
-    <div class="close-btn">✕</div>
-    <div class="miniapp-label">МИНИ-ПРИЛОЖЕНИЕ</div>
-  </div>
-  
-  <div class="welcome-content">
-    <div class="app-title">SiaMatch</div>
-    
-    <div class="heart-with-text">
-      <div class="heart-shape-final">
-        <span class="heart-text-final">Любовь начинается здесь</span>
+      <!-- НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
+      <div id="welcome-animated-screen" class="screen hidden">
+        <div class="welcome-animated-content">
+          <div id="animated-clover" class="animated-clover">🍀</div>
+          <div id="animated-title" class="animated-title">SiaMatch</div>
+          <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
+          
+          <!-- НОВОЕ СЕРДЦЕ, КОТОРОЕ РИСУЕТСЯ -->
+          <div class="heart-container">
+            <svg class="heart-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+              <!-- Путь сердца - рисуется постепенно -->
+              <path class="heart-path" d="
+                M 50,30 
+                C 60,15 80,15 85,30 
+                C 90,45 75,60 50,75 
+                C 25,60 10,45 15,30 
+                C 20,15 40,15 50,30
+                Z
+              " />
+            </svg>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <div class="welcome-subtitle-final">Найди свою пару в Telegram</div>
-    
-    <button id="startBtn" class="primary-btn-final">Начать знакомство</button>
-  </div>
-</div>
 
       <!-- ЭКРАН АНКЕТЫ -->
       <div id="onboarding-screen" class="screen hidden">
@@ -680,27 +683,5 @@
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="app.js"></script>
-<script>
-// Простой скрипт для кнопки "Начать знакомство"
-document.addEventListener('DOMContentLoaded', function() {
-  const startBtn = document.getElementById('startBtn');
-  const welcomeScreen = document.getElementById('welcome-screen');
-  const tabBar = document.getElementById('tab-bar');
-  const feedScreen = document.getElementById('screen-feed');
-  
-  if (startBtn && welcomeScreen) {
-    startBtn.addEventListener('click', function() {
-      // Скрываем экран приветствия
-      welcomeScreen.classList.add('hidden');
-      
-      // Показываем основное приложение
-      if (tabBar) tabBar.classList.remove('hidden');
-      if (feedScreen) feedScreen.classList.remove('hidden');
-      
-      console.log('Приложение запущено!');
-    });
-  }
-});
-</script>
 </body>
 </html>
