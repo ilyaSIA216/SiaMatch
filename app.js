@@ -2222,134 +2222,74 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-// ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
-function showAnimatedWelcomeScreen() {
-  if (!animatedWelcomeScreen) return;
-  
-  console.log('🖼️ Показываем анимированный экран приветствия');
-  
-  // Скрываем обычный экран приветствия
-  if (welcomeScreen) {
-    welcomeScreen.classList.add('hidden');
-  }
-  
-  // Показываем анимированный экран
-  animatedWelcomeScreen.classList.remove('hidden');
-  
-  // Сбрасываем анимации
-  const clover = document.getElementById('animated-clover');
-  const title = document.getElementById('animated-title');
-  const heartPath = document.querySelector('.heart-path');
-  const heartLines = document.querySelectorAll('.heart-line');
-  
-  if (clover) {
-    clover.style.animation = 'none';
-    clover.style.opacity = '0';
-    clover.style.transform = 'scale(0.5)';
-  }
-  
-  if (title) {
-    title.style.animation = 'none';
-    title.style.opacity = '0';
-    title.style.transform = 'translateY(30px)';
-  }
-  
-  if (heartPath) {
-    heartPath.style.animation = 'none';
-    heartPath.style.strokeDashoffset = '340';
-  }
-  
-  heartLines.forEach(line => {
-    line.style.animation = 'none';
-    line.style.opacity = '0';
-    line.style.transform = 'translateY(10px)';
-  });
-  
-  // Принудительный рефлоу для сброса анимаций
-  setTimeout(() => {
-    // Запускаем анимации с задержками
+  // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
+  function showAnimatedWelcomeScreen() {
+    if (!animatedWelcomeScreen) return;
     
-    // 1. Клевер (0-1 сек)
-    if (clover) {
-      clover.style.animation = 'cloverAppear 1s ease forwards';
+    // Скрываем обычный экран приветствия
+    if (welcomeScreen) {
+      welcomeScreen.classList.add('hidden');
     }
     
-    // 2. Название SiaMatch (1-1.8 сек)
-    setTimeout(() => {
-      if (title) {
-        title.style.animation = 'titleAppear 0.8s ease forwards';
-      }
-    }, 1000);
+    // Показываем анимированный экран
+    animatedWelcomeScreen.classList.remove('hidden');
     
-    // 3. Контейнер сердца (1.8 сек)
-    setTimeout(() => {
-      const heartContainer = document.querySelector('.heart-container');
-      if (heartContainer) {
-        heartContainer.style.opacity = '0';
-        heartContainer.style.animation = 'heartContainerAppear 0.5s ease forwards';
-      }
-    }, 1800);
+    // Добавляем DOM элемент для нижней части сердца
+    const heartAnimation = animatedWelcomeScreen.querySelector('.heart-animation');
+    if (heartAnimation && !heartAnimation.querySelector('.heart-bottom')) {
+      const heartBottom = document.createElement('div');
+      heartBottom.className = 'heart-bottom';
+      heartAnimation.appendChild(heartBottom);
+    }
     
-    // 4. Рисование сердца красной линией (2-4 сек)
-    setTimeout(() => {
-      if (heartPath) {
-        heartPath.style.animation = 'drawHeart 2s ease forwards';
-      }
-    }, 2000);
+    // Слушаем событие завершения анимации
+    const animatedSubtitle = document.getElementById('animated-subtitle');
+    if (animatedSubtitle) {
+      // Используем setTimeout как запасной вариант
+      setTimeout(() => {
+        hideAnimatedWelcomeScreen();
+      }, 6500); // 6.5 секунд - общая длительность анимации
+      
+      // Также слушаем анимацию CSS
+      animatedSubtitle.addEventListener('animationend', function() {
+        setTimeout(hideAnimatedWelcomeScreen, 2000);
+      }, { once: true });
+    }
+  }
+  
+  // ===== ФУНКЦИЯ: СКРЫТЬ АНИМИРОВАННЫЙ ЭКРАН И ПОКАЗАТЬ ПРИЛОЖЕНИЕ =====
+  function hideAnimatedWelcomeScreen() {
+    if (!animatedWelcomeScreen) return;
     
-    // 5. Текст черными буквами (2.4-2.8 сек)
-    setTimeout(() => {
-      document.querySelectorAll('.heart-line').forEach((line, index) => {
-        setTimeout(() => {
-          line.style.animation = 'textLineAppear 0.4s ease forwards';
-        }, index * 200);
-      });
-    }, 2400);
+    // Добавляем анимацию исчезновения
+    animatedWelcomeScreen.style.animation = 'fadeOutScreen 0.8s ease forwards';
     
-  }, 100);
-  
-  // Общая последовательность:
-  // 0-1 сек: Клевер появляется
-  // 1-1.8 сек: SiaMatch появляется
-  // 1.8 сек: Сердце появляется
-  // 2-4 сек: Рисуется красная линия сердца
-  // 2.4-2.8 сек: Появляется черный текст
-  // 6 сек: Переход к приложению
-  
-  console.log('⏱️ Запускаем таймер перехода через 5 секунд');
-  setTimeout(hideAnimatedWelcomeScreen, 5000);
-}
-
-// ===== ФУНКЦИЯ: СКРЫТЬ АНИМИРОВАННЫЙ ЭКРАН И ПОКАЗАТЬ ПРИЛОЖЕНИЕ =====
-function hideAnimatedWelcomeScreen() {
-  if (!animatedWelcomeScreen) return;
-  
-  console.log('✅ Анимация завершена, переходим к основному приложению');
-  
-  // Сначала просто скрываем экран
-  animatedWelcomeScreen.classList.add('hidden');
-  
-  // Показываем главное приложение
-  showMainApp();
-  
-  // Включаем все системы
-  initVerification();
-  initLikesSystem();
-  initInterestsSystem();
-  initFiltersSystem();
-  initBoostSystem();
-  initSwipesSystem();
-  initChatsSystem();
-  initBonusSystem();
-  
-  // Устанавливаем активную вкладку
-  setActiveTab("feed");
-  
-  // Показываем приветственное уведомление
-  setTimeout(() => {
-    showNotification("🍀 Добро пожаловать в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
-  }, 500);
-}
+    setTimeout(() => {
+      animatedWelcomeScreen.classList.add('hidden');
+      animatedWelcomeScreen.style.animation = '';
+      
+      // Показываем главное приложение
+      showMainApp();
+      
+      // Включаем все системы
+      initVerification();
+      initLikesSystem();
+      initInterestsSystem();
+      initFiltersSystem();
+      initBoostSystem();
+      initSwipesSystem();
+      initChatsSystem();
+      initBonusSystem();
+      
+      // Устанавливаем активную вкладку
+      setActiveTab("feed");
+      
+      // Показываем приветственное уведомление
+      setTimeout(() => {
+        showNotification("🍀 С возвращением в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
+      }, 500);
+    }, 800);
+  }
   
   // ===== ПОКАЗАТЬ АНКЕТУ =====
   function showOnboarding() {
