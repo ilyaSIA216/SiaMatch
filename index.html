@@ -26,29 +26,57 @@
         <button id="startBtn" class="primary">Начать знакомство</button>
       </div>
 
-      <!-- НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
-      <div id="welcome-animated-screen" class="screen hidden">
-        <div class="welcome-animated-content">
-          <div id="animated-clover" class="animated-clover">🍀</div>
-          <div id="animated-title" class="animated-title">SiaMatch</div>
-          <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
-          
-          <!-- НОВОЕ СЕРДЦЕ, КОТОРОЕ РИСУЕТСЯ -->
-          <div class="heart-container">
-            <svg class="heart-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-              <!-- Путь сердца - рисуется постепенно -->
-              <path class="heart-path" d="
-                M 50,30 
-                C 60,15 80,15 85,30 
-                C 90,45 75,60 50,75 
-                C 25,60 10,45 15,30 
-                C 20,15 40,15 50,30
-                Z
-              " />
-            </svg>
-          </div>
-        </div>
-      </div>
+<!-- АНИМИРОВАННЫЙ ЭКРАН ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С АНКЕТОЙ -->
+<div id="welcome-animated-screen" class="screen hidden">
+  <div class="welcome-animated-content">
+    <!-- Анимированный четырехлистник -->
+    <div id="animated-clover" class="animated-clover">🍀</div>
+    
+    <!-- Заголовок -->
+    <div id="animated-title" class="animated-title">SiaMatch</div>
+    
+    <!-- Подзаголовок -->
+    <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
+    
+    <!-- Контейнер для сердца вокруг подзаголовка -->
+    <div class="subtitle-heart-wrapper">
+      <div id="animated-subtitle-inner" class="animated-subtitle-inner">Любовь начинается здесь</div>
+      
+      <!-- SVG сердце вокруг текста -->
+      <svg class="heart-orbit-svg" viewBox="0 0 200 200">
+        <defs>
+          <filter id="heart-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path class="heart-orbit-path" 
+              d="M 100,30 Q 130,10 160,40 Q 180,70 160,110 Q 140,150 100,170 Q 60,150 40,110 Q 20,70 40,40 Q 70,10 100,30" 
+              stroke-dasharray="400" 
+              stroke-dashoffset="400"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+        <g class="floating-hearts" filter="url(#heart-glow)">
+          <text x="100" y="35" class="floating-heart" text-anchor="middle">💖</text>
+          <text x="160" y="45" class="floating-heart" text-anchor="middle">💕</text>
+          <text x="175" y="85" class="floating-heart" text-anchor="middle">💗</text>
+          <text x="160" y="125" class="floating-heart" text-anchor="middle">💖</text>
+          <text x="100" y="155" class="floating-heart" text-anchor="middle">💕</text>
+          <text x="40" y="125" class="floating-heart" text-anchor="middle">💗</text>
+          <text x="25" y="85" class="floating-heart" text-anchor="middle">💖</text>
+          <text x="40" y="45" class="floating-heart" text-anchor="middle">💕</text>
+        </g>
+      </svg>
+    </div>
+    
+    <!-- Кнопка продолжения -->
+    <button id="continueBtn" class="primary continue-btn hidden">Продолжить 🍀</button>
+  </div>
+</div>
+
 
       <!-- ЭКРАН АНКЕТЫ -->
       <div id="onboarding-screen" class="screen hidden">
