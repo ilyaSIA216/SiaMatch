@@ -32,28 +32,26 @@
     <div id="animated-clover" class="animated-clover">🍀</div>
     <div id="animated-title" class="animated-title">SiaMatch</div>
     
-    <!-- КОНТЕЙНЕР С СЕРДЦЕМ И ТЕКСТОМ -->
-    <div class="heart-container">
-      <svg class="heart-svg" viewBox="0 0 120 100" preserveAspectRatio="xMidYMid meet">
-        <!-- Текст ВНУТРИ сердца - ЧЕРНЫЙ, появляется ПЕРВЫМ -->
-        <text class="heart-text" x="60" y="48" text-anchor="middle" dominant-baseline="middle">
-          <tspan x="60" dy="-1.4em">Любовь</tspan>
-          <tspan x="60" dy="1.2em">начинается</tspan>
-          <tspan x="60" dy="1.2em">здесь</tspan>
-        </text>
-        
-        <!-- Путь сердца - рисуется ВОКРУГ текста -->
-        <path class="heart-path" d="
-          M 60,20
-          C 72,10 92,10 98,20
-          C 104,30 90,45 60,65
-          C 30,45 16,30 22,20
-          C 28,10 48,10 60,20
-          Z
-        " />
-      </svg>
-    </div>
-  </div>
+<!-- КОНТЕЙНЕР С СЕРДЦЕМ И ТЕКСТОМ -->
+<div class="heart-container">
+  <svg class="heart-svg" viewBox="0 0 120 100" preserveAspectRatio="xMidYMid meet">
+    <!-- Текст ВНУТРИ сердца - ЧЕРНЫЙ, появляется ПЕРВЫМ -->
+    <text class="heart-text" x="60" y="48" text-anchor="middle" dominant-baseline="middle">
+      <tspan x="60" dy="-1.3em" font-weight="600">Любовь</tspan>
+      <tspan x="60" dy="1.2em" font-weight="600">начинается</tspan>
+      <tspan x="60" dy="1.2em" font-weight="600">здесь</tspan>
+    </text>
+    
+    <!-- УЛУЧШЕННЫЙ Путь сердца - более ровная форма -->
+    <path class="heart-path" d="
+      M 60,18
+      C 70,8 88,8 96,18
+      C 104,28 92,42 60,62
+      C 28,42 16,28 24,18
+      C 32,8 50,8 60,18
+      Z
+    " fill="none" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
 </div>
 
       <!-- ЭКРАН АНКЕТЫ -->
