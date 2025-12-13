@@ -2339,3 +2339,291 @@ select:focus {
   content: '✓ ';
   font-weight: bold;
 }
+
+/* ===== НОВЫЕ СТИЛИ ДЛЯ АНИМИРОВАННОГО ПРИВЕТСТВИЯ ===== */
+#welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 40px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Анимация клевера */
+.clover-animation {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 40px;
+  animation: cloverFloat 4s ease-in-out infinite;
+}
+
+@keyframes cloverFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+}
+
+.clover-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 80px;
+  animation: cloverPulse 2s ease-in-out infinite;
+}
+
+@keyframes cloverPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+.clover-leaf {
+  position: absolute;
+  font-size: 40px;
+  animation: leafFloat 3s ease-in-out infinite;
+}
+
+.clover-leaf.leaf-1 {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  animation-delay: 0s;
+}
+
+.clover-leaf.leaf-2 {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%) rotate(90deg);
+  animation-delay: 0.2s;
+}
+
+.clover-leaf.leaf-3 {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  animation-delay: 0.4s;
+}
+
+.clover-leaf.leaf-4 {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) rotate(270deg);
+  animation-delay: 0.6s;
+}
+
+@keyframes leafFloat {
+  0%, 100% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translate(var(--tx, 0), var(--ty, -5px)) rotate(var(--rot, 0deg));
+  }
+}
+
+/* Текст приветствия */
+.welcome-text {
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: textReveal 0.8s ease-out forwards;
+  animation-delay: 1.5s;
+}
+
+@keyframes textReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-line {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--siamatch-green-dark);
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.welcome-line.line-1 {
+  animation: lineAppear 0.8s ease-out forwards;
+  animation-delay: 2s;
+}
+
+.welcome-line.line-2 {
+  animation: lineAppear 0.8s ease-out forwards;
+  animation-delay: 2.4s;
+  font-size: 32px;
+  color: #15803d;
+}
+
+.welcome-line.line-3 {
+  animation: lineAppear 0.8s ease-out forwards;
+  animation-delay: 2.8s;
+  font-size: 20px;
+  color: #db2777;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+@keyframes lineAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Прогресс бар загрузки */
+.loading-progress {
+  width: 80%;
+  max-width: 300px;
+  margin-top: 20px;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
+  animation-delay: 3.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 3px;
+  animation: progressLoad 2.5s ease-in-out forwards;
+  animation-delay: 3.8s;
+}
+
+@keyframes progressLoad {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+  animation: loadingPulse 1s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-width: 380px) {
+  .clover-animation {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 30px;
+  }
+  
+  .clover-center {
+    font-size: 70px;
+  }
+  
+  .clover-leaf {
+    font-size: 35px;
+  }
+  
+  .welcome-line {
+    font-size: 24px;
+  }
+  
+  .welcome-line.line-2 {
+    font-size: 28px;
+  }
+  
+  .welcome-line.line-3 {
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 600px) {
+  .clover-animation {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+  
+  .clover-center {
+    font-size: 60px;
+  }
+  
+  .clover-leaf {
+    font-size: 30px;
+  }
+  
+  .welcome-line {
+    font-size: 22px;
+  }
+  
+  .welcome-line.line-2 {
+    font-size: 26px;
+  }
+  
+  .welcome-line.line-3 {
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .loading-progress {
+    margin-top: 15px;
+  }
+}
