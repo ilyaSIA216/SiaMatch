@@ -2792,17 +2792,3 @@ select:focus {
     font-size: 32px;
   }
 }
-
-.heart-text {
-  fill: #7c2d12; /* Темный шоколадно-коричневый */
-  font-family: 'Dancing Script', 'Parisienne', 'Brush Script MT', cursive;
-  font-weight: 500;
-  font-size: 13.5px;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  opacity: 0;
-  animation: textAppear 0.4s ease forwards;
-  animation-delay: 2.4s;
-  letter-spacing: 0.7px;
-  font-style: italic;
-}
