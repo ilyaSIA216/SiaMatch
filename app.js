@@ -1,43 +1,150 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
   
-  // ===== НОВАЯ ФУНКЦИЯ - принудительное разворачивание во весь экран =====
+  // ===== НОВАЯ ФУНКЦИЯ - ГАРАНТИРОВАННОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН =====
   function forceFullScreen() {
-    // Метод для Telegram Web App
+    console.log('🟢 Запуск функции принудительного разворачивания...');
+    
+    // Способ 1: Telegram Web App API
     if (window.Telegram && Telegram.WebApp) {
+      console.log('🟢 Telegram WebApp API обнаружен');
+      
       try {
+        // ВАЖНО: Сначала вызываем ready(), потом expand()
+        Telegram.WebApp.ready();
+        console.log('🟢 Telegram.WebApp.ready() вызван');
+        
+        // Основной метод разворачивания
         Telegram.WebApp.expand();
-        console.log('🔵 Telegram WebApp развернут во весь экран');
+        console.log('🟢 Telegram.WebApp.expand() вызван');
         
-        // Дополнительные настройки для лучшего UX
-        Telegram.WebApp.enableClosingConfirmation();
+        // Дополнительные настройки
+        setTimeout(() => {
+          try {
+            Telegram.WebApp.enableClosingConfirmation();
+            console.log('🟢 Включено подтверждение закрытия');
+            
+            // Установка цветов интерфейса
+            if (Telegram.WebApp.setHeaderColor) {
+              Telegram.WebApp.setHeaderColor('#22c55e');
+              console.log('🟢 Установлен цвет заголовка: #22c55e');
+            }
+            
+            if (Telegram.WebApp.setBackgroundColor) {
+              Telegram.WebApp.setBackgroundColor('#f4fff7');
+              console.log('🟢 Установлен цвет фона: #f4fff7');
+            }
+            
+            // Запрашиваем обновление viewport
+            if (Telegram.WebApp.requestViewport) {
+              Telegram.WebApp.requestViewport();
+              console.log('🟢 Запрошен обновление viewport');
+            }
+          } catch (e) {
+            console.warn('⚠️ Ошибка в дополнительных настройках:', e);
+          }
+        }, 100);
         
-        // Установить стиль интерфейса Telegram
-        if (Telegram.WebApp.setHeaderColor) {
-          Telegram.WebApp.setHeaderColor('#22c55e'); // Зеленый цвет как у вашего приложения
-        }
-        
-        if (Telegram.WebApp.setBackgroundColor) {
-          Telegram.WebApp.setBackgroundColor('#f4fff7'); // Цвет фона вашего приложения
-        }
       } catch (e) {
-        console.warn('⚠️ Telegram expand не сработал:', e);
+        console.error('❌ Ошибка Telegram WebApp:', e);
       }
     }
     
-    // Метод для полноэкранного режима браузера (если не в Telegram)
-    if (!window.Telegram && document.documentElement.requestFullscreen) {
-      try {
-        document.documentElement.requestFullscreen();
-        console.log('🔵 Браузерный полноэкранный режим активирован');
-      } catch (e) {
-        console.warn('⚠️ Браузерный полноэкранный режим не доступен:', e);
+    // Способ 2: Если запущено как PWA или в браузере
+    if (!window.Telegram) {
+      console.log('🟡 Запущено не в Telegram, пытаемся другие методы...');
+      
+      // Проверяем, открыто ли как standalone PWA
+      if (window.navigator.standalone === true) {
+        console.log('🟢 Открыто как PWA (iOS)');
+      }
+      
+      // Пытаемся открыть полноэкранный режим
+      if (document.documentElement.requestFullscreen) {
+        try {
+          document.documentElement.requestFullscreen();
+          console.log('🟢 Активирован браузерный полноэкранный режим');
+        } catch (e) {
+          console.warn('⚠️ Браузерный полноэкранный режим не доступен:', e);
+        }
       }
     }
     
-    // Метод для iOS Web App
-    if (window.navigator.standalone === true) {
-      console.log('🔵 Приложение открыто в полноэкранном режиме iOS');
+    // Форсируем размеры
+    setTimeout(() => {
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
+      if (document.documentElement) {
+        document.documentElement.style.height = '100vh';
+      }
+      console.log('🟢 Форсированы размеры окна');
+    }, 500);
+  }
+  
+  // ===== НОВАЯ ФУНКЦИЯ: ЗАПУСК АНИМАЦИИ ПРИВЕТСТВИЯ =====
+  function startWelcomeAnimation() {
+    console.log('🎬 Запускаю анимацию приветствия...');
+    
+    // Показываем анимированный клевер сразу
+    const cloverAnimation = document.getElementById('clover-animation');
+    if (cloverAnimation) {
+      cloverAnimation.classList.remove('hidden');
+      console.log('🍀 Анимация клевера запущена');
+    }
+    
+    // Показываем текст приветствия через 1.5 секунды
+    setTimeout(() => {
+      const welcomeText = document.getElementById('welcome-text');
+      const loadingProgress = document.getElementById('loading-progress');
+      
+      if (welcomeText) {
+        welcomeText.classList.remove('hidden');
+        console.log('📝 Текст приветствия показан');
+      }
+      
+      // Показываем прогресс бар через 3.5 секунды
+      setTimeout(() => {
+        if (loadingProgress) {
+          loadingProgress.classList.remove('hidden');
+          console.log('📊 Прогресс бар показан');
+        }
+        
+        // Автоматический переход после завершения анимации (через 6.5 секунд от начала)
+        setTimeout(() => {
+          console.log('🚀 Завершение анимации, переход в приложение...');
+          completeWelcomeAnimation();
+        }, 3000); // 3 секунды на прогресс бар
+      }, 2000); // Ждем 2 секунды после текста
+    }, 1500); // Начало через 1.5 секунды
+  }
+  
+  // ===== НОВАЯ ФУНКЦИЯ: ЗАВЕРШЕНИЕ АНИМАЦИИ И ПЕРЕХОД =====
+  function completeWelcomeAnimation() {
+    console.log('🎯 Завершение анимации приветствия');
+    
+    // Скрываем экран приветствия
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (welcomeScreen) {
+      welcomeScreen.style.opacity = '0';
+      welcomeScreen.style.transition = 'opacity 0.5s ease';
+      
+      setTimeout(() => {
+        welcomeScreen.classList.add('hidden');
+        console.log('👋 Экран приветствия скрыт');
+        
+        // Проверяем профиль пользователя
+        profileData = loadProfile();
+        
+        if (profileData) {
+          // Пользователь уже зарегистрирован - показываем основное приложение
+          console.log('✅ Пользователь уже зарегистрирован, показываю основное приложение');
+          showMainApp();
+        } else {
+          // Новый пользователь - показываем анкету
+          console.log('📝 Новый пользователь, показываю анкету');
+          showOnboarding();
+        }
+      }, 500);
     }
   }
   
@@ -223,34 +330,44 @@ document.addEventListener('DOMContentLoaded', function() {
         tg = Telegram.WebApp;
         console.log('✅ Telegram WebApp обнаружен');
         
+        // Инициализация Telegram WebApp
         tg.ready();
+        console.log('🟢 Telegram.WebApp.ready() вызван');
         
-        // ПРИНУДИТЕЛЬНОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН
-        tg.expand(); // Главная команда для полного экрана
-        console.log('🟢 Приложение развернуто во весь экран');
-        
-        // Дополнительные настройки для лучшего UX
-        tg.enableClosingConfirmation(); // Спросить при закрытии
-        console.log('🟢 Включено подтверждение закрытия');
-        
-        // Установить стиль интерфейса Telegram
-        if (tg.setHeaderColor) {
-          tg.setHeaderColor('#22c55e'); // Зеленый цвет как у вашего приложения
-          console.log('🟢 Установлен цвет заголовка');
-        }
-        
-        if (tg.setBackgroundColor) {
-          tg.setBackgroundColor('#f4fff7'); // Цвет фона вашего приложения
-          console.log('🟢 Установлен цвет фона');
-        }
-        
-        // Обновить viewport
+        // Принудительное разворачивание
         setTimeout(() => {
-          if (tg.requestViewport) {
-            tg.requestViewport(); // Обновить размеры экрана
-            console.log('🟢 Viewport обновлен');
+          try {
+            tg.expand();
+            console.log('🟢 Telegram.WebApp.expand() вызван');
+            
+            // Дополнительные настройки
+            if (tg.enableClosingConfirmation) {
+              tg.enableClosingConfirmation();
+              console.log('🟢 Включено подтверждение закрытия');
+            }
+            
+            if (tg.setHeaderColor) {
+              tg.setHeaderColor('#22c55e');
+              console.log('🟢 Установлен цвет заголовка');
+            }
+            
+            if (tg.setBackgroundColor) {
+              tg.setBackgroundColor('#f4fff7');
+              console.log('🟢 Установлен цвет фона');
+            }
+            
+            // Обновить viewport
+            setTimeout(() => {
+              if (tg.requestViewport) {
+                tg.requestViewport();
+                console.log('🟢 Viewport обновлен');
+              }
+            }, 200);
+            
+          } catch (e) {
+            console.error('❌ Ошибка при разворачивании:', e);
           }
-        }, 100);
+        }, 300);
         
         if (tg.MainButton) {
           tg.MainButton.hide();
@@ -261,12 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
           document.body.classList.add('no-bounce');
           setupKeyboardHandlers();
         }
-        
-        setTimeout(() => {
-          if (tg && typeof tg.requestViewport === 'function') {
-            tg.requestViewport();
-          }
-        }, 500);
         
         return true;
       }
@@ -2251,37 +2362,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
-  function setupStartButton() {
-    if (!startBtn) return;
-    
-    startBtn.addEventListener('click', handleStartClick, { passive: true });
-    startBtn.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      handleStartClick();
-    }, { passive: false });
-  }
-  
-  function handleStartClick() {
-    if (tg?.HapticFeedback) {
-      try {
-        tg.HapticFeedback.impactOccurred('light');
-      } catch (e) {}
-    }
-    
-    if (welcomeScreen) {
-      welcomeScreen.classList.add("hidden");
-    }
-    
-    profileData = loadProfile();
-    
-    if (profileData) {
-      showMainApp();
-    } else {
-      showOnboarding();
-    }
-  }
-  
   // ===== ПОКАЗАТЬ АНКЕТУ =====
   function showOnboarding() {
     if (onboardingScreen) {
@@ -2882,14 +2962,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('🎬 Инициализация приложения...');
     
-    // ПРИНУДИТЕЛЬНОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН
+    // ГАРАНТИРОВАННОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН
     forceFullScreen();
     console.log('🟢 Функция разворачивания вызвана');
     
     initTelegram();
-    setupStartButton();
-    setupTabButtons();
     
+    // НАСТРОЙКА ЭЛЕМЕНТОВ ИНТЕРФЕЙСА
     const editProfileBtn = document.getElementById('edit-profile-btn');
     const saveChangesBtn = document.getElementById('save-profile-changes');
     const cancelEditBtn = document.getElementById('cancel-profile-edit');
@@ -2916,27 +2995,17 @@ document.addEventListener('DOMContentLoaded', function() {
       editPhotoInput.addEventListener('change', handlePhotoUpload);
     }
     
+    // НАСТРОЙКА ТАБОВ
+    setupTabButtons();
+    
+    // ЗАГРУЗКА ПРОФИЛЯ
     profileData = loadProfile();
     
-    if (welcomeScreen) {
-      welcomeScreen.classList.remove("hidden");
-    }
+    // ЗАПУСК АНИМАЦИИ ПРИВЕТСТВИЯ
+    console.log('🎬 Запускаю анимацию приветствия...');
+    startWelcomeAnimation();
     
-    if (onboardingScreen) onboardingScreen.classList.add("hidden");
-    document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'welcome-screen' && screen.id !== 'screen-interests') {
-        screen.classList.add('hidden');
-      }
-    });
-    
-    if (tabBar) tabBar.classList.add("hidden");
-    
-    if (isIOS) {
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 300);
-    }
-    
+    // ИНИЦИАЛИЗАЦИЯ СИСТЕМ
     initLikesSystem();
     initInterestsSystem();
     initFiltersSystem();
