@@ -7,39 +7,528 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- НОВЫЕ МЕТА-ТЕГИ ДЛЯ ПРИЛОЖЕНИЙ -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="SiaMatch">
+  <meta name="apple-mobile-web-app-title" content="SiaMatch">
+  <meta name="theme-color" content="#22c55e">
+  <meta name="msapplication-navbutton-color" content="#22c55e">
+  <meta name="msapplication-TileColor" content="#22c55e">
+  <meta name="msapplication-tap-highlight" content="no">
+  
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="app-root">
-    <div id="card">
-      <!-- ЭКРАН ПРИВЕТСТВИЯ -->
-      <div id="welcome-screen">
-        <div class="welcome-logo">🍀</div>
-        <div class="welcome-title">SiaMatch</div>
-        <div class="welcome-subtitle">Найди свою пару</div>
-        <div id="username">Привет!</div>
-        <div class="welcome-text">Добро пожаловать в SiaMatch!</div>
-        <div class="welcome-description">
-          Приложение для знакомств в Telegram.<br>
-          Найди свою идеальную пару рядом с тобой.
+    <!-- ЭКРАН ПРИВЕТСТВИЯ (НОВЫЙ АНИМИРОВАННЫЙ) -->
+    <div id="welcome-screen">
+      <div class="welcome-container">
+        <!-- Анимированный символ клевера -->
+        <div id="clover-animation" class="clover-animation">
+          <div class="clover-leaf leaf-1">🍀</div>
+          <div class="clover-leaf leaf-2">🍀</div>
+          <div class="clover-leaf leaf-3">🍀</div>
+          <div class="clover-leaf leaf-4">🍀</div>
+          <div class="clover-center">🍀</div>
         </div>
-        <button id="startBtn" class="primary">Начать знакомство</button>
+        
+        <!-- Текст приветствия с эффектом появления -->
+        <div id="welcome-text" class="welcome-text hidden">
+          <div class="welcome-line line-1">Добро пожаловать</div>
+          <div class="welcome-line line-2">в SiaMatch</div>
+          <!-- НОВАЯ НАДПИСЬ -->
+          <div class="welcome-line line-3">Любовь начинается здесь ❤️</div>
+        </div>
+        
+        <!-- Прогресс бар загрузки -->
+        <div id="loading-progress" class="loading-progress hidden">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="loading-text">Загрузка...</div>
+        </div>
+        
+        <!-- Скрытая кнопка старта (только для отладки) -->
+        <button id="startBtn" class="primary hidden">Начать знакомство</button>
       </div>
+    </div>
 
-      <!-- ЭКРАН АНКЕТЫ -->
-      <div id="onboarding-screen" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Заполните анкету 🍀</h2>
+    <!-- ЭКРАН АНКЕТЫ -->
+    <div id="onboarding-screen" class="screen hidden">
+      <div class="screen-content">
+        <h2 class="screen-title">Заполните анкету 🍀</h2>
 
+        <div class="field">
+          <label for="age">Возраст</label>
+          <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
+          <div class="hint">Только пользователи 18+</div>
+        </div>
+
+        <div class="field">
+          <label for="gender">Пол</label>
+          <select id="gender" required>
+            <option value="">Выберите пол</option>
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="city">Город <span style="color:#ef4444;">*</span></label>
+          <select id="city" required>
+            <option value="">Выберите город</option>
+            <option value="Москва">Москва</option>
+            <option value="Московская обл.">Московская обл.</option>
+            <option value="Санкт-Петербург">Санкт-Петербург</option>
+            <option value="Новосибирск">Новосибирск</option>
+            <option value="Екатеринбург">Екатеринбург</option>
+            <option value="Казань">Казань</option>
+            <option value="Нижний Новгород">Нижний Новгород</option>
+            <option value="Челябинск">Челябинск</option>
+            <option value="Самара">Самара</option>
+            <option value="Уфа">Уфа</option>
+            <option value="Ростов-на-Дону">Ростов-на-Дону</option>
+            <option value="Красноярск">Красноярск</option>
+            <option value="Воронеж">Воронеж</option>
+            <option value="Пермь">Пермь</option>
+            <option value="Волгоград">Волгоград</option>
+            <option value="Омск">Омск</option>
+            <option value="Краснодар">Краснодар</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="bio">О себе</label>
+          <textarea id="bio" rows="4" maxlength="300" placeholder="Расскажите о себе, своих интересах и кого вы хотите встретить 🍀"></textarea>
+          <div class="hint">Минимум 10 символов, максимум 300</div>
+        </div>
+
+        <!-- FIX: Кнопка всегда видна -->
+        <button id="saveProfileBtn">Сохранить профиль 🍀</button>
+      </div>
+    </div>
+
+    <!-- ЭКРАН ЧАТОВ -->
+    <div id="screen-chats" class="screen hidden">
+      <div class="screen-content">
+        <h2 class="screen-title">Чаты 💬</h2>
+        
+        <!-- БАДЖ С КОЛИЧЕСТВОМ ЛАЙКОВ (ТОЛЬКО ЧИСЛО!) -->
+        <div class="chats-header">
+          <div id="likes-badge" class="likes-badge">
+            <div class="likes-badge-icon">💗</div>
+            <div class="likes-badge-content">
+              <div class="likes-badge-title">
+                Вас лайкнули 
+                <span id="likes-count" class="counter-animation">0</span> 
+                человек
+              </div>
+              <div class="likes-badge-subtitle">
+                Продолжайте свайпать, чтобы найти взаимные симпатии!
+              </div>
+            </div>
+            <div id="likes-count-badge" class="likes-badge-count">0</div>
+            <div class="likes-badge-mystery">❓</div>
+          </div>
+          
+          <!-- УВЕДОМЛЕНИЕ О НОВЫХ ЛАЙКАХ -->
+          <div id="new-likes-notification" class="new-likes-notification hidden">
+            <div class="new-likes-notification-icon">🎉</div>
+            <div class="new-likes-notification-content">
+              <div class="new-likes-notification-title">Новый лайк!</div>
+              <div class="new-likes-notification-text">Кто-то оценил вашу анкету. Продолжайте свайпать, чтобы найти этого человека!</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- СПИСОК ЧАТОВ -->
+        <ul id="chats-list"></ul>
+        
+        <!-- ПУСТОЙ ЭКРАН ЧАТОВ -->
+        <div id="chats-empty" class="hint">У вас пока нет чатов. Продолжайте свайпать, чтобы найти взаимные симпатии! 💕</div>
+      </div>
+    </div>
+
+    <!-- ЭКРАН ЛЕНТЫ -->
+    <div id="screen-feed" class="screen hidden">
+      <div class="screen-content">
+        <!-- ЗАГОЛОВОК С КНОПКОЙ ФИЛЬТРОВ -->
+        <div class="feed-header">
+          <h2 class="screen-title">Познакомьтесь 🍀</h2>
+          <button id="open-filters-btn" class="filters-toggle-btn">
+            🔍 Фильтры
+          </button>
+        </div>
+        
+        <!-- АНКЕТА ДЛЯ СВАЙПОВ -->
+        <div id="candidate-card">
+          <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
+          <div id="candidate-verified" class="candidate-verified hidden">✅</div>
+          
+          <!-- ЗНАЧОК БУСТА (если анкета бустирована) -->
+          <div id="candidate-boost" class="candidate-boost hidden">🚀 Буст</div>
+          
+          <div class="candidate-photo-wrapper">
+            <img id="candidate-photo" src="" alt="Фото" />
+          </div>
+          <div class="candidate-info">
+            <div class="candidate-name-age">
+              <span id="candidate-name"></span>,
+              <span id="candidate-age"></span>
+            </div>
+            <div id="candidate-city" class="candidate-city"></div>
+            <div id="candidate-bio" class="candidate-bio"></div>
+          </div>
+        </div>
+        
+        <!-- КНОПКИ ДЕЙСТВИЙ -->
+        <div class="actions">
+          <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
+          <button id="btn-like" class="btn-circle btn-like">❤️</button>
+        </div>
+        
+        <!-- СТАТУС ЛЕНТЫ -->
+        <div id="feed-status" class="feed-status"></div>
+        
+        <!-- ИНФОРМАЦИЯ О СВАЙПАХ -->
+        <div id="swipes-info" class="swipes-info hidden">
+          <div class="swipes-info-content">
+            <div class="swipes-info-icon">🔄</div>
+            <div class="swipes-info-text">
+              <div class="swipes-info-title">Свайпы на сегодня</div>
+              <div class="swipes-info-count">Осталось: <span id="remaining-swipes">20</span></div>
+            </div>
+          </div>
+          <button id="buy-swipes-btn" class="buy-swipes-btn">+ Купить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ЭКРАН ФИЛЬТРОВ -->
+    <div id="screen-filters" class="screen hidden">
+      <div class="screen-content">
+        <div class="filters-header">
+          <h2 class="screen-title">🔍 Фильтры поиска</h2>
+          <button id="save-filters-btn" class="save-filters-btn">💾 Сохранить</button>
+        </div>
+        
+        <div class="profile-section">
+          <h3 class="section-title">Возрастной диапазон</h3>
+          <div class="age-range-fields">
+            <div class="age-input-group">
+              <label for="search-min-age">От</label>
+              <input type="number" id="search-min-age" min="18" max="99" value="18" placeholder="18" />
+            </div>
+            <div class="age-input-group">
+              <label for="search-max-age">До</label>
+              <input type="number" id="search-max-age" min="18" max="99" value="35" placeholder="35" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-section">
+          <h3 class="section-title">Пол для поиска</h3>
+          <div class="gender-filter">
+            <div class="gender-options">
+              <label class="gender-option">
+                <input type="checkbox" id="filter-gender-male" value="male" />
+                <span class="gender-label">Мужской</span>
+              </label>
+              <label class="gender-option">
+                <input type="checkbox" id="filter-gender-female" value="female" />
+                <span class="gender-label">Женский</span>
+              </label>
+            </div>
+            <div class="hint">Оставьте пустым для поиска любого пола</div>
+          </div>
+        </div>
+        
+        <div class="profile-section">
+          <h3 class="section-title">Интересы для поиска</h3>
+          <div class="interests-list filters-interests-list">
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="travel" />
+              Путешествия
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="movies" />
+              Кино
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="art" />
+              Искусство
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="sport" />
+              Спорт
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="photography" />
+              Фотография
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="dancing" />
+              Танцы
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="music" />
+              Музыка
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="cooking" />
+              Кулинария
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="business" />
+              Бизнес
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="gaming" />
+              Гейминг
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="cars" />
+              Автомобили
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="anime" />
+              Аниме
+            </label>
+            <!-- НОВЫЕ ИНТЕРЕСЫ -->
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="tattoos" />
+              Татуировки
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="piercing" />
+              Пирсинг
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="workout" />
+              Тренировки
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="wine" />
+              Вино
+            </label>
+            <label class="checkbox-field">
+              <input type="checkbox" class="search-interest" value="boardgames" />
+              Настольные игры
+            </label>
+          </div>
+        </div>
+        
+        <!-- ЦЕЛЬ ЗНАКОМСТВА В ФИЛЬТРАХ -->
+        <div class="profile-section">
+          <h3 class="section-title">Цель знакомства</h3>
+          <select id="search-dating-goal" class="filters-select">
+            <option value="">Любая цель</option>
+            <option value="marriage">Брак и создание семьи</option>
+            <option value="dating">Встречи и свидания</option>
+            <option value="friendship">Дружба и общение</option>
+            <option value="virtual">Виртуальное общение и флирт</option>
+          </select>
+        </div>
+        
+        <div class="filters-note">
+          <p>После сохранения фильтров вы автоматически вернетесь в ленту свайпов.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ЭКРАН ПРОФИЛЯ -->
+    <div id="screen-profile" class="screen hidden">
+      <div class="screen-content">
+        <!-- ОТОБРАЖЕНИЕ ПРОФИЛЯ -->
+        <div id="profile-display">
+          <div class="profile-header">
+            <h2 class="screen-title">Мой профиль</h2>
+            <button id="edit-profile-btn" class="settings-btn">⚙️</button>
+          </div>
+          
+          <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
+          <div class="profile-info-card">
+            <div class="profile-photo-section">
+              <img id="profile-photo-preview" class="profile-main-photo" />
+              <div class="profile-upload-btn">
+                <label for="profile-photo-upload" class="photo-upload-label">
+                  📸 Изменить фото
+                </label>
+                <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" />
+              </div>
+            </div>
+            
+            <div class="profile-details">
+              <div class="profile-name">
+                <h3 id="profile-name">Пользователь</h3>
+              </div>
+              
+              <div class="profile-info-row">
+                <span class="info-label">Возраст:</span>
+                <span id="profile-age-display" class="info-value">—</span>
+              </div>
+              
+              <div class="profile-info-row">
+                <span class="info-label">Пол:</span>
+                <span id="profile-gender-display" class="info-value">—</span>
+              </div>
+              
+              <div class="profile-info-row">
+                <span class="info-label">Город:</span>
+                <span id="profile-city-display" class="info-value">—</span>
+              </div>
+              
+              <!-- СТАТУС ВЕРИФИКАЦИИ -->
+              <div class="profile-info-row">
+                <span class="info-label">Верификация:</span>
+                <span id="verification-status" class="profile-verification-status not-verified">
+                  Анкета не верифицирована
+                </span>
+              </div>
+              
+              <!-- СТАТУС БУСТА -->
+              <div class="profile-info-row">
+                <span class="info-label">Буст:</span>
+                <span id="boost-status" class="boost-status not-boosted">
+                  Не активен
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- КНОПКИ ДОПОЛНИТЕЛЬНЫХ СВАЙПОВ И БУСТОВ -->
+          <div class="profile-section">
+            <h3 class="section-title">🎁 Получить больше возможностей</h3>
+            
+            <!-- ВЕРИФИКАЦИЯ С БОНУСОМ -->
+            <button id="verifyProfileBtn" class="primary verification-btn">
+              🔐 Верифицировать анкету (+20 свайпов)
+            </button>
+            
+            <!-- ПРИГЛАСИТЬ ДРУГА -->
+            <button id="inviteFriendBtn" class="secondary-btn invite-btn" style="margin-top: 10px;">
+              👥 Пригласить друга (+20 свайпов)
+            </button>
+            
+            <!-- ПОДЕЛИТЬСЯ В STORIES -->
+            <button id="shareStoriesBtn" class="secondary-btn share-btn" style="margin-top: 10px;">
+              📱 Поделиться в Stories (+24ч буст)
+            </button>
+          </div>
+          
+          <!-- ФОРМА ВЕРИФИКАЦИИ (скрыта по умолчанию) -->
+          <div id="verification-form-section" class="verification-form-section hidden">
+            <h3 class="section-title">🔐 Верификация анкеты (+20 свайпов)</h3>
+            <div class="verification-instruction">
+              Для верификации необходимо отправить селфи-фото. Администратор сравнит его с фото в вашем профиле.<br>
+              <strong>Бонус: +20 свайпов после успешной верификации!</strong>
+            </div>
+            
+            <div class="verification-steps">
+              <div class="verification-step">
+                <div class="step-number">1</div>
+                <div class="step-text">Сделайте селфи при хорошем освещении</div>
+              </div>
+              <div class="verification-step">
+                <div class="step-number">2</div>
+                <div class="step-text">Лицо должно быть чётко видно</div>
+              </div>
+              <div class="verification-step">
+                <div class="step-number">3</div>
+                <div class="step-text">Фото будет проверено в течение 24 часов</div>
+              </div>
+              <div class="verification-step">
+                <div class="step-number">🎁</div>
+                <div class="step-text">После верификации получите +20 свайпов!</div>
+              </div>
+            </div>
+            
+            <div class="field">
+              <label for="verification-photo">Селфи-фото для верификации</label>
+              <input type="file" id="verification-photo" accept="image/*" capture="user" />
+              <div class="hint">Используйте камеру для селфи. Фото должно быть чётким.</div>
+              <img id="verification-preview" class="verification-photo-preview" />
+            </div>
+            
+            <button id="submit-verification" class="primary">Отправить на проверку</button>
+            <button id="cancel-verification" class="secondary-btn">Отмена</button>
+          </div>
+          
+          <!-- Секция "На проверке" -->
+          <div id="verification-pending-section" class="verification-status-section pending hidden">
+            <div class="verification-status-icon">⏳</div>
+            <h4>На проверке</h4>
+            <p>Ваша анкета отправлена на верификацию. Проверка занимает до 24 часов.</p>
+            <p><strong>После успешной верификации вы получите +20 свайпов!</strong></p>
+          </div>
+          
+          <!-- Секция "Верифицирована" -->
+          <div id="verification-verified-section" class="verification-status-section verified hidden">
+            <div class="verification-status-icon">✅</div>
+            <h4>Анкета верифицирована</h4>
+            <p>Ваша личность подтверждена. На вашем профиле отображается значок верификации.</p>
+            <p><strong>Вы получили +20 свайпов! 🎁</strong></p>
+          </div>
+          
+          <!-- Секция "Отклонена" -->
+          <div id="verification-rejected-section" class="verification-status-section rejected hidden">
+            <div class="verification-status-icon">❌</div>
+            <h4>Верификация отклонена</h4>
+            <p>Фото не прошло проверку. Убедитесь, что селфи чёткое и соответствует фото в профиле.</p>
+            <button id="retry-verification" class="primary">
+              Попробовать снова
+            </button>
+          </div>
+          
+          <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
+          <div class="profile-section">
+            <div class="profile-section-header">
+              <h3 class="section-title">🎯 Мои интересы</h3>
+              <button id="edit-interests-btn" class="edit-interests-btn">✏️</button>
+            </div>
+            
+            <!-- ОТОБРАЖЕНИЕ ВЫБРАННЫХ ИНТЕРЕСОВ -->
+            <div id="selected-interests-display" class="selected-interests-display">
+              <div class="hint" id="no-interests-hint">Вы еще не выбрали интересы</div>
+              <div id="selected-interests-list" class="selected-interests-list"></div>
+              <div id="interests-counter" class="interests-counter hidden">
+                Выбрано: <span id="selected-count">0</span>/5 интересов
+              </div>
+            </div>
+          </div>
+          
+          <!-- ЦЕЛЬ ЗНАКОМСТВА -->
+          <div class="profile-section">
+            <h3 class="section-title">💝 Цель знакомства</h3>
+            <div class="field">
+              <select id="dating-goal">
+                <option value="">Выберите цель знакомства</option>
+                <option value="marriage">Брак и создание семьи</option>
+                <option value="dating">Встречи и свидания</option>
+                <option value="friendship">Дружба и общение</option>
+                <option value="virtual">Виртуальное общение и флирт</option>
+              </select>
+            </div>
+            <button id="save-dating-goal" class="primary" style="margin-top: 15px;">Сохранить цель</button>
+          </div>
+        </div>
+        
+        <!-- РЕДАКТИРОВАНИЕ ПРОФИЛЯ -->
+        <div id="profile-edit" class="hidden">
+          <div class="profile-edit-header">
+            <h2 class="screen-title">Редактирование профиля</h2>
+            <button id="save-profile-changes" class="save-edit-btn">💾</button>
+          </div>
+          
           <div class="field">
-            <label for="age">Возраст</label>
-            <input type="number" id="age" min="18" max="99" placeholder="Например, 25" required />
-            <div class="hint">Только пользователи 18+</div>
+            <label for="edit-age">Возраст</label>
+            <input type="number" id="edit-age" min="18" max="99" />
           </div>
 
           <div class="field">
-            <label for="gender">Пол</label>
-            <select id="gender" required>
+            <label for="edit-gender">Пол</label>
+            <select id="edit-gender">
               <option value="">Выберите пол</option>
               <option value="male">Мужской</option>
               <option value="female">Женский</option>
@@ -47,8 +536,8 @@
           </div>
 
           <div class="field">
-            <label for="city">Город <span style="color:#ef4444;">*</span></label>
-            <select id="city" required>
+            <label for="edit-city">Город</label>
+            <select id="edit-city">
               <option value="">Выберите город</option>
               <option value="Москва">Москва</option>
               <option value="Московская обл.">Московская обл.</option>
@@ -71,590 +560,128 @@
           </div>
 
           <div class="field">
-            <label for="bio">О себе</label>
-            <textarea id="bio" rows="4" maxlength="300" placeholder="Расскажите о себе, своих интересах и кого вы хотите встретить 🍀"></textarea>
-            <div class="hint">Минимум 10 символов, максимум 300</div>
+            <label for="edit-bio">О себе</label>
+            <textarea id="edit-bio" rows="4" maxlength="300"></textarea>
           </div>
 
-          <!-- FIX: Кнопка всегда видна -->
-          <button id="saveProfileBtn">Сохранить профиль 🍀</button>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ЧАТОВ -->
-      <div id="screen-chats" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Чаты 💬</h2>
-          
-          <!-- БАДЖ С КОЛИЧЕСТВОМ ЛАЙКОВ (ТОЛЬКО ЧИСЛО!) -->
-          <div class="chats-header">
-            <div id="likes-badge" class="likes-badge">
-              <div class="likes-badge-icon">💗</div>
-              <div class="likes-badge-content">
-                <div class="likes-badge-title">
-                  Вас лайкнули 
-                  <span id="likes-count" class="counter-animation">0</span> 
-                  человек
-                </div>
-                <div class="likes-badge-subtitle">
-                  Продолжайте свайпать, чтобы найти взаимные симпатии!
-                </div>
-              </div>
-              <div id="likes-count-badge" class="likes-badge-count">0</div>
-              <div class="likes-badge-mystery">❓</div>
-            </div>
-            
-            <!-- УВЕДОМЛЕНИЕ О НОВЫХ ЛАЙКАХ -->
-            <div id="new-likes-notification" class="new-likes-notification hidden">
-              <div class="new-likes-notification-icon">🎉</div>
-              <div class="new-likes-notification-content">
-                <div class="new-likes-notification-title">Новый лайк!</div>
-                <div class="new-likes-notification-text">Кто-то оценил вашу анкету. Продолжайте свайпать, чтобы найти этого человека!</div>
-              </div>
-            </div>
+          <div class="field">
+            <label>Фото профиля 📸</label>
+            <input type="file" id="edit-photo-upload" accept="image/*" />
+            <div class="hint">Выберите фото (до 5MB)</div>
+            <img id="edit-photo-preview" class="edit-photo-preview" />
           </div>
           
-          <!-- СПИСОК ЧАТОВ -->
-          <ul id="chats-list"></ul>
-          
-          <!-- ПУСТОЙ ЭКРАН ЧАТОВ -->
-          <div id="chats-empty" class="hint">У вас пока нет чатов. Продолжайте свайпать, чтобы найти взаимные симпатии! 💕</div>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ЛЕНТЫ -->
-      <div id="screen-feed" class="screen hidden">
-        <div class="screen-content">
-          <!-- ЗАГОЛОВОК С КНОПКОЙ ФИЛЬТРОВ -->
-          <div class="feed-header">
-            <h2 class="screen-title">Познакомьтесь 🍀</h2>
-            <button id="open-filters-btn" class="filters-toggle-btn">
-              🔍 Фильтры
-            </button>
-          </div>
-          
-          <!-- АНКЕТА ДЛЯ СВАЙПОВ -->
-          <div id="candidate-card">
-            <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
-            <div id="candidate-verified" class="candidate-verified hidden">✅</div>
-            
-            <!-- ЗНАЧОК БУСТА (если анкета бустирована) -->
-            <div id="candidate-boost" class="candidate-boost hidden">🚀 Буст</div>
-            
-            <div class="candidate-photo-wrapper">
-              <img id="candidate-photo" src="" alt="Фото" />
-            </div>
-            <div class="candidate-info">
-              <div class="candidate-name-age">
-                <span id="candidate-name"></span>,
-                <span id="candidate-age"></span>
-              </div>
-              <div id="candidate-city" class="candidate-city"></div>
-              <div id="candidate-bio" class="candidate-bio"></div>
-            </div>
-          </div>
-          
-          <!-- КНОПКИ ДЕЙСТВИЙ -->
-          <div class="actions">
-            <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
-            <button id="btn-like" class="btn-circle btn-like">❤️</button>
-          </div>
-          
-          <!-- СТАТУС ЛЕНТЫ -->
-          <div id="feed-status" class="feed-status"></div>
-          
-          <!-- ИНФОРМАЦИЯ О СВАЙПАХ -->
-          <div id="swipes-info" class="swipes-info hidden">
-            <div class="swipes-info-content">
-              <div class="swipes-info-icon">🔄</div>
-              <div class="swipes-info-text">
-                <div class="swipes-info-title">Свайпы на сегодня</div>
-                <div class="swipes-info-count">Осталось: <span id="remaining-swipes">20</span></div>
-              </div>
-            </div>
-            <button id="buy-swipes-btn" class="buy-swipes-btn">+ Купить</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ФИЛЬТРОВ -->
-      <div id="screen-filters" class="screen hidden">
-        <div class="screen-content">
-          <div class="filters-header">
-            <h2 class="screen-title">🔍 Фильтры поиска</h2>
-            <button id="save-filters-btn" class="save-filters-btn">💾 Сохранить</button>
-          </div>
-          
-          <div class="profile-section">
-            <h3 class="section-title">Возрастной диапазон</h3>
-            <div class="age-range-fields">
-              <div class="age-input-group">
-                <label for="search-min-age">От</label>
-                <input type="number" id="search-min-age" min="18" max="99" value="18" placeholder="18" />
-              </div>
-              <div class="age-input-group">
-                <label for="search-max-age">До</label>
-                <input type="number" id="search-max-age" min="18" max="99" value="35" placeholder="35" />
-              </div>
-            </div>
-          </div>
-          
-          <div class="profile-section">
-            <h3 class="section-title">Пол для поиска</h3>
-            <div class="gender-filter">
-              <div class="gender-options">
-                <label class="gender-option">
-                  <input type="checkbox" id="filter-gender-male" value="male" />
-                  <span class="gender-label">Мужской</span>
-                </label>
-                <label class="gender-option">
-                  <input type="checkbox" id="filter-gender-female" value="female" />
-                  <span class="gender-label">Женский</span>
-                </label>
-              </div>
-              <div class="hint">Оставьте пустым для поиска любого пола</div>
-            </div>
-          </div>
-          
-          <div class="profile-section">
-            <h3 class="section-title">Интересы для поиска</h3>
-            <div class="interests-list filters-interests-list">
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="travel" />
-                Путешествия
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="movies" />
-                Кино
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="art" />
-                Искусство
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="sport" />
-                Спорт
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="photography" />
-                Фотография
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="dancing" />
-                Танцы
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="music" />
-                Музыка
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="cooking" />
-                Кулинария
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="business" />
-                Бизнес
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="gaming" />
-                Гейминг
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="cars" />
-                Автомобили
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="anime" />
-                Аниме
-              </label>
-              <!-- НОВЫЕ ИНТЕРЕСЫ -->
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="tattoos" />
-                Татуировки
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="piercing" />
-                Пирсинг
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="workout" />
-                Тренировки
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="wine" />
-                Вино
-              </label>
-              <label class="checkbox-field">
-                <input type="checkbox" class="search-interest" value="boardgames" />
-                Настольные игры
-              </label>
-            </div>
-          </div>
-          
-          <!-- ЦЕЛЬ ЗНАКОМСТВА В ФИЛЬТРАХ -->
-          <div class="profile-section">
-            <h3 class="section-title">Цель знакомства</h3>
-            <select id="search-dating-goal" class="filters-select">
-              <option value="">Любая цель</option>
-              <option value="marriage">Брак и создание семьи</option>
-              <option value="dating">Встречи и свидания</option>
-              <option value="friendship">Дружба и общение</option>
-              <option value="virtual">Виртуальное общение и флирт</option>
-            </select>
-          </div>
-          
-          <div class="filters-note">
-            <p>После сохранения фильтров вы автоматически вернетесь в ленту свайпов.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ПРОФИЛЯ -->
-      <div id="screen-profile" class="screen hidden">
-        <div class="screen-content">
-          <!-- ОТОБРАЖЕНИЕ ПРОФИЛЯ -->
-          <div id="profile-display">
-            <div class="profile-header">
-              <h2 class="screen-title">Мой профиль</h2>
-              <button id="edit-profile-btn" class="settings-btn">⚙️</button>
-            </div>
-            
-            <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
-            <div class="profile-info-card">
-              <div class="profile-photo-section">
-                <img id="profile-photo-preview" class="profile-main-photo" />
-                <div class="profile-upload-btn">
-                  <label for="profile-photo-upload" class="photo-upload-label">
-                    📸 Изменить фото
-                  </label>
-                  <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" />
-                </div>
-              </div>
-              
-              <div class="profile-details">
-                <div class="profile-name">
-                  <h3 id="profile-name">Пользователь</h3>
-                </div>
-                
-                <div class="profile-info-row">
-                  <span class="info-label">Возраст:</span>
-                  <span id="profile-age-display" class="info-value">—</span>
-                </div>
-                
-                <div class="profile-info-row">
-                  <span class="info-label">Пол:</span>
-                  <span id="profile-gender-display" class="info-value">—</span>
-                </div>
-                
-                <div class="profile-info-row">
-                  <span class="info-label">Город:</span>
-                  <span id="profile-city-display" class="info-value">—</span>
-                </div>
-                
-                <!-- СТАТУС ВЕРИФИКАЦИИ -->
-                <div class="profile-info-row">
-                  <span class="info-label">Верификация:</span>
-                  <span id="verification-status" class="profile-verification-status not-verified">
-                    Анкета не верифицирована
-                  </span>
-                </div>
-                
-                <!-- СТАТУС БУСТА -->
-                <div class="profile-info-row">
-                  <span class="info-label">Буст:</span>
-                  <span id="boost-status" class="boost-status not-boosted">
-                    Не активен
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- КНОПКИ ДОПОЛНИТЕЛЬНЫХ СВАЙПОВ И БУСТОВ -->
-            <div class="profile-section">
-              <h3 class="section-title">🎁 Получить больше возможностей</h3>
-              
-              <!-- ВЕРИФИКАЦИЯ С БОНУСОМ -->
-              <button id="verifyProfileBtn" class="primary verification-btn">
-                🔐 Верифицировать анкету (+20 свайпов)
-              </button>
-              
-              <!-- ПРИГЛАСИТЬ ДРУГА -->
-              <button id="inviteFriendBtn" class="secondary-btn invite-btn" style="margin-top: 10px;">
-                👥 Пригласить друга (+20 свайпов)
-              </button>
-              
-              <!-- ПОДЕЛИТЬСЯ В STORIES -->
-              <button id="shareStoriesBtn" class="secondary-btn share-btn" style="margin-top: 10px;">
-                📱 Поделиться в Stories (+24ч буст)
-              </button>
-            </div>
-            
-            <!-- ФОРМА ВЕРИФИКАЦИИ (скрыта по умолчанию) -->
-            <div id="verification-form-section" class="verification-form-section hidden">
-              <h3 class="section-title">🔐 Верификация анкеты (+20 свайпов)</h3>
-              <div class="verification-instruction">
-                Для верификации необходимо отправить селфи-фото. Администратор сравнит его с фото в вашем профиле.<br>
-                <strong>Бонус: +20 свайпов после успешной верификации!</strong>
-              </div>
-              
-              <div class="verification-steps">
-                <div class="verification-step">
-                  <div class="step-number">1</div>
-                  <div class="step-text">Сделайте селфи при хорошем освещении</div>
-                </div>
-                <div class="verification-step">
-                  <div class="step-number">2</div>
-                  <div class="step-text">Лицо должно быть чётко видно</div>
-                </div>
-                <div class="verification-step">
-                  <div class="step-number">3</div>
-                  <div class="step-text">Фото будет проверено в течение 24 часов</div>
-                </div>
-                <div class="verification-step">
-                  <div class="step-number">🎁</div>
-                  <div class="step-text">После верификации получите +20 свайпов!</div>
-                </div>
-              </div>
-              
-              <div class="field">
-                <label for="verification-photo">Селфи-фото для верификации</label>
-                <input type="file" id="verification-photo" accept="image/*" capture="user" />
-                <div class="hint">Используйте камеру для селфи. Фото должно быть чётким.</div>
-                <img id="verification-preview" class="verification-photo-preview" />
-              </div>
-              
-              <button id="submit-verification" class="primary">Отправить на проверку</button>
-              <button id="cancel-verification" class="secondary-btn">Отмена</button>
-            </div>
-            
-            <!-- Секция "На проверке" -->
-            <div id="verification-pending-section" class="verification-status-section pending hidden">
-              <div class="verification-status-icon">⏳</div>
-              <h4>На проверке</h4>
-              <p>Ваша анкета отправлена на верификацию. Проверка занимает до 24 часов.</p>
-              <p><strong>После успешной верификации вы получите +20 свайпов!</strong></p>
-            </div>
-            
-            <!-- Секция "Верифицирована" -->
-            <div id="verification-verified-section" class="verification-status-section verified hidden">
-              <div class="verification-status-icon">✅</div>
-              <h4>Анкета верифицирована</h4>
-              <p>Ваша личность подтверждена. На вашем профиле отображается значок верификации.</p>
-              <p><strong>Вы получили +20 свайпов! 🎁</strong></p>
-            </div>
-            
-            <!-- Секция "Отклонена" -->
-            <div id="verification-rejected-section" class="verification-status-section rejected hidden">
-              <div class="verification-status-icon">❌</div>
-              <h4>Верификация отклонена</h4>
-              <p>Фото не прошло проверку. Убедитесь, что селфи чёткое и соответствует фото в профиле.</p>
-              <button id="retry-verification" class="primary">
-                Попробовать снова
-              </button>
-            </div>
-            
-            <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
-            <div class="profile-section">
-              <div class="profile-section-header">
-                <h3 class="section-title">🎯 Мои интересы</h3>
-                <button id="edit-interests-btn" class="edit-interests-btn">✏️</button>
-              </div>
-              
-              <!-- ОТОБРАЖЕНИЕ ВЫБРАННЫХ ИНТЕРЕСОВ -->
-              <div id="selected-interests-display" class="selected-interests-display">
-                <div class="hint" id="no-interests-hint">Вы еще не выбрали интересы</div>
-                <div id="selected-interests-list" class="selected-interests-list"></div>
-                <div id="interests-counter" class="interests-counter hidden">
-                  Выбрано: <span id="selected-count">0</span>/5 интересов
-                </div>
-              </div>
-            </div>
-            
-            <!-- ЦЕЛЬ ЗНАКОМСТВА -->
-            <div class="profile-section">
-              <h3 class="section-title">💝 Цель знакомства</h3>
-              <div class="field">
-                <select id="dating-goal">
-                  <option value="">Выберите цель знакомства</option>
-                  <option value="marriage">Брак и создание семьи</option>
-                  <option value="dating">Встречи и свидания</option>
-                  <option value="friendship">Дружба и общение</option>
-                  <option value="virtual">Виртуальное общение и флирт</option>
-                </select>
-              </div>
-              <button id="save-dating-goal" class="primary" style="margin-top: 15px;">Сохранить цель</button>
-            </div>
-          </div>
-          
-          <!-- РЕДАКТИРОВАНИЕ ПРОФИЛЯ -->
-          <div id="profile-edit" class="hidden">
-            <div class="profile-edit-header">
-              <h2 class="screen-title">Редактирование профиля</h2>
-              <button id="save-profile-changes" class="save-edit-btn">💾</button>
-            </div>
-            
-            <div class="field">
-              <label for="edit-age">Возраст</label>
-              <input type="number" id="edit-age" min="18" max="99" />
-            </div>
-
-            <div class="field">
-              <label for="edit-gender">Пол</label>
-              <select id="edit-gender">
-                <option value="">Выберите пол</option>
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="edit-city">Город</label>
-              <select id="edit-city">
-                <option value="">Выберите город</option>
-                <option value="Москва">Москва</option>
-                <option value="Московская обл.">Московская обл.</option>
-                <option value="Санкт-Петербург">Санкт-Петербург</option>
-                <option value="Новосибирск">Новосибирск</option>
-                <option value="Екатеринбург">Екатеринбург</option>
-                <option value="Казань">Казань</option>
-                <option value="Нижний Новгород">Нижний Новгород</option>
-                <option value="Челябинск">Челябинск</option>
-                <option value="Самара">Самара</option>
-                <option value="Уфа">Уфа</option>
-                <option value="Ростов-на-Дону">Ростов-на-Дону</option>
-                <option value="Красноярск">Красноярск</option>
-                <option value="Воронеж">Воронеж</option>
-                <option value="Пермь">Пермь</option>
-                <option value="Волгоград">Волгоград</option>
-                <option value="Омск">Омск</option>
-                <option value="Краснодар">Краснодар</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="edit-bio">О себе</label>
-              <textarea id="edit-bio" rows="4" maxlength="300"></textarea>
-            </div>
-
-            <div class="field">
-              <label>Фото профиля 📸</label>
-              <input type="file" id="edit-photo-upload" accept="image/*" />
-              <div class="hint">Выберите фото (до 5MB)</div>
-              <img id="edit-photo-preview" class="edit-photo-preview" />
-            </div>
-            
-            <button id="cancel-profile-edit" class="cancel-edit-btn">Отмена</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ЭКРАН ВЫБОРА ИНТЕРЕСОВ -->
-      <div id="screen-interests" class="screen hidden">
-        <div class="screen-content">
-          <div class="interests-header">
-            <button id="back-to-profile-btn" class="back-btn">←</button>
-            <h2 class="screen-title">🎯 Выбор интересов</h2>
-            <button id="save-interests-btn" class="save-interests-btn">💾</button>
-          </div>
-          
-          <div class="interests-instruction">
-            <p>Выберите до 5 интересов, которые вас характеризуют:</p>
-            <div id="interests-counter-editor" class="interests-counter">
-              Выбрано: <span id="selected-count-editor">0</span>/5 интересов
-            </div>
-          </div>
-          
-          <div class="interests-grid">
-            <!-- СУЩЕСТВУЮЩИЕ ИНТЕРЕСЫ -->
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="travel" />
-              <span class="interest-label">Путешествия</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="movies" />
-              <span class="interest-label">Кино</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="art" />
-              <span class="interest-label">Искусство</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="sport" />
-              <span class="interest-label">Спорт</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="photography" />
-              <span class="interest-label">Фотография</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="dancing" />
-              <span class="interest-label">Танцы</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="music" />
-              <span class="interest-label">Музыка</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="cooking" />
-              <span class="interest-label">Кулинария</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="business" />
-              <span class="interest-label">Бизнес</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="gaming" />
-              <span class="interest-label">Гейминг</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="cars" />
-              <span class="interest-label">Автомобили</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="anime" />
-              <span class="interest-label">Аниме</span>
-            </label>
-            <!-- НОВЫЕ ИНТЕРЕСЫ -->
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="tattoos" />
-              <span class="interest-label">Татуировки</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="piercing" />
-              <span class="interest-label">Пирсинг</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="workout" />
-              <span class="interest-label">Тренировки</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="wine" />
-              <span class="interest-label">Вино</span>
-            </label>
-            <label class="checkbox-field">
-              <input type="checkbox" class="interest-checkbox" value="boardgames" />
-              <span class="interest-label">Настольные игры</span>
-            </label>
-          </div>
-          
-          <div class="interests-note">
-            <p>Выберите до 5 интересов. Это поможет найти более подходящих людей.</p>
-          </div>
+          <button id="cancel-profile-edit" class="cancel-edit-btn">Отмена</button>
         </div>
       </div>
     </div>
 
-    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
-    <div id="tab-bar" class="hidden">
-      <button class="tab-btn" data-tab="chats">
-        💬
-        <!-- Бейдж с количеством лайков на иконке чатов -->
-        <div id="tab-chats-badge" class="tab-notification-badge hidden">0</div>
-      </button>
-      <button class="tab-btn active" data-tab="feed">🍀</button>
-      <button class="tab-btn" data-tab="filters">🔍</button>
-      <button class="tab-btn" data-tab="profile">✏️</button>
+    <!-- ЭКРАН ВЫБОРА ИНТЕРЕСОВ -->
+    <div id="screen-interests" class="screen hidden">
+      <div class="screen-content">
+        <div class="interests-header">
+          <button id="back-to-profile-btn" class="back-btn">←</button>
+          <h2 class="screen-title">🎯 Выбор интересов</h2>
+          <button id="save-interests-btn" class="save-interests-btn">💾</button>
+        </div>
+        
+        <div class="interests-instruction">
+          <p>Выберите до 5 интересов, которые вас характеризуют:</p>
+          <div id="interests-counter-editor" class="interests-counter">
+            Выбрано: <span id="selected-count-editor">0</span>/5 интересов
+          </div>
+        </div>
+        
+        <div class="interests-grid">
+          <!-- СУЩЕСТВУЮЩИЕ ИНТЕРЕСЫ -->
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="travel" />
+            <span class="interest-label">Путешествия</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="movies" />
+            <span class="interest-label">Кино</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="art" />
+            <span class="interest-label">Искусство</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="sport" />
+            <span class="interest-label">Спорт</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="photography" />
+            <span class="interest-label">Фотография</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="dancing" />
+            <span class="interest-label">Танцы</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="music" />
+            <span class="interest-label">Музыка</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="cooking" />
+            <span class="interest-label">Кулинария</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="business" />
+            <span class="interest-label">Бизнес</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="gaming" />
+            <span class="interest-label">Гейминг</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="cars" />
+            <span class="interest-label">Автомобили</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="anime" />
+            <span class="interest-label">Аниме</span>
+          </label>
+          <!-- НОВЫЕ ИНТЕРЕСЫ -->
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="tattoos" />
+            <span class="interest-label">Татуировки</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="piercing" />
+            <span class="interest-label">Пирсинг</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="workout" />
+            <span class="interest-label">Тренировки</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="wine" />
+            <span class="interest-label">Вино</span>
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" class="interest-checkbox" value="boardgames" />
+            <span class="interest-label">Настольные игры</span>
+          </label>
+        </div>
+        
+        <div class="interests-note">
+          <p>Выберите до 5 интересов. Это поможет найти более подходящих людей.</p>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <div id="tab-bar" class="hidden">
+    <button class="tab-btn" data-tab="chats">
+      💬
+      <!-- Бейдж с количеством лайков на иконке чатов -->
+      <div id="tab-chats-badge" class="tab-notification-badge hidden">0</div>
+    </button>
+    <button class="tab-btn active" data-tab="feed">🍀</button>
+    <button class="tab-btn" data-tab="filters">🔍</button>
+    <button class="tab-btn" data-tab="profile">✏️</button>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
