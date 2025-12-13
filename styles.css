@@ -2567,7 +2567,7 @@ select:focus {
   }
 }
 
-/* ===== НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
+/* Обновленные стили для анимированного приветственного экрана */
 #welcome-animated-screen {
   display: flex;
   flex-direction: column;
@@ -2592,14 +2592,14 @@ select:focus {
   position: relative;
 }
 
-/* Анимированный клевер - ВЫШЕ И БОЛЬШЕ */
+/* Анимированный клевер */
 .animated-clover {
-  font-size: 100px;
+  font-size: 80px;
   opacity: 0;
   transform: scale(0.5) translateY(-50px);
-  animation: cloverAppear 1.5s ease forwards;
+  animation: cloverAppear 2s ease forwards;
   margin-bottom: 30px;
-  margin-top: -50px;
+  margin-top: -30px;
 }
 
 @keyframes cloverAppear {
@@ -2613,18 +2613,18 @@ select:focus {
   }
   100% {
     opacity: 1;
-    transform: scale(1.1) translateY(0) rotate(0deg);
+    transform: scale(1) translateY(0) rotate(0deg);
   }
 }
 
 /* Анимированный заголовок */
 .animated-title {
-  font-size: 48px;
+  font-size: 36px;
   font-weight: 800;
   color: var(--siamatch-green-dark);
   opacity: 0;
   transform: translateY(20px);
-  animation: titleAppear 1s ease 1.5s forwards;
+  animation: titleAppear 1.5s ease 2s forwards;
   margin-bottom: 10px;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
 }
@@ -2640,17 +2640,17 @@ select:focus {
   }
 }
 
-/* Анимированный подзаголовок */
+/* Текст "Любовь начинается здесь" - появляется ПЕРВЫМ */
 .animated-subtitle {
-  font-size: 28px;
+  font-size: 22px;
   color: #064e3b;
   opacity: 0;
   transform: translateY(20px);
   animation: subtitleAppear 1s ease 3.5s forwards;
   font-weight: 700;
-  margin-top: 20px;
+  margin-top: 40px;
   position: relative;
-  padding: 20px 40px;
+  padding: 20px 0;
   z-index: 2;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
 }
@@ -2666,15 +2666,18 @@ select:focus {
   }
 }
 
-/* КОНТЕЙНЕР ДЛЯ СЕРДЦА */
+/* Контейнер для сердца - рисуется ВОКРУГ текста */
 .heart-container {
   position: absolute;
-  width: 380px;
-  height: 380px;
+  width: 320px;
+  height: 280px;
+  top: calc(50% + 40px);
+  left: 50%;
+  transform: translate(-50%, -50%);
   opacity: 0;
-  animation: heartContainerAppear 0.1s ease 3.5s forwards;
+  animation: heartContainerAppear 0.1s ease 4.5s forwards; /* Через 1 секунду после текста */
   z-index: 1;
-  pointer-events: none; /* Чтобы не мешало кликам */
+  pointer-events: none;
 }
 
 @keyframes heartContainerAppear {
@@ -2686,7 +2689,7 @@ select:focus {
   }
 }
 
-/* SVG СЕРДЦА */
+/* SVG сердца */
 .heart-svg {
   width: 100%;
   height: 100%;
@@ -2696,24 +2699,24 @@ select:focus {
   transform: translate(-50%, -50%);
 }
 
-/* ПУТЬ СЕРДЦА - РИСУЕТСЯ ПОСТЕПЕННО */
+/* Путь сердца - только КОНТУР, рисуется МЕДЛЕННО вокруг текста */
 .heart-path {
-  fill: none; /* НЕ закрашиваем внутри! */
-  stroke: #f472b6; /* Розовый цвет, как лайки */
+  fill: none; /* НЕ закрашиваем! */
+  stroke: #f472b6; /* Розовый цвет контура */
   stroke-width: 4px;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 1000; /* Общая длина пути */
-  stroke-dashoffset: 1000; /* Начинаем с полностью скрытого */
-  animation: drawHeart 2s ease 3.6s forwards;
-  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.6));
+  stroke-dasharray: 800; /* Общая длина пути */
+  stroke-dashoffset: 800; /* Начинаем с полностью скрытого */
+  animation: drawHeart 3s ease 4.6s forwards; /* Медленно рисуется 3 секунды */
+  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.4));
   transform-origin: center;
 }
 
-/* Анимация рисования сердца из одной точки */
+/* Анимация рисования сердца из одной точки ВОКРУГ текста */
 @keyframes drawHeart {
   0% {
-    stroke-dashoffset: 1000;
+    stroke-dashoffset: 800;
     opacity: 0.8;
   }
   70% {
@@ -2741,43 +2744,50 @@ select:focus {
 /* Адаптив для маленьких экранов */
 @media (max-height: 700px) {
   .animated-clover {
-    font-size: 80px;
-    margin-top: -30px;
-  }
-  
-  .animated-title {
-    font-size: 40px;
-  }
-  
-  .animated-subtitle {
-    font-size: 24px;
-    padding: 15px 30px;
-  }
-  
-  .heart-container {
-    width: 320px;
-    height: 320px;
-  }
-}
-
-@media (max-height: 600px) {
-  .animated-clover {
     font-size: 70px;
     margin-top: -20px;
   }
   
   .animated-title {
-    font-size: 36px;
+    font-size: 32px;
   }
   
   .animated-subtitle {
-    font-size: 22px;
-    padding: 12px 25px;
+    font-size: 20px;
+    margin-top: 35px;
   }
   
   .heart-container {
     width: 280px;
-    height: 280px;
+    height: 240px;
+    top: calc(50% + 35px);
+  }
+  
+  .heart-path {
+    stroke-width: 3.5px;
+  }
+}
+
+@media (max-height: 600px) {
+  .animated-clover {
+    font-size: 60px;
+    margin-top: -15px;
+  }
+  
+  .animated-title {
+    font-size: 28px;
+  }
+  
+  .animated-subtitle {
+    font-size: 18px;
+    margin-top: 30px;
+    padding: 15px 0;
+  }
+  
+  .heart-container {
+    width: 240px;
+    height: 210px;
+    top: calc(50% + 30px);
   }
   
   .heart-path {
@@ -2787,49 +2797,17 @@ select:focus {
 
 @media (max-width: 380px) {
   .animated-title {
-    font-size: 36px;
+    font-size: 30px;
   }
   
   .animated-subtitle {
-    font-size: 22px;
-    padding: 10px 20px;
+    font-size: 18px;
+    padding: 15px 0;
   }
   
   .heart-container {
-    width: 260px;
-    height: 260px;
-  }
-}
-
-/* ===== ТОЧНОЕ ПОЗИЦИОНИРОВАНИЕ ===== */
-/* Спускаем надпись на 1 см (≈20px) */
-#animated-subtitle {
-  margin-top: 40px !important; /* Переопределяем предыдущие стили */
-}
-
-/* Спускаем сердце на 2.5 см (≈50px) */
-.heart-container {
-  top: calc(50% + 50px) !important; /* Центр + 2.5 см вниз */
-  transform: translate(-50%, -50%) !important;
-}
-
-/* Обновляем адаптив */
-@media (max-height: 700px) {
-  #animated-subtitle {
-    margin-top: 35px !important;
-  }
-  
-  .heart-container {
-    top: calc(50% + 40px) !important; /* Чуть меньше для маленьких экранов */
-  }
-}
-
-@media (max-height: 600px) {
-  #animated-subtitle {
-    margin-top: 30px !important;
-  }
-  
-  .heart-container {
-    top: calc(50% + 30px) !important;
+    width: 220px;
+    height: 190px;
+    top: calc(50% + 25px);
   }
 }
