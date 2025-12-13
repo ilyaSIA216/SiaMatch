@@ -2566,3 +2566,237 @@ select:focus {
     height: 300px;
   }
 }
+
+/* ===== НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
+#welcome-animated-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1001;
+}
+
+.welcome-animated-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+}
+
+/* Анимированный клевер - ВЫШЕ И БОЛЬШЕ */
+.animated-clover {
+  font-size: 100px;
+  opacity: 0;
+  transform: scale(0.5) translateY(-50px);
+  animation: cloverAppear 1.5s ease forwards;
+  margin-bottom: 30px;
+  margin-top: -50px;
+}
+
+@keyframes cloverAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-50px) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2) translateY(-20px) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0) rotate(0deg);
+  }
+}
+
+/* Анимированный заголовок */
+.animated-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--siamatch-green-dark);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: titleAppear 1s ease 1.5s forwards;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes titleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимированный подзаголовок */
+.animated-subtitle {
+  font-size: 28px;
+  color: #064e3b;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: subtitleAppear 1s ease 3.5s forwards;
+  font-weight: 700;
+  margin-top: 20px;
+  position: relative;
+  padding: 20px 40px;
+  z-index: 2;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes subtitleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* КОНТЕЙНЕР ДЛЯ СЕРДЦА */
+.heart-container {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  opacity: 0;
+  animation: heartContainerAppear 0.1s ease 3.5s forwards;
+  z-index: 1;
+  pointer-events: none; /* Чтобы не мешало кликам */
+}
+
+@keyframes heartContainerAppear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* SVG СЕРДЦА */
+.heart-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ПУТЬ СЕРДЦА - РИСУЕТСЯ ПОСТЕПЕННО */
+.heart-path {
+  fill: none; /* НЕ закрашиваем внутри! */
+  stroke: #f472b6; /* Розовый цвет, как лайки */
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000; /* Общая длина пути */
+  stroke-dashoffset: 1000; /* Начинаем с полностью скрытого */
+  animation: drawHeart 2s ease 3.6s forwards;
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.6));
+  transform-origin: center;
+}
+
+/* Анимация рисования сердца из одной точки */
+@keyframes drawHeart {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0.8;
+  }
+  70% {
+    stroke-dashoffset: 200;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Анимация для перехода к основному приложению */
+@keyframes fadeOutScreen {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-height: 700px) {
+  .animated-clover {
+    font-size: 80px;
+    margin-top: -30px;
+  }
+  
+  .animated-title {
+    font-size: 40px;
+  }
+  
+  .animated-subtitle {
+    font-size: 24px;
+    padding: 15px 30px;
+  }
+  
+  .heart-container {
+    width: 320px;
+    height: 320px;
+  }
+}
+
+@media (max-height: 600px) {
+  .animated-clover {
+    font-size: 70px;
+    margin-top: -20px;
+  }
+  
+  .animated-title {
+    font-size: 36px;
+  }
+  
+  .animated-subtitle {
+    font-size: 22px;
+    padding: 12px 25px;
+  }
+  
+  .heart-container {
+    width: 280px;
+    height: 280px;
+  }
+  
+  .heart-path {
+    stroke-width: 3px;
+  }
+}
+
+@media (max-width: 380px) {
+  .animated-title {
+    font-size: 36px;
+  }
+  
+  .animated-subtitle {
+    font-size: 22px;
+    padding: 10px 20px;
+  }
+  
+  .heart-container {
+    width: 260px;
+    height: 260px;
+  }
+}
