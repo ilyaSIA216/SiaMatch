@@ -2352,233 +2352,6 @@ select:focus {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1001; /* Выше обычного приветственного экрана */
-}
-
-.welcome-animated-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 20px;
-  position: relative;
-}
-
-/* Анимированный клевер - ВЫШЕ И БОЛЬШЕ */
-.animated-clover {
-  font-size: 100px; /* Увеличили размер */
-  opacity: 0;
-  transform: scale(0.5) translateY(-50px); /* Подняли выше */
-  animation: cloverAppear 1.5s ease forwards;
-  margin-bottom: 30px; /* Увеличили отступ */
-  margin-top: -50px; /* Поднимаем еще выше */
-}
-
-@keyframes cloverAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) translateY(-50px) rotate(0deg);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.2) translateY(-20px) rotate(5deg); /* Увеличили масштаб */
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.1) translateY(0) rotate(0deg); /* Окончательный размер больше */
-  }
-}
-
-/* Анимированный заголовок */
-.animated-title {
-  font-size: 48px; /* Увеличили размер */
-  font-weight: 800;
-  color: var(--siamatch-green-dark);
-  opacity: 0;
-  transform: translateY(20px);
-  animation: titleAppear 1s ease 1.5s forwards; /* Через 1.5 сек после клевера */
-  margin-bottom: 10px;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15); /* Усилили тень */
-}
-
-@keyframes titleAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Анимированный подзаголовок - ЧЕРЕЗ 2 СЕКУНДЫ ПОСЛЕ ЗАГОЛОВКА */
-.animated-subtitle {
-  font-size: 28px; /* Увеличили размер */
-  color: #064e3b;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: subtitleAppear 1s ease 3.5s forwards; /* 1.5 (клевер) + 1 (заголовок) + 1 (пауза) = 3.5 сек */
-  font-weight: 700; /* Сделали жирнее */
-  margin-top: 20px;
-  position: relative;
-  padding: 20px 40px;
-  z-index: 2;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes subtitleAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Анимация сердца вокруг подзаголовка - РИСУЕТСЯ ИЗ ТОЧКИ */
-.heart-container {
-  position: absolute;
-  width: 400px; /* Увеличили размер */
-  height: 400px;
-  opacity: 0;
-  animation: heartContainerAppear 0.1s ease 3.5s forwards; /* Появляется контейнер */
-  z-index: 1;
-}
-
-@keyframes heartContainerAppear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Сердце - РИСУЕТСЯ ПОНЕМНОГУ */
-.heart-path {
-  fill: none; /* НЕ закрашиваем внутри! */
-  stroke: #fda4af; /* Только обводка */
-  stroke-width: 4px; /* Толщина линии */
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 500; /* Общая длина пути */
-  stroke-dashoffset: 500; /* Начинаем с полностью скрытого */
-  animation: drawHeart 2s ease 3.6s forwards; /* Начинаем рисовать через 0.1 сек после появления контейнера */
-  filter: drop-shadow(0 0 8px rgba(253, 164, 175, 0.6));
-}
-
-@keyframes drawHeart {
-  0% {
-    stroke-dashoffset: 500; /* Полностью скрыто */
-    opacity: 0.8;
-  }
-  70% {
-    stroke-dashoffset: 100; /* Почти нарисовано */
-    opacity: 1;
-  }
-  100% {
-    stroke-dashoffset: 0; /* Полностью нарисовано */
-    opacity: 1;
-  }
-}
-
-/* SVG для сердца (путь сердца) */
-.heart-svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* Анимация для перехода к основному приложению */
-@keyframes fadeOutScreen {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.9);
-    display: none;
-  }
-}
-
-/* Адаптив для маленьких экранов */
-@media (max-height: 700px) {
-  .animated-clover {
-    font-size: 80px;
-    margin-top: -30px;
-  }
-  
-  .animated-title {
-    font-size: 40px;
-  }
-  
-  .animated-subtitle {
-    font-size: 24px;
-    padding: 15px 30px;
-  }
-  
-  .heart-container {
-    width: 350px;
-    height: 350px;
-  }
-}
-
-@media (max-height: 600px) {
-  .animated-clover {
-    font-size: 70px;
-    margin-top: -20px;
-  }
-  
-  .animated-title {
-    font-size: 36px;
-  }
-  
-  .animated-subtitle {
-    font-size: 22px;
-    padding: 12px 25px;
-  }
-  
-  .heart-container {
-    width: 320px;
-    height: 320px;
-  }
-  
-  .heart-path {
-    stroke-width: 3px;
-  }
-}
-
-@media (max-width: 380px) {
-  .animated-title {
-    font-size: 36px;
-  }
-  
-  .animated-subtitle {
-    font-size: 22px;
-  }
-  
-  .heart-container {
-    width: 300px;
-    height: 300px;
-  }
-}
-
-/* Обновленные стили для анимированного приветственного экрана */
-#welcome-animated-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
-  position: absolute;
-  top: 0;
-  left: 0;
   z-index: 1001;
 }
 
@@ -2589,222 +2362,105 @@ select:focus {
   justify-content: center;
   text-align: center;
   padding: 20px;
-  position: relative;
 }
 
 /* Анимированный клевер */
 .animated-clover {
-  font-size: 80px;
+  font-size: 64px;
   opacity: 0;
-  transform: scale(0.5) translateY(-50px);
-  animation: cloverAppear 2s ease forwards;
-  margin-bottom: 30px;
-  margin-top: -30px;
+  transform: scale(0.5);
+  animation: cloverAppear 1.5s ease forwards;
+  margin-bottom: 20px;
 }
 
 @keyframes cloverAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) translateY(-50px) rotate(0deg);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.2) translateY(-20px) rotate(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0) rotate(0deg);
-  }
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 /* Анимированный заголовок */
 .animated-title {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 800;
   color: var(--siamatch-green-dark);
   opacity: 0;
   transform: translateY(20px);
-  animation: titleAppear 1.5s ease 2s forwards;
-  margin-bottom: 40px; /* Увеличили отступ */
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  animation: titleAppear 1s ease 1.5s forwards;
+  margin-bottom: 30px;
 }
 
 @keyframes titleAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* КОНТЕЙНЕР ДЛЯ СЕРДЦА С ТЕКСТОМ ВНУТРИ */
+/* Контейнер для сердца */
 .heart-container {
-  width: 320px;
-  height: 280px;
+  width: 280px;
+  height: 220px;
   opacity: 0;
-  animation: heartContainerAppear 0.1s ease 3.5s forwards;
-  z-index: 1;
-  position: relative;
+  animation: heartContainerAppear 0.5s ease 2.5s forwards;
 }
 
 @keyframes heartContainerAppear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-/* SVG сердца с увеличенным viewBox */
+/* SVG сердца */
 .heart-svg {
   width: 100%;
   height: 100%;
 }
 
-/* Путь сердца - только КОНТУР, рисуется ВОКРУГ текста */
-.heart-path {
-  fill: none; /* НЕ закрашиваем! */
-  stroke: #f472b6; /* Розовый цвет контура */
-  stroke-width: 4px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1000; /* Общая длина пути */
-  stroke-dashoffset: 1000; /* Начинаем с полностью скрытого */
-  animation: drawHeart 3s ease 3.6s forwards; /* Медленно рисуется 3 секунды */
-  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.4));
-  transform-origin: center;
-}
-
-/* Текст ВНУТРИ сердца */
+/* Текст ВНУТРИ сердца - появляется сразу */
 .heart-text {
-  fill: #064e3b; /* Темно-зеленый цвет как в дизайне */
-  font-size: 18px;
+  fill: #064e3b;
+  font-size: 14px;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   text-anchor: middle;
-  dominant-baseline: middle;
   opacity: 0;
-  animation: textAppear 0.5s ease 3.5s forwards; /* Появляется перед началом рисования сердца */
-  pointer-events: none;
-}
-
-@keyframes drawHeart {
-  0% {
-    stroke-dashoffset: 1000;
-  }
-  70% {
-    stroke-dashoffset: 200;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
+  animation: textAppear 0.5s ease 2.5s forwards;
 }
 
 @keyframes textAppear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-/* Скрываем старый элемент текста */
-.animated-subtitle {
-  display: none !important;
+/* Путь сердца - рисуется ВОКРУГ текста */
+.heart-path {
+  fill: none;
+  stroke: #f472b6;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: drawHeart 2.5s ease 3s forwards; /* Рисуется медленнее */
 }
 
-/* Анимация для перехода к основному приложению */
-@keyframes fadeOutScreen {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
+@keyframes drawHeart {
+  0% { stroke-dashoffset: 300; }
+  100% { stroke-dashoffset: 0; }
 }
 
-/* Адаптив для маленьких экранов */
+/* Адаптив */
 @media (max-height: 700px) {
-  .animated-clover {
-    font-size: 70px;
-    margin-top: -20px;
-  }
-  
-  .animated-title {
-    font-size: 32px;
-    margin-bottom: 30px;
-  }
-  
-  .heart-container {
-    width: 280px;
-    height: 245px;
-  }
-  
-  .heart-text {
-    font-size: 16px;
-  }
-  
-  .heart-path {
-    stroke-width: 3.5px;
-  }
+  .animated-clover { font-size: 56px; }
+  .animated-title { font-size: 28px; }
+  .heart-container { width: 240px; height: 190px; }
+  .heart-text { font-size: 12px; }
 }
 
 @media (max-height: 600px) {
-  .animated-clover {
-    font-size: 60px;
-    margin-top: -15px;
-  }
-  
-  .animated-title {
-    font-size: 28px;
-    margin-bottom: 25px;
-  }
-  
-  .heart-container {
-    width: 240px;
-    height: 210px;
-  }
-  
-  .heart-text {
-    font-size: 14px;
-  }
-  
-  .heart-path {
-    stroke-width: 3px;
-  }
+  .animated-clover { font-size: 48px; margin-bottom: 15px; }
+  .animated-title { font-size: 24px; margin-bottom: 20px; }
+  .heart-container { width: 200px; height: 160px; margin-top: 10px; }
+  .heart-text { font-size: 11px; }
 }
 
 @media (max-width: 380px) {
-  .animated-title {
-    font-size: 30px;
-    margin-bottom: 25px;
-  }
-  
-  .heart-container {
-    width: 220px;
-    height: 192px;
-  }
-  
-  .heart-text {
-    font-size: 13px;
-  }
-}
-
-/* Для очень маленьких экранов */
-@media (max-width: 340px) {
-  .heart-container {
-    width: 200px;
-    height: 175px;
-  }
-  
-  .heart-text {
-    font-size: 12px;
-  }
+  .heart-container { width: 220px; height: 170px; }
 }
