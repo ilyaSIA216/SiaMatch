@@ -2236,67 +2236,63 @@ function showAnimatedWelcomeScreen() {
   // Показываем анимированный экран
   animatedWelcomeScreen.classList.remove('hidden');
   
-// В функции showAnimatedWelcomeScreen():
-// Удаляем старый код для сердца и добавляем новый:
-
-// Сбрасываем анимации для альтернативного дизайна
-const heartAltContainer = document.querySelector('.heart-alt-container');
-const heartLines = document.querySelectorAll('.heart-line');
-const heartAltSvg = document.querySelector('.heart-alt-svg');
-const heartAltPath = document.querySelector('.heart-alt-path');
-
-if (heartAltContainer) heartAltContainer.style.animation = 'none';
-if (heartAltSvg) heartAltSvg.style.opacity = '0';
-if (heartAltPath) heartAltPath.style.animation = 'none';
-heartLines.forEach(line => {
-  line.style.animation = 'none';
-  line.style.opacity = '0';
-  line.style.transform = 'translateY(10px)';
-});
-
-// Принудительный рефлоу
-void heartAltContainer.offsetWidth;
-heartLines.forEach(line => void line.offsetWidth);
-if (heartAltPath) void heartAltPath.offsetWidth;
-
-// Запускаем новые анимации
-setTimeout(() => {
-  if (heartAltContainer) {
-    heartAltContainer.style.animation = 'heartAltAppear 0.5s ease forwards';
-  }
+  // Сбрасываем анимации
+  const clover = document.getElementById('animated-clover');
+  const title = document.getElementById('animated-title');
+  const heartPath = document.querySelector('.heart-path');
+  const heartLines = document.querySelectorAll('.heart-line');
   
-  // Анимация строк текста
-  setTimeout(() => {
-    if (heartLines[0]) heartLines[0].style.animation = 'textLineAppear 0.4s ease forwards';
-  }, 100);
+  if (clover) clover.style.animation = 'none';
+  if (title) title.style.animation = 'none';
+  if (heartPath) heartPath.style.animation = 'none';
+  heartLines.forEach(line => {
+    line.style.animation = 'none';
+    line.style.opacity = '0';
+    line.style.transform = 'translateY(10px)';
+  });
+  
+  // Принудительный рефлоу
+  void clover.offsetWidth;
+  void title.offsetWidth;
+  if (heartPath) void heartPath.offsetWidth;
+  heartLines.forEach(line => void line.offsetWidth);
+  
+  // Запускаем анимации
+  if (clover) clover.style.animation = 'cloverAppear 1.5s ease forwards';
   
   setTimeout(() => {
-    if (heartLines[1]) heartLines[1].style.animation = 'textLineAppear 0.4s ease forwards';
-  }, 300);
+    if (title) title.style.animation = 'titleAppear 1s ease forwards';
+  }, 1500);
   
   setTimeout(() => {
-    if (heartLines[2]) heartLines[2].style.animation = 'textLineAppear 0.4s ease forwards';
-  }, 500);
-  
-  // Анимация сердца
-  setTimeout(() => {
-    if (heartAltSvg) heartAltSvg.style.opacity = '1';
-    if (heartAltPath) {
-      heartAltPath.style.animation = 'drawHeartAlt 2s ease forwards';
+    const heartContainer = document.querySelector('.heart-container');
+    if (heartContainer) {
+      heartContainer.style.opacity = '0';
+      heartContainer.style.animation = 'heartContainerAppear 0.5s ease forwards';
     }
-  }, 700);
+  }, 2500);
   
-}, 2500); // Начинаем через 2.5 секунды от старта
+  // Анимация рисования сердца
+  setTimeout(() => {
+    if (heartPath) {
+      heartPath.style.animation = 'drawHeart 2s ease forwards';
+    }
+  }, 3000);
   
-  // Общая последовательность анимаций:
-  // 0-1.5 сек: Клевер
-  // 1.5-2.5 сек: Заголовок SiaMatch
-  // 2.5 сек: Появляется контейнер с текстом
-  // 2.6 сек: Появляется текст
-  // 2.9 сек: Начинает рисоваться сердце (2.5 сек)
-  // 5.4 сек: Завершается рисование сердца
-  // 5.4-6 сек: Пауза
-  // ИТОГО: 6 секунд
+  // Анимация текста
+  setTimeout(() => {
+    heartLines.forEach((line, index) => {
+      line.style.animation = `textLineAppear 0.4s ease forwards`;
+    });
+  }, 3200);
+  
+  // Общая последовательность:
+  // 0-1.5 сек: Анимация клевера
+  // 1.5-2.5 сек: Появление заголовка SiaMatch
+  // 2.5 сек: Появление контейнера сердца
+  // 3.0-5.0 сек: Рисование сердца (2 секунды)
+  // 3.2-3.6 сек: Появление текста "Любовь начинается здесь"
+  // ИТОГО: 5.6 секунд
   
   console.log('⏱️ Запускаем таймер перехода через 6 секунд');
   setTimeout(hideAnimatedWelcomeScreen, 6000);
