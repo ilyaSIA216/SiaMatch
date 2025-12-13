@@ -2340,7 +2340,7 @@ select:focus {
   font-weight: bold;
 }
 
-/* ===== АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
+/* ===== НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
 #welcome-animated-screen {
   display: flex;
   flex-direction: column;
@@ -2348,8 +2348,233 @@ select:focus {
   justify-content: center;
   height: 100%;
   width: 100%;
-  padding: 40px 24px;
+  background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1001; /* Выше обычного приветственного экрана */
+}
+
+.welcome-animated-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 20px;
+  position: relative;
+}
+
+/* Анимированный клевер - ВЫШЕ И БОЛЬШЕ */
+.animated-clover {
+  font-size: 100px; /* Увеличили размер */
+  opacity: 0;
+  transform: scale(0.5) translateY(-50px); /* Подняли выше */
+  animation: cloverAppear 1.5s ease forwards;
+  margin-bottom: 30px; /* Увеличили отступ */
+  margin-top: -50px; /* Поднимаем еще выше */
+}
+
+@keyframes cloverAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-50px) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2) translateY(-20px) rotate(5deg); /* Увеличили масштаб */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0) rotate(0deg); /* Окончательный размер больше */
+  }
+}
+
+/* Анимированный заголовок */
+.animated-title {
+  font-size: 48px; /* Увеличили размер */
+  font-weight: 800;
+  color: var(--siamatch-green-dark);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: titleAppear 1s ease 1.5s forwards; /* Через 1.5 сек после клевера */
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15); /* Усилили тень */
+}
+
+@keyframes titleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимированный подзаголовок - ЧЕРЕЗ 2 СЕКУНДЫ ПОСЛЕ ЗАГОЛОВКА */
+.animated-subtitle {
+  font-size: 28px; /* Увеличили размер */
+  color: #064e3b;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: subtitleAppear 1s ease 3.5s forwards; /* 1.5 (клевер) + 1 (заголовок) + 1 (пауза) = 3.5 сек */
+  font-weight: 700; /* Сделали жирнее */
+  margin-top: 20px;
+  position: relative;
+  padding: 20px 40px;
+  z-index: 2;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes subtitleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация сердца вокруг подзаголовка - РИСУЕТСЯ ИЗ ТОЧКИ */
+.heart-container {
+  position: absolute;
+  width: 400px; /* Увеличили размер */
+  height: 400px;
+  opacity: 0;
+  animation: heartContainerAppear 0.1s ease 3.5s forwards; /* Появляется контейнер */
+  z-index: 1;
+}
+
+@keyframes heartContainerAppear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Сердце - РИСУЕТСЯ ПОНЕМНОГУ */
+.heart-path {
+  fill: none; /* НЕ закрашиваем внутри! */
+  stroke: #fda4af; /* Только обводка */
+  stroke-width: 4px; /* Толщина линии */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 500; /* Общая длина пути */
+  stroke-dashoffset: 500; /* Начинаем с полностью скрытого */
+  animation: drawHeart 2s ease 3.6s forwards; /* Начинаем рисовать через 0.1 сек после появления контейнера */
+  filter: drop-shadow(0 0 8px rgba(253, 164, 175, 0.6));
+}
+
+@keyframes drawHeart {
+  0% {
+    stroke-dashoffset: 500; /* Полностью скрыто */
+    opacity: 0.8;
+  }
+  70% {
+    stroke-dashoffset: 100; /* Почти нарисовано */
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0; /* Полностью нарисовано */
+    opacity: 1;
+  }
+}
+
+/* SVG для сердца (путь сердца) */
+.heart-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Анимация для перехода к основному приложению */
+@keyframes fadeOutScreen {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+    display: none;
+  }
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-height: 700px) {
+  .animated-clover {
+    font-size: 80px;
+    margin-top: -30px;
+  }
+  
+  .animated-title {
+    font-size: 40px;
+  }
+  
+  .animated-subtitle {
+    font-size: 24px;
+    padding: 15px 30px;
+  }
+  
+  .heart-container {
+    width: 350px;
+    height: 350px;
+  }
+}
+
+@media (max-height: 600px) {
+  .animated-clover {
+    font-size: 70px;
+    margin-top: -20px;
+  }
+  
+  .animated-title {
+    font-size: 36px;
+  }
+  
+  .animated-subtitle {
+    font-size: 22px;
+    padding: 12px 25px;
+  }
+  
+  .heart-container {
+    width: 320px;
+    height: 320px;
+  }
+  
+  .heart-path {
+    stroke-width: 3px;
+  }
+}
+
+@media (max-width: 380px) {
+  .animated-title {
+    font-size: 36px;
+  }
+  
+  .animated-subtitle {
+    font-size: 22px;
+  }
+  
+  .heart-container {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* ===== НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
+#welcome-animated-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
   background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
   position: absolute;
   top: 0;
@@ -2362,49 +2587,52 @@ select:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  text-align: center;
+  padding: 20px;
+  position: relative;
 }
 
-/* КЛЕВЕР - просто появляется и немного увеличивается */
+/* Анимированный клевер - ВЫШЕ И БОЛЬШЕ */
 .animated-clover {
-  font-size: 80px;
-  margin-bottom: 30px;
+  font-size: 100px;
   opacity: 0;
-  transform: scale(0.5);
-  animation: cloverAppear 1s ease forwards;
+  transform: scale(0.5) translateY(-50px);
+  animation: cloverAppear 1.5s ease forwards;
+  margin-bottom: 30px;
+  margin-top: -50px;
 }
 
 @keyframes cloverAppear {
   0% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.5) translateY(-50px) rotate(0deg);
   }
-  80% {
+  70% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.2) translateY(-20px) rotate(5deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1.1) translateY(0) rotate(0deg);
   }
 }
 
+/* Анимированный заголовок */
 .animated-title {
-  font-size: 42px;
+  font-size: 48px;
   font-weight: 800;
   color: var(--siamatch-green-dark);
-  margin-bottom: 50px;
   opacity: 0;
-  transform: translateY(30px);
-  animation: titleAppear 0.8s ease 1s forwards;
-  text-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+  transform: translateY(20px);
+  animation: titleAppear 1s ease 1.5s forwards;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes titleAppear {
   0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -2412,151 +2640,144 @@ select:focus {
   }
 }
 
-/* КОНТЕЙНЕР СЕРДЦА */
-.heart-container {
-  margin-top: 20px;
+/* Анимированный подзаголовок */
+.animated-subtitle {
+  font-size: 28px;
+  color: #064e3b;
   opacity: 0;
-  animation: heartContainerAppear 0.5s ease 1.8s forwards;
-}
-
-@keyframes heartContainerAppear {
-  0% { 
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  100% { 
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.heart-svg {
-  width: 300px;
-  height: 250px;
-  filter: drop-shadow(0 8px 20px rgba(239, 68, 68, 0.3));
-}
-
-/* ПУТЬ СЕРДЦА - красная линия */
-.heart-path {
-  fill: none;
-  stroke: #ef4444; /* Красный цвет */
-  stroke-width: 4px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 340;
-  stroke-dashoffset: 340;
-  animation: drawHeart 2s ease 2s forwards;
-}
-
-@keyframes drawHeart {
-  0% { 
-    stroke-dashoffset: 340;
-    stroke-width: 4px;
-  }
-  50% {
-    stroke-width: 4px;
-  }
-  100% { 
-    stroke-dashoffset: 0;
-    stroke-width: 3px;
-  }
-}
-
-/* ОБЕРТКА ДЛЯ ТЕКСТА - центрирование */
-.heart-text-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.heart-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  width: 100%;
-  height: 100%;
-}
-
-/* ТЕКСТ - черный, центрированный */
-.heart-line {
-  font-size: 18px;
+  transform: translateY(20px);
+  animation: subtitleAppear 1s ease 3.5s forwards;
   font-weight: 700;
-  color: #000000; /* Черный цвет */
-  opacity: 0;
-  transform: translateY(10px);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
-  line-height: 1.3;
+  margin-top: 20px;
+  position: relative;
+  padding: 20px 40px;
+  z-index: 2;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Анимация появления строк текста */
-.heart-line.line1 {
-  animation: textLineAppear 0.4s ease 2.4s forwards;
-}
-
-.heart-line.line2 {
-  animation: textLineAppear 0.4s ease 2.6s forwards;
-}
-
-.heart-line.line3 {
-  animation: textLineAppear 0.4s ease 2.8s forwards;
-}
-
-@keyframes textLineAppear {
-  0% { 
+@keyframes subtitleAppear {
+  0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
-  100% { 
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* ===== АДАПТИВНОСТЬ ===== */
+/* КОНТЕЙНЕР ДЛЯ СЕРДЦА */
+.heart-container {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  opacity: 0;
+  animation: heartContainerAppear 0.1s ease 3.5s forwards;
+  z-index: 1;
+  pointer-events: none; /* Чтобы не мешало кликам */
+}
+
+@keyframes heartContainerAppear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* SVG СЕРДЦА */
+.heart-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ПУТЬ СЕРДЦА - РИСУЕТСЯ ПОСТЕПЕННО */
+.heart-path {
+  fill: none; /* НЕ закрашиваем внутри! */
+  stroke: #f472b6; /* Розовый цвет, как лайки */
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000; /* Общая длина пути */
+  stroke-dashoffset: 1000; /* Начинаем с полностью скрытого */
+  animation: drawHeart 2s ease 3.6s forwards;
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.6));
+  transform-origin: center;
+}
+
+/* Анимация рисования сердца из одной точки */
+@keyframes drawHeart {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0.8;
+  }
+  70% {
+    stroke-dashoffset: 200;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Анимация для перехода к основному приложению */
+@keyframes fadeOutScreen {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Адаптив для маленьких экранов */
 @media (max-height: 700px) {
   .animated-clover {
-    font-size: 70px;
-    margin-bottom: 25px;
+    font-size: 80px;
+    margin-top: -30px;
   }
   
   .animated-title {
-    font-size: 36px;
-    margin-bottom: 40px;
+    font-size: 40px;
   }
   
-  .heart-svg {
-    width: 250px;
-    height: 210px;
+  .animated-subtitle {
+    font-size: 24px;
+    padding: 15px 30px;
   }
   
-  .heart-line {
-    font-size: 16px;
+  .heart-container {
+    width: 320px;
+    height: 320px;
   }
 }
 
 @media (max-height: 600px) {
   .animated-clover {
-    font-size: 60px;
-    margin-bottom: 20px;
+    font-size: 70px;
+    margin-top: -20px;
   }
   
   .animated-title {
-    font-size: 32px;
-    margin-bottom: 30px;
+    font-size: 36px;
   }
   
-  .heart-svg {
-    width: 220px;
-    height: 180px;
+  .animated-subtitle {
+    font-size: 22px;
+    padding: 12px 25px;
   }
   
-  .heart-line {
-    font-size: 15px;
+  .heart-container {
+    width: 280px;
+    height: 280px;
   }
   
   .heart-path {
@@ -2566,459 +2787,49 @@ select:focus {
 
 @media (max-width: 380px) {
   .animated-title {
-    font-size: 28px;
+    font-size: 36px;
   }
   
-  .heart-svg {
-    width: 200px;
-    height: 170px;
+  .animated-subtitle {
+    font-size: 22px;
+    padding: 10px 20px;
   }
   
-  .heart-line {
-    font-size: 14px;
-  }
-}
-
-/* Для очень маленьких экранов */
-@media (max-height: 500px) {
-  .animated-clover {
-    font-size: 50px;
-    margin-bottom: 15px;
-  }
-  
-  .animated-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .heart-svg {
-    width: 180px;
-    height: 150px;
-  }
-  
-  .heart-line {
-    font-size: 13px;
-  }
-  
-  .heart-path {
-    stroke-width: 2.5px;
-  }
-}
-
-/* АНИМИРОВАННОЕ СЕРДЦЕ С ТЕКСТОМ */
-.heart-container {
-  width: 220px;
-  height: 200px;
-  margin: 30px auto;
-  position: relative;
-  animation: heartContainerAppear 0.5s ease forwards;
-  opacity: 0;
-}
-
-.heart-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 5px 15px rgba(239, 68, 68, 0.3));
-}
-
-.heart-path {
-  fill: #fecaca;
-  stroke: #ef4444;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 340;
-  stroke-dashoffset: 340;
-  animation: drawHeart 2s ease forwards;
-  animation-delay: 2s;
-}
-
-.heart-text {
-  fill: #000000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  opacity: 0;
-  animation: textAppear 0.4s ease forwards;
-  animation-delay: 2.4s;
-}
-
-.heart-text .heart-line {
-  opacity: 0;
-  animation: textLineAppear 0.4s ease forwards;
-}
-
-.heart-text .heart-line:nth-child(1) {
-  animation-delay: 2.4s;
-}
-
-.heart-text .heart-line:nth-child(2) {
-  animation-delay: 2.6s;
-}
-
-.heart-text .heart-line:nth-child(3) {
-  animation-delay: 2.8s;
-}
-
-/* Анимации */
-@keyframes drawHeart {
-  0% {
-    stroke-dashoffset: 340;
-    fill: transparent;
-  }
-  70% {
-    stroke-dashoffset: 0;
-    fill: transparent;
-  }
-  100% {
-    stroke-dashoffset: 0;
-    fill: #fecaca;
-  }
-}
-
-@keyframes textLineAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes textAppear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes heartContainerAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes cloverAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) rotate(-90deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes titleAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ */
-#welcome-animated-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.welcome-animated-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 20px;
-}
-
-.animated-clover {
-  font-size: 80px;
-  margin-bottom: 20px;
-  opacity: 0;
-  animation: cloverAppear 1s ease forwards;
-}
-
-.animated-title {
-  font-size: 40px;
-  font-weight: 800;
-  color: #000;
-  margin-bottom: 30px;
-  opacity: 0;
-  animation: titleAppear 0.8s ease forwards;
-  animation-delay: 1s;
-}
-
-/* Адаптивность */
-@media (max-width: 480px) {
   .heart-container {
-    width: 180px;
-    height: 160px;
-    margin: 20px auto;
-  }
-  
-  .heart-text {
-    font-size: 10px;
-  }
-  
-  .animated-clover {
-    font-size: 60px;
-  }
-  
-  .animated-title {
-    font-size: 32px;
+    width: 260px;
+    height: 260px;
   }
 }
 
-/* АНИМИРОВАННОЕ СЕРДЦЕ */
+/* ===== ТОЧНОЕ ПОЗИЦИОНИРОВАНИЕ ===== */
+/* Спускаем надпись на 1 см (≈20px) */
+#animated-subtitle {
+  margin-top: 40px !important; /* Переопределяем предыдущие стили */
+}
+
+/* Спускаем сердце на 2.5 см (≈50px) */
 .heart-container {
-  width: 220px;
-  height: 200px;
-  margin: 30px auto;
-  position: relative;
-  animation: heartContainerAppear 0.5s ease forwards;
-  opacity: 0;
+  top: calc(50% + 50px) !important; /* Центр + 2.5 см вниз */
+  transform: translate(-50%, -50%) !important;
 }
 
-.heart-shape {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #fecaca;
-  border-radius: 50%;
-}
-
-.heart-shape:before,
-.heart-shape:after {
-  content: '';
-  position: absolute;
-  width: 140px;
-  height: 220px;
-  background: #fecaca;
-  border-radius: 140px 140px 0 0;
-  top: 0;
-}
-
-.heart-shape:before {
-  left: 140px;
-  transform: rotate(-45deg);
-  transform-origin: 0 100%;
-}
-
-.heart-shape:after {
-  left: 0;
-  transform: rotate(45deg);
-  transform-origin: 100% 100%;
-}
-
-.heart-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 2;
-  opacity: 0;
-  animation: textAppear 0.4s ease forwards;
-  animation-delay: 2.4s;
-}
-
-.heart-line {
-  font-size: 18px;
-  font-weight: bold;
-  color: #000;
-  margin: 8px 0;
-  opacity: 0;
-  animation: textLineAppear 0.4s ease forwards;
-}
-
-.heart-line:nth-child(1) { animation-delay: 2.4s; }
-.heart-line:nth-child(2) { animation-delay: 2.6s; }
-.heart-line:nth-child(3) { animation-delay: 2.8s; }
-
-@keyframes heartContainerAppear {
-  0% { opacity: 0; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes textAppear {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes textLineAppear {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-#welcome-screen {
-  background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 100%);
-  min-height: 100vh;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.welcome-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-.close-btn {
-  font-size: 24px;
-  color: #333;
-  cursor: pointer;
-}
-
-.miniapp-label {
-  font-size: 12px;
-  color: #666;
-  font-weight: 500;
-}
-
-.welcome-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.app-title {
-  font-size: 32px;
-  font-weight: 800;
-  color: #2d6a4f;
-  margin-bottom: 40px;
-}
-
-.heart-with-text {
-  width: 280px;
-  height: 250px;
-  margin: 30px auto;
-  position: relative;
-}
-
-.heart-shape-final {
-  width: 100%;
-  height: 100%;
-  background: #ffcad4;
-  position: relative;
-  border-radius: 50%;
-  box-shadow: 0 10px 30px rgba(255, 107, 129, 0.3);
-}
-
-.heart-shape-final:before,
-.heart-shape-final:after {
-  content: '';
-  position: absolute;
-  width: 160px;
-  height: 240px;
-  background: #ffcad4;
-  border-radius: 160px 160px 0 0;
-  top: 0;
-}
-
-.heart-shape-final:before {
-  left: 160px;
-  transform: rotate(-45deg);
-  transform-origin: 0 100%;
-}
-
-.heart-shape-final:after {
-  left: 0;
-  transform: rotate(45deg);
-  transform-origin: 100% 100%;
-}
-
-.heart-text-final {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #590d22;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-align: center;
-  width: 70%;
-  z-index: 2;
-  font-family: 'Arial', sans-serif;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.welcome-subtitle-final {
-  margin-top: 30px;
-  color: #40916c;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.primary-btn-final {
-  background: #2d6a4f;
-  color: white;
-  border: none;
-  padding: 16px 40px;
-  border-radius: 25px;
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 40px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(45, 106, 79, 0.3);
-}
-
-.primary-btn-final:hover {
-  background: #1b4332;
-}
-
-/* Адаптивность */
-@media (max-width: 480px) {
-  .heart-with-text {
-    width: 220px;
-    height: 200px;
+/* Обновляем адаптив */
+@media (max-height: 700px) {
+  #animated-subtitle {
+    margin-top: 35px !important;
   }
   
-  .heart-shape-final:before,
-  .heart-shape-final:after {
-    width: 130px;
-    height: 190px;
-    border-radius: 130px 130px 0 0;
+  .heart-container {
+    top: calc(50% + 40px) !important; /* Чуть меньше для маленьких экранов */
+  }
+}
+
+@media (max-height: 600px) {
+  #animated-subtitle {
+    margin-top: 30px !important;
   }
   
-  .heart-shape-final:before {
-    left: 130px;
-  }
-  
-  .heart-text-final {
-    font-size: 16px;
-  }
-  
-  .app-title {
-    font-size: 28px;
+  .heart-container {
+    top: calc(50% + 30px) !important;
   }
 }
