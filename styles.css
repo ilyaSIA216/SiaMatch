@@ -2800,3 +2800,36 @@ select:focus {
     height: 260px;
   }
 }
+
+/* ===== ТОЧНОЕ ПОЗИЦИОНИРОВАНИЕ ===== */
+/* Спускаем надпись на 1 см (≈20px) */
+#animated-subtitle {
+  margin-top: 40px !important; /* Переопределяем предыдущие стили */
+}
+
+/* Спускаем сердце на 2.5 см (≈50px) */
+.heart-container {
+  top: calc(50% + 50px) !important; /* Центр + 2.5 см вниз */
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Обновляем адаптив */
+@media (max-height: 700px) {
+  #animated-subtitle {
+    margin-top: 35px !important;
+  }
+  
+  .heart-container {
+    top: calc(50% + 40px) !important; /* Чуть меньше для маленьких экранов */
+  }
+}
+
+@media (max-height: 600px) {
+  #animated-subtitle {
+    margin-top: 30px !important;
+  }
+  
+  .heart-container {
+    top: calc(50% + 30px) !important;
+  }
+}
