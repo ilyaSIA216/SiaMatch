@@ -27,24 +27,22 @@
       </div>
 
 <!-- АНИМИРОВАННЫЙ ЭКРАН ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С АНКЕТОЙ -->
-<div id="welcome-animated-screen" class="screen hidden">
+<div id="welcome-animated-screen" class="screen">
   <div class="welcome-animated-content">
-    <!-- Анимированный четырехлистник -->
     <div id="animated-clover" class="animated-clover">🍀</div>
-    
-    <!-- Заголовок -->
     <div id="animated-title" class="animated-title">SiaMatch</div>
-    
-    <!-- Подзаголовок -->
     <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
     
-    <!-- Контейнер для сердца вокруг подзаголовка -->
     <div class="subtitle-heart-wrapper">
       <div id="animated-subtitle-inner" class="animated-subtitle-inner">Любовь начинается здесь</div>
       
-      <!-- SVG сердце вокруг текста -->
       <svg class="heart-orbit-svg" viewBox="0 0 200 200">
         <defs>
+          <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff6b9d"></stop>
+            <stop offset="50%" stop-color="#ff8e8e"></stop>
+            <stop offset="100%" stop-color="#ff6b9d"></stop>
+          </linearGradient>
           <filter id="heart-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
             <feMerge> 
@@ -72,8 +70,7 @@
       </svg>
     </div>
     
-    <!-- Кнопка продолжения -->
-    <button id="continueBtn" class="primary continue-btn hidden">Продолжить 🍀</button>
+    <button id="continueBtn" class="primary continue-btn">Продолжить 🍀</button>
   </div>
 </div>
 
