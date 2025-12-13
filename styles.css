@@ -2340,58 +2340,154 @@ select:focus {
   font-weight: bold;
 }
 
-/* ===== АЛЬТЕРНАТИВНЫЙ ДИЗАЙН: ТЕКСТ НАД СЕРДЦЕМ ===== */
-.heart-alt-container {
+/* ===== АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
+#welcome-animated-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 20px auto;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: heartAltAppear 0.5s ease 2.5s forwards;
+  height: 100%;
+  width: 100%;
+  padding: 40px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #d9f99d 0%, #f4fff7 50%, #ecfdf3 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1001;
 }
 
-@keyframes heartAltAppear {
-  0% { 
+.welcome-animated-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.animated-clover {
+  font-size: 80px;
+  margin-bottom: 30px;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: cloverAppear 1.5s ease forwards;
+}
+
+@keyframes cloverAppear {
+  0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: scale(0.5) rotate(0deg);
   }
-  100% { 
+  70% {
+    opacity: 1;
+    transform: scale(1.1) rotate(180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+.animated-title {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--siamatch-green-dark);
+  margin-bottom: 50px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: titleAppear 1s ease 1.5s forwards;
+  text-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+}
+
+@keyframes titleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.heart-alt-text {
-  text-align: center;
-  margin-bottom: 20px;
+/* КОНТЕЙНЕР СЕРДЦА */
+.heart-container {
+  margin-top: 20px;
+  opacity: 0;
+  animation: heartContainerAppear 0.5s ease 2.5s forwards;
+}
+
+@keyframes heartContainerAppear {
+  0% { 
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.heart-svg {
+  width: 300px;
+  height: 250px;
+  filter: drop-shadow(0 10px 25px rgba(244, 114, 182, 0.4));
+}
+
+/* ПУТЬ СЕРДЦА (анимированное рисование) */
+.heart-path {
+  fill: none;
+  stroke: #f472b6;
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  animation: drawHeart 2s ease 3s forwards;
+}
+
+@keyframes drawHeart {
+  0% { 
+    stroke-dashoffset: 320;
+    opacity: 0.8;
+  }
+  100% { 
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* ТЕКСТ ВНУТРИ СЕРДЦА */
+.heart-text {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
 .heart-line {
-  font-size: 22px;
-  font-weight: 600;
-  color: #063b1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  letter-spacing: 0.5px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #831843;
   opacity: 0;
   transform: translateY(10px);
 }
 
 /* Анимация появления строк текста */
-.heart-line.line-1 {
-  animation: textLineAppear 0.4s ease 2.6s forwards;
+.heart-line:nth-child(1) {
+  animation: textLineAppear 0.4s ease 3.2s forwards;
 }
 
-.heart-line.line-2 {
-  animation: textLineAppear 0.4s ease 2.8s forwards;
+.heart-line:nth-child(2) {
+  animation: textLineAppear 0.4s ease 3.4s forwards;
 }
 
-.heart-line.line-3 {
-  animation: textLineAppear 0.4s ease 3.0s forwards;
+.heart-line:nth-child(3) {
+  animation: textLineAppear 0.4s ease 3.6s forwards;
 }
 
 @keyframes textLineAppear {
@@ -2405,101 +2501,90 @@ select:focus {
   }
 }
 
-.heart-alt-svg {
-  width: 200px;
-  height: 180px;
-  opacity: 0;
-}
-
-.heart-alt-path {
-  fill: none;
-  stroke: #f472b6;
-  stroke-width: 3px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 280;
-  stroke-dashoffset: 280;
-  animation: drawHeartAlt 2s ease 3.2s forwards;
-}
-
-@keyframes drawHeartAlt {
-  0% { 
-    stroke-dashoffset: 280;
-    opacity: 0.8;
-  }
-  100% { 
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-}
-
 /* ===== АДАПТИВНОСТЬ ===== */
 @media (max-height: 700px) {
-  .heart-alt-text {
-    margin-bottom: 15px;
+  .animated-clover {
+    font-size: 70px;
+    margin-bottom: 25px;
   }
   
-  .heart-line {
-    font-size: 20px;
+  .animated-title {
+    font-size: 36px;
+    margin-bottom: 40px;
   }
   
-  .heart-alt-svg {
-    width: 180px;
-    height: 160px;
-  }
-}
-
-@media (max-height: 600px) {
-  .heart-alt-container {
-    margin: 15px auto;
-  }
-  
-  .heart-alt-text {
-    margin-bottom: 12px;
-  }
-  
-  .heart-line {
-    font-size: 18px;
-    gap: 3px;
-  }
-  
-  .heart-alt-svg {
-    width: 160px;
-    height: 140px;
-  }
-  
-  .heart-alt-path {
-    stroke-width: 2.5px;
-  }
-}
-
-@media (max-width: 380px) {
-  .heart-alt-svg {
-    width: 150px;
-    height: 130px;
-  }
-  
-  .heart-line {
-    font-size: 17px;
-  }
-}
-
-/* Для очень маленьких экранов */
-@media (max-height: 500px) {
-  .heart-alt-container {
-    transform: scale(0.9);
-  }
-  
-  .heart-alt-text {
-    margin-bottom: 10px;
+  .heart-svg {
+    width: 250px;
+    height: 210px;
   }
   
   .heart-line {
     font-size: 16px;
   }
+}
+
+@media (max-height: 600px) {
+  .animated-clover {
+    font-size: 60px;
+    margin-bottom: 20px;
+  }
   
-  .heart-alt-svg {
-    width: 140px;
-    height: 120px;
+  .animated-title {
+    font-size: 32px;
+    margin-bottom: 30px;
+  }
+  
+  .heart-svg {
+    width: 220px;
+    height: 180px;
+  }
+  
+  .heart-line {
+    font-size: 15px;
+  }
+  
+  .heart-path {
+    stroke-width: 3px;
+  }
+}
+
+@media (max-width: 380px) {
+  .animated-title {
+    font-size: 28px;
+  }
+  
+  .heart-svg {
+    width: 200px;
+    height: 170px;
+  }
+  
+  .heart-line {
+    font-size: 14px;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-height: 500px) {
+  .animated-clover {
+    font-size: 50px;
+    margin-bottom: 15px;
+  }
+  
+  .animated-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .heart-svg {
+    width: 180px;
+    height: 150px;
+  }
+  
+  .heart-line {
+    font-size: 13px;
+  }
+  
+  .heart-path {
+    stroke-width: 2.5px;
   }
 }
