@@ -2353,6 +2353,7 @@ select:focus {
   top: 0;
   left: 0;
   z-index: 1001;
+  overflow: hidden;
 }
 
 .welcome-animated-content {
@@ -2362,6 +2363,7 @@ select:focus {
   justify-content: center;
   text-align: center;
   padding: 20px;
+  width: 100%;
 }
 
 /* Анимированный клевер */
@@ -2397,9 +2399,13 @@ select:focus {
 /* Контейнер для сердца */
 .heart-container {
   width: 280px;
-  height: 220px;
+  height: 250px;
   opacity: 0;
   animation: heartContainerAppear 0.5s ease 2.5s forwards;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes heartContainerAppear {
@@ -2411,17 +2417,23 @@ select:focus {
 .heart-svg {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
-/* Текст ВНУТРИ сердца - появляется сразу */
+/* Текст ВНУТРИ сердца */
 .heart-text {
-  fill: #064e3b;
+  fill: #ffffff;
   font-size: 14px;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   text-anchor: middle;
   opacity: 0;
-  animation: textAppear 0.5s ease 2.5s forwards;
+  animation: textAppear 0.5s ease 3s forwards;
+}
+
+.heart-text tspan {
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 @keyframes textAppear {
@@ -2431,36 +2443,53 @@ select:focus {
 
 /* Путь сердца - рисуется ВОКРУГ текста */
 .heart-path {
-  fill: none;
+  fill: #f472b6;
   stroke: #f472b6;
   stroke-width: 3px;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: drawHeart 2.5s ease 3s forwards; /* Рисуется медленнее */
+  stroke-dasharray: 350;
+  stroke-dashoffset: 350;
+  animation: drawHeart 2.5s ease 2.8s forwards;
 }
 
 @keyframes drawHeart {
-  0% { stroke-dashoffset: 300; }
+  0% { stroke-dashoffset: 350; }
   100% { stroke-dashoffset: 0; }
 }
 
-/* Адаптив */
+/* Адаптив для разных экранов */
 @media (max-height: 700px) {
   .animated-clover { font-size: 56px; }
   .animated-title { font-size: 28px; }
-  .heart-container { width: 240px; height: 190px; }
+  .heart-container { 
+    width: 240px; 
+    height: 210px;
+    margin-top: 10px;
+  }
   .heart-text { font-size: 12px; }
 }
 
 @media (max-height: 600px) {
-  .animated-clover { font-size: 48px; margin-bottom: 15px; }
-  .animated-title { font-size: 24px; margin-bottom: 20px; }
-  .heart-container { width: 200px; height: 160px; margin-top: 10px; }
+  .animated-clover { 
+    font-size: 48px; 
+    margin-bottom: 15px; 
+  }
+  .animated-title { 
+    font-size: 24px; 
+    margin-bottom: 20px; 
+  }
+  .heart-container { 
+    width: 200px; 
+    height: 180px;
+    margin-top: 10px;
+  }
   .heart-text { font-size: 11px; }
 }
 
 @media (max-width: 380px) {
-  .heart-container { width: 220px; height: 170px; }
+  .heart-container { 
+    width: 220px; 
+    height: 190px;
+  }
 }
