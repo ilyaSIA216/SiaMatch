@@ -2481,3 +2481,74 @@ select:focus {
     height: 220px;
   }
 }
+
+/* Улучшенные стили для анимаций сердца */
+.heart-container {
+  width: 280px; /* Уменьшено для лучшего вида */
+  height: 240px; /* Уменьшено для лучшего вида */
+  opacity: 0;
+  transform: scale(0.9);
+  position: relative;
+}
+
+.heart-text {
+  fill: #000000;
+  font-size: 15px; /* Уменьшен размер шрифта */
+  font-weight: 600; /* Уменьшена жирность */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  text-anchor: middle;
+  opacity: 0;
+  letter-spacing: 0.5px; /* Добавлен межбуквенный интервал */
+}
+
+.heart-path {
+  fill: none;
+  stroke: #f472b6;
+  stroke-width: 2.5px; /* Уменьшена толщина контура */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 320; /* Уменьшено для нового размера */
+  stroke-dashoffset: 320;
+}
+
+@keyframes drawHeart {
+  0% { stroke-dashoffset: 320; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Адаптив для разных экранов */
+@media (max-height: 700px) {
+  .animated-clover { font-size: 56px; }
+  .animated-title { font-size: 28px; }
+  .heart-container { 
+    width: 240px; 
+    height: 200px;
+  }
+  .heart-text { font-size: 13px; }
+  .heart-path { stroke-width: 2px; }
+}
+
+@media (max-height: 600px) {
+  .animated-clover { 
+    font-size: 48px; 
+    margin-bottom: 15px; 
+  }
+  .animated-title { 
+    font-size: 24px; 
+    margin-bottom: 20px; 
+  }
+  .heart-container { 
+    width: 200px; 
+    height: 170px;
+  }
+  .heart-text { font-size: 12px; }
+  .heart-path { stroke-width: 1.8px; }
+}
+
+@media (max-width: 380px) {
+  .heart-container { 
+    width: 220px; 
+    height: 190px;
+  }
+  .heart-text { font-size: 12px; }
+}
