@@ -1,6 +1,46 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
   
+  // ===== НОВАЯ ФУНКЦИЯ - принудительное разворачивание во весь экран =====
+  function forceFullScreen() {
+    // Метод для Telegram Web App
+    if (window.Telegram && Telegram.WebApp) {
+      try {
+        Telegram.WebApp.expand();
+        console.log('🔵 Telegram WebApp развернут во весь экран');
+        
+        // Дополнительные настройки для лучшего UX
+        Telegram.WebApp.enableClosingConfirmation();
+        
+        // Установить стиль интерфейса Telegram
+        if (Telegram.WebApp.setHeaderColor) {
+          Telegram.WebApp.setHeaderColor('#22c55e'); // Зеленый цвет как у вашего приложения
+        }
+        
+        if (Telegram.WebApp.setBackgroundColor) {
+          Telegram.WebApp.setBackgroundColor('#f4fff7'); // Цвет фона вашего приложения
+        }
+      } catch (e) {
+        console.warn('⚠️ Telegram expand не сработал:', e);
+      }
+    }
+    
+    // Метод для полноэкранного режима браузера (если не в Telegram)
+    if (!window.Telegram && document.documentElement.requestFullscreen) {
+      try {
+        document.documentElement.requestFullscreen();
+        console.log('🔵 Браузерный полноэкранный режим активирован');
+      } catch (e) {
+        console.warn('⚠️ Браузерный полноэкранный режим не доступен:', e);
+      }
+    }
+    
+    // Метод для iOS Web App
+    if (window.navigator.standalone === true) {
+      console.log('🔵 Приложение открыто в полноэкранном режиме iOS');
+    }
+  }
+  
   // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
   let tg = null;
   let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -184,7 +224,33 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Telegram WebApp обнаружен');
         
         tg.ready();
-        tg.expand();
+        
+        // ПРИНУДИТЕЛЬНОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН
+        tg.expand(); // Главная команда для полного экрана
+        console.log('🟢 Приложение развернуто во весь экран');
+        
+        // Дополнительные настройки для лучшего UX
+        tg.enableClosingConfirmation(); // Спросить при закрытии
+        console.log('🟢 Включено подтверждение закрытия');
+        
+        // Установить стиль интерфейса Telegram
+        if (tg.setHeaderColor) {
+          tg.setHeaderColor('#22c55e'); // Зеленый цвет как у вашего приложения
+          console.log('🟢 Установлен цвет заголовка');
+        }
+        
+        if (tg.setBackgroundColor) {
+          tg.setBackgroundColor('#f4fff7'); // Цвет фона вашего приложения
+          console.log('🟢 Установлен цвет фона');
+        }
+        
+        // Обновить viewport
+        setTimeout(() => {
+          if (tg.requestViewport) {
+            tg.requestViewport(); // Обновить размеры экрана
+            console.log('🟢 Viewport обновлен');
+          }
+        }, 100);
         
         if (tg.MainButton) {
           tg.MainButton.hide();
@@ -2815,6 +2881,10 @@ document.addEventListener('DOMContentLoaded', function() {
     hasInitialized = true;
     
     console.log('🎬 Инициализация приложения...');
+    
+    // ПРИНУДИТЕЛЬНОЕ РАЗВОРАЧИВАНИЕ ВО ВЕСЬ ЭКРАН
+    forceFullScreen();
+    console.log('🟢 Функция разворачивания вызвана');
     
     initTelegram();
     setupStartButton();
