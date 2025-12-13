@@ -2236,60 +2236,57 @@ function showAnimatedWelcomeScreen() {
   // Показываем анимированный экран
   animatedWelcomeScreen.classList.remove('hidden');
   
-  // Сбрасываем все анимации
-  const heartText = document.querySelector('.heart-text');
-  const heartPath = document.querySelector('.heart-path');
-  const animatedClover = document.getElementById('animated-clover');
-  const animatedTitle = document.getElementById('animated-title');
-  const heartContainer = document.querySelector('.heart-container');
-  
-  // Сбрасываем анимации
-  if (heartText) heartText.style.animation = 'none';
-  if (heartPath) heartPath.style.animation = 'none';
-  if (animatedClover) animatedClover.style.animation = 'none';
-  if (animatedTitle) animatedTitle.style.animation = 'none';
-  if (heartContainer) heartContainer.style.animation = 'none';
-  
-  // Принудительный рефлоу для сброса
-  void animatedClover.offsetWidth;
-  void animatedTitle.offsetWidth;
-  void heartContainer.offsetWidth;
-  void heartText.offsetWidth;
-  void heartPath.offsetWidth;
-  
-  // Запускаем анимации по новой
-  if (animatedClover) {
-    animatedClover.style.animation = 'cloverAppear 1.5s ease forwards';
+// В функции showAnimatedWelcomeScreen():
+// Удаляем старый код для сердца и добавляем новый:
+
+// Сбрасываем анимации для альтернативного дизайна
+const heartAltContainer = document.querySelector('.heart-alt-container');
+const heartLines = document.querySelectorAll('.heart-line');
+const heartAltSvg = document.querySelector('.heart-alt-svg');
+const heartAltPath = document.querySelector('.heart-alt-path');
+
+if (heartAltContainer) heartAltContainer.style.animation = 'none';
+if (heartAltSvg) heartAltSvg.style.opacity = '0';
+if (heartAltPath) heartAltPath.style.animation = 'none';
+heartLines.forEach(line => {
+  line.style.animation = 'none';
+  line.style.opacity = '0';
+  line.style.transform = 'translateY(10px)';
+});
+
+// Принудительный рефлоу
+void heartAltContainer.offsetWidth;
+heartLines.forEach(line => void line.offsetWidth);
+if (heartAltPath) void heartAltPath.offsetWidth;
+
+// Запускаем новые анимации
+setTimeout(() => {
+  if (heartAltContainer) {
+    heartAltContainer.style.animation = 'heartAltAppear 0.5s ease forwards';
   }
   
-  // Заголовок SiaMatch с задержкой
+  // Анимация строк текста
   setTimeout(() => {
-    if (animatedTitle) {
-      animatedTitle.style.animation = 'titleAppear 1s ease forwards';
-    }
-  }, 1500);
+    if (heartLines[0]) heartLines[0].style.animation = 'textLineAppear 0.4s ease forwards';
+  }, 100);
   
-  // Контейнер с сердцем с задержкой
   setTimeout(() => {
-    if (heartContainer) {
-      heartContainer.style.animation = 'heartContainerAppear 0.5s ease forwards';
+    if (heartLines[1]) heartLines[1].style.animation = 'textLineAppear 0.4s ease forwards';
+  }, 300);
+  
+  setTimeout(() => {
+    if (heartLines[2]) heartLines[2].style.animation = 'textLineAppear 0.4s ease forwards';
+  }, 500);
+  
+  // Анимация сердца
+  setTimeout(() => {
+    if (heartAltSvg) heartAltSvg.style.opacity = '1';
+    if (heartAltPath) {
+      heartAltPath.style.animation = 'drawHeartAlt 2s ease forwards';
     }
-    
-    // Текст появляется сразу с контейнером
-    setTimeout(() => {
-      if (heartText) {
-        heartText.style.animation = 'textAppear 0.3s ease forwards';
-      }
-    }, 100);
-    
-    // Сердце рисуется через 300мс после появления текста
-    setTimeout(() => {
-      if (heartPath) {
-        heartPath.style.animation = 'drawHeart 2.5s ease forwards';
-      }
-    }, 400);
-    
-  }, 2500);
+  }, 700);
+  
+}, 2500); // Начинаем через 2.5 секунды от старта
   
   // Общая последовательность анимаций:
   // 0-1.5 сек: Клевер
