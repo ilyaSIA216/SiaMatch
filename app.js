@@ -234,6 +234,33 @@ if (tg) {
     document.documentElement.style.setProperty('--tg-viewport-height', `${data.height}px`);
   });
 }
+        tg.ready();
+
+// ✅ ПРОВЕРКА РЕГИСТРАЦИИ - ТОЛЬКО ЭТО
+const profileData = loadProfile();
+if (profileData) {
+  // Есть анкета → сразу анимация
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('welcome-animated-screen').classList.remove('hidden');
+  document.getElementById('username').textContent = `Привет, ${profileData.firstname || 'друг'}!`;
+  
+  setTimeout(() => {
+    // Тихий переход на ленту
+    document.getElementById('tab-bar').classList.remove('hidden');
+    setActiveTab('feed');
+    loadLikesData();
+    loadSwipesCount();
+    initSwipesSystem();
+    initChatsSystem();
+    updateLikesUI();
+  }, 4500);
+} else {
+  // Нет анкеты → обычный экран
+  document.getElementById('welcome-screen').classList.remove('hidden');
+}
+
+tg.expand();
+
         tg.expand();
         
         if (tg.MainButton) {
