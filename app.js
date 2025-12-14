@@ -900,9 +900,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function initFiltersSystem() {
     console.log('🔍 Инициализирую систему фильтров');
     
-    loadSearchFilters();
-    initSearchFilters();
+  loadSearchFilters();
+  
+  // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
+  const openFiltersBtn = document.getElementById("open-filters-btn");
+  if (openFiltersBtn && openFiltersBtn.parentNode) {
+    openFiltersBtn.parentNode.removeChild(openFiltersBtn);
   }
+  
+  initSearchFilters();
+}
   
   function initSearchFilters() {
     loadSearchFilters();
