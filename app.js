@@ -236,30 +236,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         tg.ready();
 
-        // ✅ ТЕПЕРЬ ВСЕГДА анимированный экран
+        // Всегда показываем анимацию
         document.getElementById('welcome-animated-screen').classList.remove('hidden');
 
-        // Проверка анкеты для быстрого перехода
         const profileData = loadProfile();
         if (profileData) {
           document.getElementById('username').textContent = `Привет, ${profileData.firstname || 'друг'}!`;
-          // Быстрый переход через 2с для зарегистрированных
-          setTimeout(goToFeed, 2000);
+          setTimeout(goToFeed, 2000); // Быстро для старых
         } else {
-          // Полная анимация 4.5с для новых
-          setTimeout(goToFeed, 4500);
-        }
-
-        tg.expand();
-
-        function goToFeed() {
-          document.getElementById('tab-bar').classList.remove('hidden');
-          setActiveTab('feed');
-          loadLikesData();
-          loadSwipesCount();
-          initSwipesSystem();
-          initChatsSystem();
-          updateLikesUI();
+          setTimeout(goToFeed, 4500); // Полная анимация для новых
         }
 
         tg.expand();
@@ -1049,14 +1034,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (saveFiltersBtn) {
       saveFiltersBtn.addEventListener('click', function() {
         saveSearchFilters();
-        setActiveTab("feed");
+        // Показываем ленту напрямую
+        document.querySelectorAll('.screen').forEach(screen => {
+          if (screen.id !== 'welcome-screen' && 
+              screen.id !== 'chat-screen' && 
+              screen.id !== 'screen-interests' &&
+              screen.id !== 'welcome-animated-screen') {
+            screen.classList.add('hidden');
+          }
+        });
+        document.getElementById('screen-feed').classList.remove('hidden');
+        document.querySelector('.tab-btn[data-tab="feed"]').classList.add('active');
+        document.querySelectorAll('.tab-btn:not([data-tab="feed"])').forEach(btn => {
+          btn.classList.remove('active');
+        });
         
         showNotification('✅ Фильтры применены!\n\nТеперь в ленте будут показываться только подходящие анкеты. 🎯');
         
         if (tg?.HapticFeedback) {
           try {
             tg.HapticFeedback.impactOccurred('medium');
-        } catch (e) {}
+          } catch (e) {}
         }
       });
     }
@@ -2723,6 +2721,108 @@ function updatePhotoIndicators() {
     }
   }
 
+  // ===== ФУНКЦИЯ goToFeed =====
+  function goToFeed() {
+    // ✅ ПРЯМО показываем ленту
+    document.getElementById('welcome-animated-screen').classList.add('hidden');
+    document.getElementById('screen-feed').classList.remove('hidden');
+    document.getElementById('tab-bar').classList.remove('hidden');
+    
+    // Активируем вкладку ленты
+    document.querySelector('.tab-btn[data-tab="feed"]').classList.add('active');
+    document.querySelectorAll('.tab-btn:not([data-tab="feed"])').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Загружаем данные
+    loadLikesData();
+    loadSwipesCount();
+    initSwipesSystem();
+    initChatsSystem();
+    updateLikesUI();
+    
+    // Загружаем первую анкету
+    loadNextCandidate();
+    
+    // Инициализируем другие системы
+    initVerification();
+    initInterestsSystem();
+    initFiltersSystem();
+    initBoostSystem();
+    initBonusSystem();
+    initSwipeSystem();
+  }
+  
+  // ===== ФУНКЦИЯ loadNextCandidate =====
+  function loadNextCandidate() {
+    // Проверяем, есть ли кандидаты
+    const filtered = getFilteredCandidates();
+    
+    if (filtered.length === 0) {
+      document.getElementById("candidate-name").textContent = "";
+      document.getElementById("candidate-age").textContent = "";
+      document.getElementById("candidate-city").textContent = "";
+      document.getElementById("candidate-bio").textContent = "";
+      document.getElementById("candidate-photo").src = "";
+      document.getElementById("candidate-interests").innerHTML = "";
+      
+      const verifiedBadge = document.getElementById('candidate-verified');
+      if (verifiedBadge) verifiedBadge.classList.add('hidden');
+      
+      const boostBadge = document.getElementById('candidate-boost');
+      if (boostBadge) boostBadge.classList.add('hidden');
+      
+      document.getElementById("feed-status").textContent = 
+        "Нет подходящих анкет по вашим фильтрам. Попробуйте изменить параметры поиска 🍀";
+      
+      candidatePhotos = [];
+      candidateInterests = [];
+      currentPhotoIndex = 0;
+      updatePhotoIndicators();
+      return;
+    }
+    
+    if (currentIndex >= filtered.length) {
+      currentIndex = 0; // Сбрасываем индекс
+      likedIds = []; // Очищаем лайки
+    }
+    
+    const candidate = filtered[currentIndex];
+    currentCandidateId = candidate.id;
+    
+    candidatePhotos = candidate.photos || [candidate.photo];
+    candidateInterests = candidate.interests || [];
+    currentPhotoIndex = 0;
+    
+    document.getElementById("candidate-name").textContent = candidate.name;
+    document.getElementById("candidate-age").textContent = candidate.age;
+    document.getElementById("candidate-city").textContent = candidate.city;
+    document.getElementById("candidate-bio").textContent = candidate.bio;
+    document.getElementById("feed-status").textContent = "";
+    
+    updateCandidatePhoto();
+    updateCandidateInterests();
+    updatePhotoIndicators();
+    
+    const verifiedBadge = document.getElementById('candidate-verified');
+    if (verifiedBadge) {
+      if (candidate.verified) {
+        verifiedBadge.classList.remove('hidden');
+      } else {
+        verifiedBadge.classList.add('hidden');
+      }
+    }
+    
+    const boostBadge = document.getElementById('candidate-boost');
+    if (boostBadge) {
+      if (candidate.boosted) {
+        boostBadge.classList.remove('hidden');
+      } else {
+        boostBadge.classList.add('hidden');
+      }
+    }
+  }
+  
   // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
   function showAnimatedWelcomeScreen() {
     if (!animatedWelcomeScreen) return;
@@ -2765,7 +2865,8 @@ function updatePhotoIndicators() {
       initChatsSystem();
       initBonusSystem();
       
-      setActiveTab("feed");
+      // Используем goToFeed вместо setActiveTab
+      goToFeed();
       
       setTimeout(() => {
         showNotification("🍀 С возвращением в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
@@ -2891,7 +2992,8 @@ function updatePhotoIndicators() {
     initChatsSystem();
     initBonusSystem();
     
-    setActiveTab("feed");
+    // Используем goToFeed вместо setActiveTab
+    goToFeed();
   }
   
   // ===== УПРАВЛЕНИЕ ТАБАМИ =====
@@ -2959,7 +3061,7 @@ function updatePhotoIndicators() {
     currentIndex = 0;
     initSearchFilters();
     initSwipeSystem();
-    showCurrentCandidate();
+    loadNextCandidate(); // Используем новую функцию
   }
   
   function initFiltersTab() {
@@ -3001,93 +3103,6 @@ function updatePhotoIndicators() {
     
     return filtered;
   }
-  
-  function showCurrentCandidate() {
-    const filtered = getFilteredCandidates();
-    
-    if (filtered.length === 0) {
-      document.getElementById("candidate-name").textContent = "";
-      document.getElementById("candidate-age").textContent = "";
-      document.getElementById("candidate-city").textContent = "";
-      document.getElementById("candidate-bio").textContent = "";
-      document.getElementById("candidate-photo").src = "";
-      document.getElementById("candidate-interests").innerHTML = "";
-      
-      const verifiedBadge = document.getElementById('candidate-verified');
-      if (verifiedBadge) verifiedBadge.classList.add('hidden');
-      
-      const boostBadge = document.getElementById('candidate-boost');
-      if (boostBadge) boostBadge.classList.add('hidden');
-      
-      document.getElementById("feed-status").textContent = 
-        "Нет подходящих анкет по вашим фильтрам. Попробуйте изменить параметры поиска 🍀";
-      
-      candidatePhotos = [];
-      candidateInterests = [];
-      currentPhotoIndex = 0;
-      updatePhotoIndicators();
-      return;
-    }
-    
-    if (currentIndex >= filtered.length) {
-      document.getElementById("candidate-name").textContent = "";
-      document.getElementById("candidate-age").textContent = "";
-      document.getElementById("candidate-city").textContent = "";
-      document.getElementById("candidate-bio").textContent = "";
-      document.getElementById("candidate-photo").src = "";
-      document.getElementById("candidate-interests").innerHTML = "";
-      
-      const verifiedBadge = document.getElementById('candidate-verified');
-      if (verifiedBadge) verifiedBadge.classList.add('hidden');
-      
-      const boostBadge = document.getElementById('candidate-boost');
-      if (boostBadge) boostBadge.classList.add('hidden');
-      
-      document.getElementById("feed-status").textContent = 
-        "На сегодня всё! Загляните позже 🍀";
-      
-      candidatePhotos = [];
-      candidateInterests = [];
-      currentPhotoIndex = 0;
-      updatePhotoIndicators();
-      return;
-    }
-    
-    const candidate = filtered[currentIndex];
-    currentCandidateId = candidate.id;
-    
-    candidatePhotos = candidate.photos || [candidate.photo];
-    candidateInterests = candidate.interests || [];
-    currentPhotoIndex = 0;
-    
-    document.getElementById("candidate-name").textContent = candidate.name;
-    document.getElementById("candidate-age").textContent = candidate.age;
-    document.getElementById("candidate-city").textContent = candidate.city;
-    document.getElementById("candidate-bio").textContent = candidate.bio;
-    document.getElementById("feed-status").textContent = "";
-    
-    updateCandidatePhoto();
-    updateCandidateInterests();
-    updatePhotoIndicators();
-    
-    const verifiedBadge = document.getElementById('candidate-verified');
-    if (verifiedBadge) {
-      if (candidate.verified) {
-        verifiedBadge.classList.remove('hidden');
-      } else {
-        verifiedBadge.classList.add('hidden');
-      }
-    }
-    
-    const boostBadge = document.getElementById('candidate-boost');
-    if (boostBadge) {
-      if (candidate.boosted) {
-        boostBadge.classList.remove('hidden');
-      } else {
-        boostBadge.classList.add('hidden');
-      }
-    }
-  }
 
   function handleLike() {
     if (!useSwipe()) return;
@@ -3103,7 +3118,7 @@ function updatePhotoIndicators() {
       const likedUser = filtered[currentIndex];
       likedIds.push(likedUser.id);
       currentIndex++;
-      showCurrentCandidate();
+      loadNextCandidate(); // Загружаем следующего кандидата
       
       checkForMatch(likedUser.id);
       
@@ -3117,14 +3132,14 @@ function updatePhotoIndicators() {
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
-      } catch (e) {}
+    } catch (e) {}
     }
     
     const filtered = getFilteredCandidates();
     if (currentIndex < filtered.length) {
       const dislikedUser = filtered[currentIndex];
       currentIndex++;
-      showCurrentCandidate();
+      loadNextCandidate(); // Загружаем следующего кандидата
       
       console.log(`✖️ Дизлайк пользователю ${dislikedUser.name} (ID: ${dislikedUser.id})`);
     }
@@ -3249,7 +3264,19 @@ function updatePhotoIndicators() {
     }
     
     // Возврат к профилю
-    setActiveTab('profile');
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'welcome-screen' && 
+          screen.id !== 'chat-screen' && 
+          screen.id !== 'screen-interests' &&
+          screen.id !== 'welcome-animated-screen') {
+        screen.classList.add('hidden');
+      }
+    });
+    document.getElementById('screen-profile').classList.remove('hidden');
+    document.querySelector('.tab-btn[data-tab="profile"]').classList.add('active');
+    document.querySelectorAll('.tab-btn:not([data-tab="profile"])').forEach(btn => {
+      btn.classList.remove('active');
+    });
   }
   
   // ===== ПРОФИЛЬ =====
