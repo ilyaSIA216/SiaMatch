@@ -236,27 +236,30 @@ if (tg) {
 }
         tg.ready();
 
-// ✅ ПРОВЕРКА РЕГИСТРАЦИИ - ТОЛЬКО ЭТО
+// ✅ ТЕПЕРЬ ВСЕГДА анимированный экран
+document.getElementById('welcome-animated-screen').classList.remove('hidden');
+
+// Проверка анкеты для быстрого перехода
 const profileData = loadProfile();
 if (profileData) {
-  // Есть анкета → сразу анимация
-  document.getElementById('welcome-screen').classList.add('hidden');
-  document.getElementById('welcome-animated-screen').classList.remove('hidden');
   document.getElementById('username').textContent = `Привет, ${profileData.firstname || 'друг'}!`;
-  
-  setTimeout(() => {
-    // Тихий переход на ленту
-    document.getElementById('tab-bar').classList.remove('hidden');
-    setActiveTab('feed');
-    loadLikesData();
-    loadSwipesCount();
-    initSwipesSystem();
-    initChatsSystem();
-    updateLikesUI();
-  }, 4500);
+  // Быстрый переход через 2с для зарегистрированных
+  setTimeout(goToFeed, 2000);
 } else {
-  // Нет анкеты → обычный экран
-  document.getElementById('welcome-screen').classList.remove('hidden');
+  // Полная анимация 4.5с для новых
+  setTimeout(goToFeed, 4500);
+}
+
+tg.expand();
+
+function goToFeed() {
+  document.getElementById('tab-bar').classList.remove('hidden');
+  setActiveTab('feed');
+  loadLikesData();
+  loadSwipesCount();
+  initSwipesSystem();
+  initChatsSystem();
+  updateLikesUI();
 }
 
 tg.expand();
