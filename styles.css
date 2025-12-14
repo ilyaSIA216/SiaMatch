@@ -3201,3 +3201,42 @@ select:focus {
     font-size: 13px;
   }
 }
+
+/* НОВАЯ ПОДСКАЗКА ДЛЯ СВАЙПОВ */
+.swipe-hint {
+  margin: 10px 0 20px;
+  text-align: center;
+  padding: 12px;
+  background: rgba(34, 197, 94, 0.08);
+  border-radius: 15px;
+  border: 1px dashed rgba(34, 197, 94, 0.3);
+}
+
+.swipe-hint-text {
+  font-size: 14px;
+  color: var(--siamatch-green-dark);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.swipe-hint-icons {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 10px;
+}
+
+.swipe-hint-icon-left {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.swipe-hint-icon-right {
+  color: var(--siamatch-green-dark);
+  font-weight: 600;
+}
+
+/* УБИРАЕМ СТАРЫЕ СТИЛИ ДЛЯ КНОПОК */
+.swipe-instruction {
+  display: none !important;
+}
