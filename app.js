@@ -2222,40 +2222,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
-  function showAnimatedWelcomeScreen() {
-    if (!animatedWelcomeScreen) return;
-    
-    // Скрываем обычный экран приветствия
-    if (welcomeScreen) {
-      welcomeScreen.classList.add('hidden');
-    }
-    
-    // Показываем анимированный экран
-    animatedWelcomeScreen.classList.remove('hidden');
-    
-    // Добавляем DOM элемент для нижней части сердца
-    const heartAnimation = animatedWelcomeScreen.querySelector('.heart-animation');
-    if (heartAnimation && !heartAnimation.querySelector('.heart-bottom')) {
-      const heartBottom = document.createElement('div');
-      heartBottom.className = 'heart-bottom';
-      heartAnimation.appendChild(heartBottom);
-    }
-    
-    // Слушаем событие завершения анимации
-    const animatedSubtitle = document.getElementById('animated-subtitle');
-    if (animatedSubtitle) {
-      // Используем setTimeout как запасной вариант
-      setTimeout(() => {
-        hideAnimatedWelcomeScreen();
-      }, 6500); // 6.5 секунд - общая длительность анимации
-      
-      // Также слушаем анимацию CSS
-      animatedSubtitle.addEventListener('animationend', function() {
-        setTimeout(hideAnimatedWelcomeScreen, 2000);
-      }, { once: true });
-    }
+// ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
+function showAnimatedWelcomeScreen() {
+  if (!animatedWelcomeScreen) return;
+  
+  // Скрываем обычный экран приветствия
+  if (welcomeScreen) {
+    welcomeScreen.classList.add('hidden');
   }
+  
+  // Показываем анимированный экран
+  animatedWelcomeScreen.classList.remove('hidden');
+  
+  // Слушаем событие завершения анимации
+  const animatedSubtitle = document.getElementById('animated-subtitle');
+  if (animatedSubtitle) {
+    // Используем setTimeout как запасной вариант
+    setTimeout(() => {
+      hideAnimatedWelcomeScreen();
+    }, 6500); // 6.5 секунд - общая длительность анимации
+    
+    // Также слушаем анимацию CSS
+    animatedSubtitle.addEventListener('animationend', function() {
+      setTimeout(hideAnimatedWelcomeScreen, 2000);
+    }, { once: true });
+  }
+}
   
   // ===== ФУНКЦИЯ: СКРЫТЬ АНИМИРОВАННЫЙ ЭКРАН И ПОКАЗАТЬ ПРИЛОЖЕНИЕ =====
   function hideAnimatedWelcomeScreen() {
