@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ЛЕНТЫ -->
+      <!-- ОБНОВЛЕННЫЙ ЭКРАН ЛЕНТЫ -->
       <div id="screen-feed" class="screen hidden">
         <div class="screen-content">
           <!-- ЗАГОЛОВОК С КНОПКОЙ ФИЛЬТРОВ -->
@@ -163,7 +163,7 @@
             </button>
           </div>
           
-          <!-- АНКЕТА ДЛЯ СВАЙПОВ -->
+          <!-- ОБНОВЛЕННАЯ АНКЕТА ДЛЯ СВАЙПОВ -->
           <div id="candidate-card">
             <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
             <div id="candidate-verified" class="candidate-verified hidden">✅</div>
@@ -171,9 +171,19 @@
             <!-- ЗНАЧОК БУСТА (если анкета бустирована) -->
             <div id="candidate-boost" class="candidate-boost hidden">🚀 Буст</div>
             
-            <div class="candidate-photo-wrapper">
-              <img id="candidate-photo" src="" alt="Фото" />
+            <!-- КОНТЕЙНЕР ДЛЯ ФОТОГРАФИЙ -->
+            <div class="candidate-photos-container">
+              <!-- ОСНОВНОЕ ФОТО -->
+              <img id="candidate-photo" src="" alt="Фото" class="active-photo" />
+              
+              <!-- ИНДИКАТОРЫ ДЛЯ ФОТОГРАФИЙ -->
+              <div class="photo-indicators"></div>
+              
+              <!-- КНОПКИ ДЛЯ ЛИСТАНИЯ (НЕВИДИМЫЕ НА ПК, РАБОТАЮТ ПО ТАПАМ) -->
+              <div class="photo-swipe-area left-swipe-area"></div>
+              <div class="photo-swipe-area right-swipe-area"></div>
             </div>
+            
             <div class="candidate-info">
               <div class="candidate-name-age">
                 <span id="candidate-name"></span>,
@@ -181,13 +191,25 @@
               </div>
               <div id="candidate-city" class="candidate-city"></div>
               <div id="candidate-bio" class="candidate-bio"></div>
+              
+              <!-- СЕКЦИЯ ИНТЕРЕСОВ -->
+              <div class="candidate-interests-section">
+                <div class="interests-title">Интересы:</div>
+                <div id="candidate-interests" class="candidate-interests"></div>
+              </div>
             </div>
           </div>
           
-          <!-- КНОПКИ ДЕЙСТВИЙ -->
-          <div class="actions">
-            <button id="btn-dislike" class="btn-circle btn-dislike">✖️</button>
-            <button id="btn-like" class="btn-circle btn-like">❤️</button>
+          <!-- СВАЙП-ИНСТРУКЦИЯ -->
+          <div class="swipe-instruction">
+            <div class="swipe-hint-left">
+              <div class="swipe-icon">✖️</div>
+              <div class="swipe-text">Свайп влево</div>
+            </div>
+            <div class="swipe-hint-right">
+              <div class="swipe-icon">❤️</div>
+              <div class="swipe-text">Свайп вправо</div>
+            </div>
           </div>
           
           <!-- СТАТУС ЛЕНТЫ -->
@@ -686,6 +708,9 @@
       <button class="tab-btn" data-tab="profile">✏️</button>
     </div>
   </div>
+
+  <!-- ДОБАВЛЕННЫЕ ЭЛЕМЕНТЫ ДЛЯ АНИМАЦИЙ СВАЙПОВ -->
+  <div id="swipe-feedback" class="swipe-feedback hidden"></div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="app.js"></script>
