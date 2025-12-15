@@ -26,31 +26,35 @@
         <button id="startBtn" class="primary">Начать знакомство</button>
       </div>
 
-      <!-- НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
-      <div id="welcome-animated-screen" class="screen hidden">
-        <div class="welcome-animated-layout">
-          <div class="welcome-text-content">
-            <div id="animated-clover" class="animated-clover">🍀</div>
-            <div id="animated-title" class="animated-title">SiaMatch</div>
-            <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
-          </div>
-          
-          <div class="heart-container-wrapper">
-            <div class="heart-container">
-              <svg class="heart-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-                <path class="heart-path" d="
-                  M 50,30 
-                  C 60,15 80,15 85,30 
-                  C 90,45 75,60 50,75 
-                  C 25,60 10,45 15,30 
-                  C 20,15 40,15 50,30
-                  Z
-                " />
-              </svg>
-            </div>
-          </div>
-        </div>
+<!-- НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
+<div id="welcome-animated-screen" class="screen hidden">
+  <!-- Контейнер с flexbox колоннами -->
+  <div class="welcome-animated-layout">
+    <!-- ВЕРХНЯЯ ЧАСТЬ: весь текст -->
+    <div class="welcome-text-content">
+      <div id="animated-clover" class="animated-clover">🍀</div>
+      <div id="animated-title" class="animated-title">SiaMatch</div>
+      <div id="animated-subtitle" class="animated-subtitle">Любовь начинается здесь</div>
+    </div>
+    
+    <!-- НИЖНЯЯ ЧАСТЬ: сердце -->
+    <div class="heart-container-wrapper">
+      <div class="heart-container">
+        <svg class="heart-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+          <!-- Путь сердца - рисуется постепенно -->
+          <path class="heart-path" d="
+            M 50,30 
+            C 60,15 80,15 85,30 
+            C 90,45 75,60 50,75 
+            C 25,60 10,45 15,30 
+            C 20,15 40,15 50,30
+            Z
+          " />
+        </svg>
       </div>
+    </div>
+  </div>
+</div>
 
       <!-- ЭКРАН АНКЕТЫ -->
       <div id="onboarding-screen" class="screen hidden">
@@ -102,6 +106,7 @@
             <div class="hint">Минимум 10 символов, максимум 300</div>
           </div>
 
+          <!-- FIX: Кнопка всегда видна -->
           <button id="saveProfileBtn">Сохранить профиль 🍀</button>
         </div>
       </div>
@@ -111,7 +116,7 @@
         <div class="screen-content">
           <h2 class="screen-title">Чаты 💬</h2>
           
-          <!-- БАДЖ С КОЛИЧЕСТВОМ ЛАЙКОВ -->
+          <!-- БАДЖ С КОЛИЧЕСТВОМ ЛАЙКОВ (ТОЛЬКО ЧИСЛО!) -->
           <div class="chats-header">
             <div id="likes-badge" class="likes-badge">
               <div class="likes-badge-icon">💗</div>
@@ -147,17 +152,18 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ЛЕНТЫ -->
-      <div id="screen-feed" class="screen hidden">
-        <div class="screen-content">
-          <h2 class="screen-title">Познакомьтесь 🍀</h2>
+<!-- ЭКРАН ЛЕНТЫ -->
+<div id="screen-feed" class="screen hidden">
+  <div class="screen-content">
+    <!-- ЗАГОЛОВОК -->
+    <h2 class="screen-title">Познакомьтесь 🍀</h2>
           
           <!-- ОБНОВЛЕННАЯ АНКЕТА ДЛЯ СВАЙПОВ -->
           <div id="candidate-card">
             <!-- ЗНАЧОК ВЕРИФИКАЦИИ -->
             <div id="candidate-verified" class="candidate-verified hidden">✅</div>
             
-            <!-- ЗНАЧОК БУСТА -->
+            <!-- ЗНАЧОК БУСТА (если анкета бустирована) -->
             <div id="candidate-boost" class="candidate-boost hidden">🚀 Буст</div>
             
             <!-- КОНТЕЙНЕР ДЛЯ ФОТОГРАФИЙ -->
@@ -706,25 +712,7 @@
   <!-- ДОБАВИМ ЭЛЕМЕНТЫ ДЛЯ АНИМАЦИЙ СВАЙПОВ -->
   <div id="swipe-feedback" class="swipe-feedback hidden"></div>
 
-  <!-- Загружаем Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <!-- Загружаем модули в правильном порядке -->
-  <script type="module" src="modules/state.js"></script>
-  <script type="module" src="utils/storage.js"></script>
-  <script type="module" src="utils/helpers.js"></script>
-  <script type="module" src="utils/notifications.js"></script>
-  <script type="module" src="modules/auth.js"></script>
-  <script type="module" src="modules/likes.js"></script>
-  <script type="module" src="modules/swipe.js"></script>
-  <script type="module" src="modules/chat.js"></script>
-  <script type="module" src="modules/profile.js"></script>
-  <script type="module" src="modules/filters.js"></script>
-  <script type="module" src="modules/verification.js"></script>
-  <script type="module" src="modules/interests.js"></script>
-  <script type="module" src="modules/bonus.js"></script>
-  
-  <!-- Главный файл приложения -->
-  <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
