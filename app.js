@@ -1,23 +1,5 @@
-// Обработчик критических ошибок
-try {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
-  
-  // ===== УТИЛИТЫ =====
-  function showNotification(message) {
-    // Для демо-режима используем alert
-    if (typeof alert !== 'undefined') {
-      alert(message);
-    }
-    
-    // В будущем можно добавить красивую нотификацию
-    console.log('📢 Уведомление:', message);
-    
-    // Вибрация для мобильных устройств
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
-  }
   
   // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
   let tg = null;
@@ -222,49 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tg = Telegram.WebApp;
         console.log('✅ Telegram WebApp обнаружен');
         
-        // Получаем элементы с проверкой на null
-        const userNameElement = document.getElementById('user-name');
-        const userAvatarElement = document.getElementById('user-avatar');
-        const userDataElement = document.getElementById('user-data');
-        
-        // Проверяем существование элемента перед работой с ним
-        if (userNameElement) {
-          const user = Telegram.WebApp.initDataUnsafe?.user;
-          if (user) {
-            userNameElement.textContent = user.first_name || 'Друг';
-          }
-        }
-        
         tg.ready();
-        // iOS WHITE SCREEN FIX - обязательно между ready() и expand()
-        if (tg) {
-          // Устанавливаем стабильную высоту viewport (критично для iPhone)
-          document.documentElement.style.setProperty('--tg-viewport-height', `${tg.viewportStableHeight}px`);
-          document.documentElement.style.setProperty('--tg-viewport-width', `${tg.viewportStableWidth}px`);
-          
-          // Обработчик изменения viewport (клавиатура iOS)
-          tg.onEvent('viewportChanged', (data) => {
-            document.documentElement.style.setProperty('--tg-viewport-height', `${data.height}px`);
-          });
-        }
-        tg.ready();
-
-        // Всегда показываем анимацию
-        if (document.getElementById('welcome-animated-screen')) {
-          document.getElementById('welcome-animated-screen').classList.remove('hidden');
-        }
-
-        const profileData = loadProfile();
-        if (profileData) {
-          const usernameEl = document.getElementById('username');
-          if (usernameEl) {
-            usernameEl.textContent = `Привет, ${profileData.firstname || 'друг'}!`;
-          }
-          setTimeout(goToFeed, 2000); // Быстро для старых
-        } else {
-          setTimeout(goToFeed, 4500); // Полная анимация для новых
-        }
-
         tg.expand();
         
         if (tg.MainButton) {
@@ -703,77 +643,47 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function setupChatEventHandlers() {
-    const backToChatsBtn = document.getElementById('back-to-chats');
-    const sendMessageBtn = document.getElementById('send-message-btn');
-    const messageInput = document.getElementById('chat-message-input');
-    const reportBtn = document.getElementById('chat-report-btn');
-    const closeReportBtn = document.getElementById('close-report-modal-btn');
-    const cancelReportBtn = document.getElementById('cancel-report-btn');
-    const reportReasonSelect = document.getElementById('report-reason');
-    const submitReportBtn = document.getElementById('submit-report-btn');
-    const reportModal = document.getElementById('report-modal');
+    document.getElementById('back-to-chats').addEventListener('click', () => {
+      document.getElementById('chat-screen').classList.add('hidden');
+      document.getElementById('screen-chats').classList.remove('hidden');
+      document.getElementById('tab-bar').classList.remove('hidden');
+      currentChatId = null;
+    });
     
-    if (backToChatsBtn) {
-      backToChatsBtn.addEventListener('click', () => {
-        document.getElementById('chat-screen').classList.add('hidden');
-        document.getElementById('screen-chats').classList.remove('hidden');
-        document.getElementById('tab-bar').classList.remove('hidden');
-        currentChatId = null;
-      });
-    }
+    document.getElementById('send-message-btn').addEventListener('click', sendMessage);
     
-    if (sendMessageBtn) {
-      sendMessageBtn.addEventListener('click', sendMessage);
-    }
+    document.getElementById('chat-message-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
     
-    if (messageInput) {
-      messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          sendMessage();
-        }
-      });
-    }
+    document.getElementById('chat-report-btn').addEventListener('click', openReportModal);
     
-    if (reportBtn) {
-      reportBtn.addEventListener('click', openReportModal);
-    }
+    document.getElementById('close-report-modal-btn').addEventListener('click', () => {
+      document.getElementById('report-modal').classList.add('hidden');
+    });
     
-    if (closeReportBtn) {
-      closeReportBtn.addEventListener('click', () => {
+    document.getElementById('cancel-report-btn').addEventListener('click', () => {
+      document.getElementById('report-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('report-reason').addEventListener('change', function() {
+      const customReasonDiv = document.getElementById('custom-report-reason');
+      if (this.value === 'other') {
+        customReasonDiv.classList.remove('hidden');
+      } else {
+        customReasonDiv.classList.add('hidden');
+      }
+    });
+    
+    document.getElementById('submit-report-btn').addEventListener('click', submitReport);
+    
+    document.getElementById('report-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('report-modal')) {
         document.getElementById('report-modal').classList.add('hidden');
-      });
-    }
-    
-    if (cancelReportBtn) {
-      cancelReportBtn.addEventListener('click', () => {
-        document.getElementById('report-modal').classList.add('hidden');
-      });
-    }
-    
-    if (reportReasonSelect) {
-      reportReasonSelect.addEventListener('change', function() {
-        const customReasonDiv = document.getElementById('custom-report-reason');
-        if (customReasonDiv) {
-          if (this.value === 'other') {
-            customReasonDiv.classList.remove('hidden');
-          } else {
-            customReasonDiv.classList.add('hidden');
-          }
-        }
-      });
-    }
-    
-    if (submitReportBtn) {
-      submitReportBtn.addEventListener('click', submitReport);
-    }
-    
-    if (reportModal) {
-      reportModal.addEventListener('click', (e) => {
-        if (e.target === reportModal) {
-          reportModal.classList.add('hidden');
-        }
-      });
-    }
+      }
+    });
   }
   
   function loadMessagesForChat(userId) {
@@ -811,8 +721,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function sendMessage() {
     const input = document.getElementById('chat-message-input');
-    if (!input) return;
-    
     const messageText = input.value.trim();
     
     if (!messageText || !currentChatId) return;
@@ -837,22 +745,18 @@ document.addEventListener('DOMContentLoaded', function() {
     saveChatMessages();
     
     const messagesContainer = document.getElementById('chat-messages');
-    if (messagesContainer) {
-      const messageElement = document.createElement('div');
-      messageElement.className = 'message message-out';
-      messageElement.innerHTML = `
-        <div class="message-content">${messageText}</div>
-        <div class="message-time">${timeString}</div>
-      `;
-      messagesContainer.appendChild(messageElement);
-    }
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message message-out';
+    messageElement.innerHTML = `
+      <div class="message-content">${messageText}</div>
+      <div class="message-time">${timeString}</div>
+    `;
+    messagesContainer.appendChild(messageElement);
     
     input.value = '';
     
     setTimeout(() => {
-      if (messagesContainer) {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }, 100);
     
     setTimeout(() => {
@@ -922,38 +826,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const user = matchedUsers.find(u => u.id === parseInt(currentChatId));
     if (!user) return;
     
-    const reportUserName = document.getElementById('report-user-name');
-    if (reportUserName) {
-      reportUserName.textContent = `${user.name}, ${user.age}`;
-    }
+    document.getElementById('report-user-name').textContent = `${user.name}, ${user.age}`;
     
-    const reportReason = document.getElementById('report-reason');
-    const customReasonDiv = document.getElementById('custom-report-reason');
-    const customReasonText = document.getElementById('custom-reason-text');
-    const reportAdditional = document.getElementById('report-additional');
+    document.getElementById('report-reason').value = '';
+    document.getElementById('custom-report-reason').classList.add('hidden');
+    document.getElementById('custom-reason-text').value = '';
+    document.getElementById('report-additional').value = '';
     
-    if (reportReason) reportReason.value = '';
-    if (customReasonDiv) customReasonDiv.classList.add('hidden');
-    if (customReasonText) customReasonText.value = '';
-    if (reportAdditional) reportAdditional.value = '';
-    
-    const reportModal = document.getElementById('report-modal');
-    if (reportModal) {
-      reportModal.classList.remove('hidden');
-    }
+    document.getElementById('report-modal').classList.remove('hidden');
   }
   
   function submitReport() {
-    const reportReason = document.getElementById('report-reason');
-    const customReasonText = document.getElementById('custom-reason-text');
-    const reportAdditional = document.getElementById('report-additional');
+    const reason = document.getElementById('report-reason').value;
+    const customReason = document.getElementById('custom-reason-text').value;
+    const additional = document.getElementById('report-additional').value;
     
-    if (!reportReason || !reportReason.value) {
+    if (!reason) {
       showNotification('Выберите причину жалобы');
       return;
     }
     
-    if (reportReason.value === 'other' && (!customReasonText || !customReasonText.value.trim())) {
+    if (reason === 'other' && !customReason.trim()) {
       showNotification('Опишите причину жалобы');
       return;
     }
@@ -967,8 +860,8 @@ document.addEventListener('DOMContentLoaded', function() {
       reporterName: profileData?.first_name || 'Пользователь',
       reportedUserId: user.id,
       reportedUserName: user.name,
-      reason: reportReason.value === 'other' ? customReasonText.value : reportReason.value,
-      additionalInfo: reportAdditional ? reportAdditional.value : '',
+      reason: reason === 'other' ? customReason : reason,
+      additionalInfo: additional,
       chatMessages: chatMessages[currentChatId] || [],
       reporterProfile: profileData,
       reportedUserProfile: user,
@@ -984,10 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     showNotification('✅ Жалоба отправлена!\n\nВаша жалоба будет рассмотрена администратором в течение 24 часов. Диалог сохранён для проверки.');
     
-    const reportModal = document.getElementById('report-modal');
-    if (reportModal) {
-      reportModal.classList.add('hidden');
-    }
+    document.getElementById('report-modal').classList.add('hidden');
     
     if (tg?.HapticFeedback) {
       try {
@@ -1010,16 +900,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function initFiltersSystem() {
     console.log('🔍 Инициализирую систему фильтров');
     
-    loadSearchFilters();
-    
-    // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
-    const openFiltersBtn = document.getElementById("open-filters-btn");
-    if (openFiltersBtn && openFiltersBtn.parentNode) {
-      openFiltersBtn.parentNode.removeChild(openFiltersBtn);
-    }
-    
-    initSearchFilters();
+  loadSearchFilters();
+  
+  // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
+  const openFiltersBtn = document.getElementById("open-filters-btn");
+  if (openFiltersBtn && openFiltersBtn.parentNode) {
+    openFiltersBtn.parentNode.removeChild(openFiltersBtn);
   }
+  
+  initSearchFilters();
+}
   
   function initSearchFilters() {
     loadSearchFilters();
@@ -1102,20 +992,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (saveFiltersBtn) {
       saveFiltersBtn.addEventListener('click', function() {
         saveSearchFilters();
-        // Показываем ленту напрямую
-        document.querySelectorAll('.screen').forEach(screen => {
-          if (screen.id !== 'welcome-screen' && 
-              screen.id !== 'chat-screen' && 
-              screen.id !== 'screen-interests' &&
-              screen.id !== 'welcome-animated-screen') {
-            screen.classList.add('hidden');
-          }
-        });
-        document.getElementById('screen-feed').classList.remove('hidden');
-        document.querySelector('.tab-btn[data-tab="feed"]').classList.add('active');
-        document.querySelectorAll('.tab-btn:not([data-tab="feed"])').forEach(btn => {
-          btn.classList.remove('active');
-        });
+        setActiveTab("feed");
         
         showNotification('✅ Фильтры применены!\n\nТеперь в ленте будут показываться только подходящие анкеты. 🎯');
         
@@ -1445,8 +1322,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const friendIdInput = document.getElementById('friend-id-input');
       const screenshotInput = document.getElementById('invite-screenshot-input');
       
-      const friendId = friendIdInput ? friendIdInput.value.trim() : '';
-      const screenshotFile = screenshotInput ? screenshotInput.files[0] : null;
+      const friendId = friendIdInput.value.trim();
+      const screenshotFile = screenshotInput.files[0];
       
       if (!friendId && !screenshotFile) {
         showNotification('Заполните хотя бы одно поле: ID друга или загрузите скриншот');
@@ -1541,50 +1418,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewDiv = document.getElementById('screenshot-preview');
     const previewImg = document.getElementById('preview-image');
     
-    if (closeBtn) {
-      closeBtn.onclick = () => {
-        document.body.removeChild(modal);
-      };
-    }
+    closeBtn.onclick = () => {
+      document.body.removeChild(modal);
+    };
     
-    if (cancelBtn) {
-      cancelBtn.onclick = () => {
-        document.body.removeChild(modal);
-      };
-    }
+    cancelBtn.onclick = () => {
+      document.body.removeChild(modal);
+    };
     
-    if (screenshotInput) {
-      screenshotInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            if (previewImg) previewImg.src = e.target.result;
-            if (previewDiv) previewDiv.style.display = 'block';
-            if (submitBtn) submitBtn.disabled = false;
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-    
-    if (submitBtn) {
-      submitBtn.onclick = () => {
-        const file = screenshotInput ? screenshotInput.files[0] : null;
-        if (!file) {
-          showNotification('Сначала загрузите скриншот');
-          return;
-        }
-        
+    screenshotInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          const screenshotData = event.target.result;
-          submitShareForVerification(screenshotData);
-          document.body.removeChild(modal);
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          previewDiv.style.display = 'block';
+          submitBtn.disabled = false;
         };
         reader.readAsDataURL(file);
+      }
+    });
+    
+    submitBtn.onclick = () => {
+      const file = screenshotInput.files[0];
+      if (!file) {
+        showNotification('Сначала загрузите скриншот');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const screenshotData = event.target.result;
+        submitShareForVerification(screenshotData);
+        document.body.removeChild(modal);
       };
-    }
+      reader.readAsDataURL(file);
+    };
     
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
@@ -1648,33 +1517,31 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(notification);
     
     const copyBtn = document.getElementById('bonus-copy-btn');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', () => {
-        if (link) {
-          navigator.clipboard.writeText(link).then(() => {
-            showNotification('✅ Ссылка скопирована в буфер обмена!');
-          }).catch(() => {
-            const textArea = document.createElement('textarea');
-            textArea.value = link;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            showNotification('✅ Ссылка скопирована!');
-          });
+    copyBtn.addEventListener('click', () => {
+      if (link) {
+        navigator.clipboard.writeText(link).then(() => {
+          showNotification('✅ Ссылка скопирована в буфер обмена!');
+        }).catch(() => {
+          const textArea = document.createElement('textarea');
+          textArea.value = link;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          showNotification('✅ Ссылка скопирована!');
+        });
+      }
+      
+      notification.style.animation = 'bonusDisappear 0.3s ease forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
         }
-        
-        notification.style.animation = 'bonusDisappear 0.3s ease forwards';
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-          }
-          if (style.parentNode) {
-            style.parentNode.removeChild(style);
-          }
-        }, 300);
-      });
-    }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
+    });
     
     setTimeout(() => {
       if (notification.parentNode) {
@@ -2310,7 +2177,7 @@ document.addEventListener('DOMContentLoaded', function() {
       showNotification('❌ Ошибка при сохранении цели');
     }
   }
-
+  
 // ===== СИСТЕМА СВАЙПОВ И УПРАВЛЕНИЯ ФОТОГРАФИЯМИ =====
 function initSwipeSystem() {
   console.log('🔄 Инициализирую систему свайпов и фотографий');
@@ -2696,17 +2563,15 @@ function updateCandidatePhoto() {
     const photoUrl = candidatePhotos[currentPhotoIndex];
     const photoElement = document.getElementById("candidate-photo");
     
-    if (photoElement) {
-      // Предзагрузка следующего фото для плавного переключения
-      if (candidatePhotos.length > 1) {
-        const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
-        const nextPhotoUrl = candidatePhotos[nextIndex];
-        const img = new Image();
-        img.src = nextPhotoUrl;
-      }
-      
-      photoElement.src = photoUrl;
+    // Предзагрузка следующего фото для плавного переключения
+    if (candidatePhotos.length > 1) {
+      const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
+      const nextPhotoUrl = candidatePhotos[nextIndex];
+      const img = new Image();
+      img.src = nextPhotoUrl;
     }
+    
+    photoElement.src = photoUrl;
   }
 }
 
@@ -2801,132 +2666,6 @@ function updatePhotoIndicators() {
     }
   }
 
-  // ===== ФУНКЦИЯ goToFeed =====
-  function goToFeed() {
-    // ✅ ПРЯМО показываем ленту
-    if (document.getElementById('welcome-animated-screen')) {
-      document.getElementById('welcome-animated-screen').classList.add('hidden');
-    }
-    if (document.getElementById('screen-feed')) {
-      document.getElementById('screen-feed').classList.remove('hidden');
-    }
-    if (document.getElementById('tab-bar')) {
-      document.getElementById('tab-bar').classList.remove('hidden');
-    }
-    
-    // Активируем вкладку ленты
-    const feedTabBtn = document.querySelector('.tab-btn[data-tab="feed"]');
-    if (feedTabBtn) {
-      feedTabBtn.classList.add('active');
-    }
-    document.querySelectorAll('.tab-btn:not([data-tab="feed"])').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    
-    // Загружаем данные
-    loadLikesData();
-    loadSwipesCount();
-    initSwipesSystem();
-    initChatsSystem();
-    updateLikesUI();
-    
-    // Загружаем первую анкету
-    loadNextCandidate();
-    
-    // Инициализируем другие системы
-    initVerification();
-    initInterestsSystem();
-    initFiltersSystem();
-    initBoostSystem();
-    initBonusSystem();
-    initSwipeSystem();
-  }
-  
-  // ===== ФУНКЦИЯ loadNextCandidate =====
-  function loadNextCandidate() {
-    // Проверяем, есть ли кандидаты
-    const filtered = getFilteredCandidates();
-    
-    if (filtered.length === 0) {
-      const candidateName = document.getElementById("candidate-name");
-      const candidateAge = document.getElementById("candidate-age");
-      const candidateCity = document.getElementById("candidate-city");
-      const candidateBio = document.getElementById("candidate-bio");
-      const candidatePhoto = document.getElementById("candidate-photo");
-      const candidateInterests = document.getElementById("candidate-interests");
-      const feedStatus = document.getElementById("feed-status");
-      
-      if (candidateName) candidateName.textContent = "";
-      if (candidateAge) candidateAge.textContent = "";
-      if (candidateCity) candidateCity.textContent = "";
-      if (candidateBio) candidateBio.textContent = "";
-      if (candidatePhoto) candidatePhoto.src = "";
-      if (candidateInterests) candidateInterests.innerHTML = "";
-      
-      const verifiedBadge = document.getElementById('candidate-verified');
-      if (verifiedBadge) verifiedBadge.classList.add('hidden');
-      
-      const boostBadge = document.getElementById('candidate-boost');
-      if (boostBadge) boostBadge.classList.add('hidden');
-      
-      if (feedStatus) {
-        feedStatus.textContent = "Нет подходящих анкет по вашим фильтрам. Попробуйте изменить параметры поиска 🍀";
-      }
-      
-      candidatePhotos = [];
-      candidateInterests = [];
-      currentPhotoIndex = 0;
-      updatePhotoIndicators();
-      return;
-    }
-    
-    if (currentIndex >= filtered.length) {
-      currentIndex = 0; // Сбрасываем индекс
-      likedIds = []; // Очищаем лайки
-    }
-    
-    const candidate = filtered[currentIndex];
-    currentCandidateId = candidate.id;
-    
-    candidatePhotos = candidate.photos || [candidate.photo];
-    candidateInterests = candidate.interests || [];
-    currentPhotoIndex = 0;
-    
-    const candidateName = document.getElementById("candidate-name");
-    const candidateAge = document.getElementById("candidate-age");
-    const candidateCity = document.getElementById("candidate-city");
-    const candidateBio = document.getElementById("candidate-bio");
-    const feedStatus = document.getElementById("feed-status");
-    
-    if (candidateName) candidateName.textContent = candidate.name;
-    if (candidateAge) candidateAge.textContent = candidate.age;
-    if (candidateCity) candidateCity.textContent = candidate.city;
-    if (candidateBio) candidateBio.textContent = candidate.bio;
-    if (feedStatus) feedStatus.textContent = "";
-    
-    updateCandidatePhoto();
-    updateCandidateInterests();
-    updatePhotoIndicators();
-    
-    const verifiedBadge = document.getElementById('candidate-verified');
-    if (verifiedBadge) {
-      if (candidate.verified) {
-        verifiedBadge.classList.remove('hidden');
-      } else {
-        verifiedBadge.classList.add('hidden');
-      }
-    }
-    
-    const boostBadge = document.getElementById('candidate-boost');
-    if (boostBadge) {
-      if (candidate.boosted) {
-        boostBadge.classList.remove('hidden');
-      } else {
-        boostBadge.classList.add('hidden');
-      }
-    }
-  }
-  
   // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
   function showAnimatedWelcomeScreen() {
     if (!animatedWelcomeScreen) return;
@@ -2969,8 +2708,7 @@ function updatePhotoIndicators() {
       initChatsSystem();
       initBonusSystem();
       
-      // Используем goToFeed вместо setActiveTab
-      goToFeed();
+      setActiveTab("feed");
       
       setTimeout(() => {
         showNotification("🍀 С возвращением в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
@@ -3013,20 +2751,10 @@ function updatePhotoIndicators() {
     if (card) card.style.transform = 'translateY(0)';
     
     setTimeout(() => {
-      const ageInput = document.getElementById("age");
-      const genderSelect = document.getElementById("gender");
-      const cityInput = document.getElementById("city");
-      const bioTextarea = document.getElementById("bio");
-      
-      if (!ageInput || !genderSelect || !cityInput || !bioTextarea) {
-        showNotification("Ошибка: не найдены поля формы");
-        return;
-      }
-      
-      const ageValue = Number(ageInput.value);
-      const gender = genderSelect.value;
-      const city = cityInput.value;
-      const bio = bioTextarea.value.trim();
+      const ageValue = Number(document.getElementById("age").value);
+      const gender = document.getElementById("gender").value;
+      const city = document.getElementById("city").value;
+      const bio = document.getElementById("bio").value.trim();
       
       if (!ageValue || ageValue < 18 || ageValue > 99) {
         showNotification("Возраст должен быть от 18 до 99 лет");
@@ -3106,8 +2834,7 @@ function updatePhotoIndicators() {
     initChatsSystem();
     initBonusSystem();
     
-    // Используем goToFeed вместо setActiveTab
-    goToFeed();
+    setActiveTab("feed");
   }
   
   // ===== УПРАВЛЕНИЕ ТАБАМИ =====
@@ -3175,7 +2902,7 @@ function updatePhotoIndicators() {
     currentIndex = 0;
     initSearchFilters();
     initSwipeSystem();
-    loadNextCandidate(); // Используем новую функцию
+    showCurrentCandidate();
   }
   
   function initFiltersTab() {
@@ -3217,6 +2944,93 @@ function updatePhotoIndicators() {
     
     return filtered;
   }
+  
+  function showCurrentCandidate() {
+    const filtered = getFilteredCandidates();
+    
+    if (filtered.length === 0) {
+      document.getElementById("candidate-name").textContent = "";
+      document.getElementById("candidate-age").textContent = "";
+      document.getElementById("candidate-city").textContent = "";
+      document.getElementById("candidate-bio").textContent = "";
+      document.getElementById("candidate-photo").src = "";
+      document.getElementById("candidate-interests").innerHTML = "";
+      
+      const verifiedBadge = document.getElementById('candidate-verified');
+      if (verifiedBadge) verifiedBadge.classList.add('hidden');
+      
+      const boostBadge = document.getElementById('candidate-boost');
+      if (boostBadge) boostBadge.classList.add('hidden');
+      
+      document.getElementById("feed-status").textContent = 
+        "Нет подходящих анкет по вашим фильтрам. Попробуйте изменить параметры поиска 🍀";
+      
+      candidatePhotos = [];
+      candidateInterests = [];
+      currentPhotoIndex = 0;
+      updatePhotoIndicators();
+      return;
+    }
+    
+    if (currentIndex >= filtered.length) {
+      document.getElementById("candidate-name").textContent = "";
+      document.getElementById("candidate-age").textContent = "";
+      document.getElementById("candidate-city").textContent = "";
+      document.getElementById("candidate-bio").textContent = "";
+      document.getElementById("candidate-photo").src = "";
+      document.getElementById("candidate-interests").innerHTML = "";
+      
+      const verifiedBadge = document.getElementById('candidate-verified');
+      if (verifiedBadge) verifiedBadge.classList.add('hidden');
+      
+      const boostBadge = document.getElementById('candidate-boost');
+      if (boostBadge) boostBadge.classList.add('hidden');
+      
+      document.getElementById("feed-status").textContent = 
+        "На сегодня всё! Загляните позже 🍀";
+      
+      candidatePhotos = [];
+      candidateInterests = [];
+      currentPhotoIndex = 0;
+      updatePhotoIndicators();
+      return;
+    }
+    
+    const candidate = filtered[currentIndex];
+    currentCandidateId = candidate.id;
+    
+    candidatePhotos = candidate.photos || [candidate.photo];
+    candidateInterests = candidate.interests || [];
+    currentPhotoIndex = 0;
+    
+    document.getElementById("candidate-name").textContent = candidate.name;
+    document.getElementById("candidate-age").textContent = candidate.age;
+    document.getElementById("candidate-city").textContent = candidate.city;
+    document.getElementById("candidate-bio").textContent = candidate.bio;
+    document.getElementById("feed-status").textContent = "";
+    
+    updateCandidatePhoto();
+    updateCandidateInterests();
+    updatePhotoIndicators();
+    
+    const verifiedBadge = document.getElementById('candidate-verified');
+    if (verifiedBadge) {
+      if (candidate.verified) {
+        verifiedBadge.classList.remove('hidden');
+      } else {
+        verifiedBadge.classList.add('hidden');
+      }
+    }
+    
+    const boostBadge = document.getElementById('candidate-boost');
+    if (boostBadge) {
+      if (candidate.boosted) {
+        boostBadge.classList.remove('hidden');
+      } else {
+        boostBadge.classList.add('hidden');
+      }
+    }
+  }
 
   function handleLike() {
     if (!useSwipe()) return;
@@ -3232,7 +3046,7 @@ function updatePhotoIndicators() {
       const likedUser = filtered[currentIndex];
       likedIds.push(likedUser.id);
       currentIndex++;
-      loadNextCandidate(); // Загружаем следующего кандидата
+      showCurrentCandidate();
       
       checkForMatch(likedUser.id);
       
@@ -3246,14 +3060,14 @@ function updatePhotoIndicators() {
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.impactOccurred('light');
-    } catch (e) {}
+      } catch (e) {}
     }
     
     const filtered = getFilteredCandidates();
     if (currentIndex < filtered.length) {
       const dislikedUser = filtered[currentIndex];
       currentIndex++;
-      loadNextCandidate(); // Загружаем следующего кандидата
+      showCurrentCandidate();
       
       console.log(`✖️ Дизлайк пользователю ${dislikedUser.name} (ID: ${dislikedUser.id})`);
     }
@@ -3273,221 +3087,7 @@ function updatePhotoIndicators() {
     }
   }
   
-  // ===== ИНИЦИАЛИЗАЦИЯ ПЕРЕСТАНОВКИ ФОТО =====
-  function initPhotoReorder() {
-    const container = document.getElementById('photo-reorder-list');
-    const doneBtn = document.getElementById('done-photo-order-btn');
-    
-    if (!doneBtn) return;
-    
-    doneBtn.addEventListener('click', savePhotoOrderAndBack);
-    
-    loadProfilePhotosForReorder();
-    
-    // Drag & Drop
-    let draggedItem = null;
-    
-    if (container) {
-      container.addEventListener('dragstart', (e) => {
-        draggedItem = e.target.closest('.photo-reorder-item');
-        if (draggedItem) {
-          draggedItem.classList.add('dragging');
-        }
-      });
-      
-      container.addEventListener('dragend', (e) => {
-        if (draggedItem) {
-          draggedItem.classList.remove('dragging');
-          draggedItem = null;
-        }
-      });
-      
-      container.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        if (!draggedItem) return;
-        
-        const afterElement = getDragAfterElement(container, e.clientY);
-        
-        if (afterElement == null) {
-          container.appendChild(draggedItem);
-        } else {
-          container.insertBefore(draggedItem, afterElement);
-        }
-      });
-    }
-  }
-  
-  function loadProfilePhotosForReorder() {
-    const container = document.getElementById('photo-reorder-list');
-    if (!container) return;
-    
-    const profile = loadProfile();
-    const photos = profile?.photos || [];
-    
-    if (photos.length === 0) {
-      container.innerHTML = `
-        <div class="photo-reorder-empty">
-          <div class="empty-icon">📸</div>
-          <p>Добавьте фото в профиле</p>
-          <p class="empty-hint">Сначала добавьте минимум 1 фото</p>
-        </div>
-      `;
-      return;
-    }
-    
-    container.innerHTML = photos.map((photo, index) => `
-      <div class="photo-reorder-item" draggable="true">
-        <div class="photo-reorder-number">${index + 1}</div>
-        <img src="${photo}" alt="Фото ${index + 1}" class="photo-reorder-preview">
-        <div class="drag-handle">⋮⋮</div>
-      </div>
-    `).join('');
-    
-    // Обновляем номера после drag
-    updatePhotoNumbers();
-  }
-  
-  function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.photo-reorder-item:not(.dragging)')];
-    
-    return draggableElements.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child };
-      } else {
-        return closest;
-      }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-  }
-  
-  function updatePhotoNumbers() {
-    const items = document.querySelectorAll('.photo-reorder-item');
-    items.forEach((item, index) => {
-      const numberElement = item.querySelector('.photo-reorder-number');
-      if (numberElement) {
-        numberElement.textContent = index + 1;
-      }
-    });
-  }
-  
-  function savePhotoOrderAndBack() {
-    const items = document.querySelectorAll('.photo-reorder-item');
-    const newOrder = Array.from(items).map(item => {
-      const preview = item.querySelector('.photo-reorder-preview');
-      return preview ? preview.src : '';
-    }).filter(src => src);
-    
-    const profile = loadProfile();
-    if (profile) {
-      profile.photos = newOrder;
-      saveProfile(profile);
-      showNotification('✅ Порядок фото сохранен!');
-    }
-    
-    // Возврат к профилю
-    document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'welcome-screen' && 
-          screen.id !== 'chat-screen' && 
-          screen.id !== 'screen-interests' &&
-          screen.id !== 'welcome-animated-screen') {
-        screen.classList.add('hidden');
-      }
-    });
-    document.getElementById('screen-profile').classList.remove('hidden');
-    document.querySelector('.tab-btn[data-tab="profile"]').classList.add('active');
-    document.querySelectorAll('.tab-btn:not([data-tab="profile"])').forEach(btn => {
-      btn.classList.remove('active');
-    });
-  }
-  
   // ===== ПРОФИЛЬ =====
-  function updateProfileDisplay() {
-    if (!profileData) return;
-    
-    const profileName = document.getElementById('profile-name');
-    const profileAge = document.getElementById('profile-age-display');
-    const profileGender = document.getElementById('profile-gender-display');
-    const profileCity = document.getElementById('profile-city-display');
-    
-    if (profileName) profileName.textContent = profileData.first_name || 'Пользователь';
-    if (profileAge) profileAge.textContent = profileData.age || '—';
-    if (profileGender) profileGender.textContent = profileData.gender === 'male' ? 'Мужской' : profileData.gender === 'female' ? 'Женский' : '—';
-    if (profileCity) profileCity.textContent = profileData.city || '—';
-  }
-  
-  function updateEditForm() {
-    if (!profileData) return;
-    
-    const editAge = document.getElementById('edit-age');
-    const editGender = document.getElementById('edit-gender');
-    const editCity = document.getElementById('edit-city');
-    const editBio = document.getElementById('edit-bio');
-    const editPhotoPreview = document.getElementById('edit-photo-preview');
-    
-    if (editAge) editAge.value = profileData.age || '';
-    if (editGender) editGender.value = profileData.gender || '';
-    if (editCity) editCity.value = profileData.city || '';
-    if (editBio) editBio.value = profileData.bio || '';
-    
-    if (editPhotoPreview && profileData.photos && profileData.photos.length > 0) {
-      editPhotoPreview.src = profileData.photos[0];
-      editPhotoPreview.style.display = 'block';
-    }
-  }
-  
-  function handleEditProfile() {
-    // Теперь при нажатии на кнопку редактирования показываем экран перестановки фото
-    initPhotoReorder();
-    // На экране профиля теперь есть функция drag-and-drop, так что просто показываем его
-  }
-  
-  function handleSaveProfileChanges() {
-    const editAge = document.getElementById('edit-age');
-    const editGender = document.getElementById('edit-gender');
-    const editCity = document.getElementById('edit-city');
-    const editBio = document.getElementById('edit-bio');
-    
-    if (!editAge || !editGender || !editCity || !editBio) return;
-    
-    const ageValue = Number(editAge.value);
-    if (!ageValue || ageValue < 18 || ageValue > 99) {
-      showNotification("Возраст должен быть от 18 до 99 лет");
-      return;
-    }
-    
-    if (!editGender.value) {
-      showNotification("Выберите пол");
-      return;
-    }
-    
-    if (!editCity.value) {
-      showNotification("Выберите город");
-      return;
-    }
-    
-    profileData.age = ageValue;
-    profileData.gender = editGender.value;
-    profileData.city = editCity.value;
-    profileData.bio = editBio.value.trim();
-    
-    if (saveProfile(profileData)) {
-      showNotification('✅ Профиль обновлен!');
-      updateProfileDisplay();
-      handleCancelEdit();
-    } else {
-      showNotification('❌ Ошибка при сохранении профиля');
-    }
-  }
-  
-  function handleCancelEdit() {
-    const profileDisplay = document.getElementById('profile-display');
-    const profileEdit = document.getElementById('profile-edit');
-    
-    if (profileDisplay) profileDisplay.classList.remove('hidden');
-    if (profileEdit) profileEdit.classList.add('hidden');
-  }
-  
   function initProfile() {
     profileData = loadProfile();
     
@@ -3499,59 +3099,254 @@ function updatePhotoIndicators() {
     updateVerificationUI();
     updateBoostUI();
     initInterestsSystem();
+    initProfilePhotos();
   }
 
-// ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
-function initApp() {
-  if (hasInitialized) return;
-  hasInitialized = true;
-  
-  console.log('🎬 Инициализация приложения...');
-  
-  // Простая инициализация без ошибок
-  try {
-    // Сначала показываем приветствие
-    if (welcomeScreen) {
-      welcomeScreen.classList.remove("hidden");
+  function initProfilePhotos() {
+    const addPhotoBtn = document.getElementById('add-photo-btn');
+    const removePhotoBtn = document.getElementById('remove-photo-btn');
+    const photoUpload = document.getElementById('profile-photo-upload');
+    
+    if (!profileData.photos) {
+      profileData.photos = [];
+      if (profileData.custom_photo_url) {
+        profileData.photos.push(profileData.custom_photo_url);
+      }
+      saveProfile(profileData);
     }
-    console.log('✅ Приветственный экран показан');
-  } catch (e) {
-    console.error('❌ Ошибка при инициализации:', e);
+    
+    updateProfilePhotos();
+    
+    if (addPhotoBtn) {
+      addPhotoBtn.addEventListener('click', () => {
+        photoUpload.click();
+      });
+    }
+    
+    if (removePhotoBtn) {
+      removePhotoBtn.addEventListener('click', removeCurrentPhoto);
+    }
+    
+    if (photoUpload) {
+      photoUpload.addEventListener('change', handleProfilePhotoUpload);
+    }
+    
+    const profilePhotosContainer = document.querySelector('.profile-photos-container');
+    if (profilePhotosContainer) {
+      profilePhotosContainer.addEventListener('touchstart', handleProfilePhotoTouchStart);
+      profilePhotosContainer.addEventListener('touchend', handleProfilePhotoTouchEnd);
+    }
   }
-  
-  // Инициализируем Telegram WebApp
-  initTelegram();
-  
-  // Инициализируем базовые обработчики
-  setupStartButton();
-  setupTabButtons();
-  
-  // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА (если она там есть)
-  const openFiltersBtn = document.getElementById("open-filters-btn");
-  if (openFiltersBtn && openFiltersBtn.parentNode) {
-    openFiltersBtn.parentNode.removeChild(openFiltersBtn);
+
+  function updateProfilePhotos() {
+    if (!profileData.photos || profileData.photos.length === 0) return;
+    
+    const container = document.querySelector('.profile-photos-container');
+    const indicators = document.querySelector('.profile-photo-indicators');
+    const photosCount = document.getElementById('photos-count');
+    const removeBtn = document.getElementById('remove-photo-btn');
+    
+    if (!container || !indicators) return;
+    
+    container.innerHTML = '';
+    
+    profileData.photos.forEach((photoUrl, index) => {
+      const img = document.createElement('img');
+      img.className = `profile-main-photo ${index === 0 ? 'active' : ''}`;
+      img.src = photoUrl;
+      img.alt = `Фото ${index + 1}`;
+      container.appendChild(img);
+    });
+    
+    indicators.innerHTML = '';
+    profileData.photos.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `profile-photo-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicators.appendChild(indicator);
+    });
+    
+    if (photosCount) {
+      photosCount.textContent = `${profileData.photos.length}/3 фото`;
+    }
+    
+    if (removeBtn) {
+      removeBtn.disabled = profileData.photos.length <= 1;
+    }
   }
-  
-  const editProfileBtn = document.getElementById('edit-profile-btn');
-  const saveChangesBtn = document.getElementById('save-profile-changes');
-  const cancelEditBtn = document.getElementById('cancel-profile-edit');
-  const profilePhotoInput = document.getElementById('profile-photo-upload');
-  const editPhotoInput = document.getElementById('edit-photo-upload');
-  
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener('click', handleEditProfile);
-  }
-  
-  if (saveChangesBtn) {
-    saveChangesBtn.addEventListener('click', handleSaveProfileChanges);
-  }
-  
-  if (cancelEditBtn) {
-    cancelEditBtn.addEventListener('click', handleCancelEdit);
-  }
-  
-  // Функция для загрузки фото профиля
+
   function handleProfilePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('Фото слишком большое (максимум 5MB)');
+      return;
+    }
+    
+    if (profileData.photos.length >= 3) {
+      showNotification('Можно добавить не более 3 фото');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const photoUrl = event.target.result;
+      
+      if (!profileData.photos) {
+        profileData.photos = [];
+      }
+      
+      profileData.photos.push(photoUrl);
+      saveProfile(profileData);
+      updateProfilePhotos();
+      
+      showNotification('Фото добавлено! 📸');
+    };
+    reader.readAsDataURL(file);
+    
+    e.target.value = '';
+  }
+
+  function removeCurrentPhoto() {
+    if (!profileData.photos || profileData.photos.length <= 1) return;
+    
+    profileData.photos.splice(0, 1);
+    saveProfile(profileData);
+    updateProfilePhotos();
+    
+    showNotification('Фото удалено');
+  }
+
+  function handleProfilePhotoTouchStart(e) {
+    const touch = e.touches[0];
+    swipeStartX = touch.clientX;
+  }
+
+  function handleProfilePhotoTouchEnd(e) {
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartX;
+    
+    if (Math.abs(deltaX) > 30 && profileData.photos && profileData.photos.length > 1) {
+      const currentIndex = 0;
+      const nextIndex = deltaX > 0 ? 
+        (currentIndex - 1 + profileData.photos.length) % profileData.photos.length :
+        (currentIndex + 1) % profileData.photos.length;
+      
+      const temp = profileData.photos[currentIndex];
+      profileData.photos[currentIndex] = profileData.photos[nextIndex];
+      profileData.photos[nextIndex] = temp;
+      
+      saveProfile(profileData);
+      updateProfilePhotos();
+      
+      showNotification('Фото изменено местами');
+    }
+  }
+  
+  function updateProfileDisplay() {
+    const profileNameElem = document.getElementById('profile-name');
+    const profileAgeElem = document.getElementById('profile-age-display');
+    const profileGenderElem = document.getElementById('profile-gender-display');
+    const profileCityElem = document.getElementById('profile-city-display');
+    const profilePhotoElem = document.getElementById('profile-photo-preview');
+    
+    if (profileNameElem) {
+      profileNameElem.textContent = profileData.first_name || "Пользователь";
+    }
+    
+    if (profileAgeElem) {
+      profileAgeElem.textContent = profileData.age ? `${profileData.age} лет` : "";
+    }
+    
+    if (profileGenderElem) {
+      const genderMap = {
+        'male': 'Мужской',
+        'female': 'Женский'
+      };
+      profileGenderElem.textContent = profileData.gender ? genderMap[profileData.gender] || profileData.gender : "";
+    }
+    
+    if (profileCityElem) {
+      profileCityElem.textContent = profileData.city || "";
+    }
+    
+    if (profilePhotoElem && profileData.custom_photo_url) {
+      profilePhotoElem.src = profileData.custom_photo_url;
+      profilePhotoElem.style.display = 'block';
+    }
+  }
+  
+  function updateEditForm() {
+    const editAgeElem = document.getElementById("edit-age");
+    const editGenderElem = document.getElementById("edit-gender");
+    const editCityElem = document.getElementById("edit-city");
+    const editBioElem = document.getElementById("edit-bio");
+    const editPhotoElem = document.getElementById('edit-photo-preview');
+    
+    if (editAgeElem) editAgeElem.value = profileData.age || "";
+    if (editGenderElem) editGenderElem.value = profileData.gender || "";
+    if (editCityElem) editCityElem.value = profileData.city || "";
+    if (editBioElem) editBioElem.value = profileData.bio || "";
+    
+    if (editPhotoElem && profileData.custom_photo_url) {
+      editPhotoElem.src = profileData.custom_photo_url;
+      editPhotoElem.style.display = 'block';
+    }
+  }
+  
+  function handleEditProfile() {
+    document.getElementById('profile-display').classList.add('hidden');
+    document.getElementById('profile-edit').classList.remove('hidden');
+    
+    if (tg?.HapticFeedback) {
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+  }
+  
+  function handleSaveProfileChanges() {
+    document.activeElement?.blur();
+    document.body.classList.remove('keyboard-open');
+    if (card) card.style.transform = 'translateY(0)';
+    
+    setTimeout(() => {
+      if (!profileData) {
+        showNotification("Сначала создайте профиль!");
+        return;
+      }
+      
+      profileData.age = Number(document.getElementById("edit-age").value);
+      profileData.gender = document.getElementById("edit-gender").value;
+      profileData.city = document.getElementById("edit-city").value;
+      profileData.bio = document.getElementById("edit-bio").value.trim();
+      
+      if (saveProfile(profileData)) {
+        updateProfileDisplay();
+        
+        document.getElementById('profile-display').classList.remove('hidden');
+        document.getElementById('profile-edit').classList.add('hidden');
+        
+        showNotification("✅ Профиль обновлён!");
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.impactOccurred('light');
+        } catch (e) {}
+        }
+      } else {
+        showNotification("❌ Ошибка при обновлении профиля");
+      }
+    }, 300);
+  }
+  
+  function handleCancelEdit() {
+    document.getElementById('profile-display').classList.remove('hidden');
+    document.getElementById('profile-edit').classList.add('hidden');
+  }
+  
+  function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     
@@ -3562,140 +3357,189 @@ function initApp() {
     
     const reader = new FileReader();
     reader.onload = function(event) {
-      // Сохраняем фото в профиле
-      if (!profileData) {
-        profileData = {};
-      }
+      const isEditMode = !document.getElementById('profile-edit').classList.contains('hidden');
       
-      if (!profileData.photos) {
-        profileData.photos = [];
-      }
-      
-      // Добавляем новое фото (можно ограничить количество)
-      if (profileData.photos.length >= 3) {
-        showNotification('Можно добавить не более 3 фото');
-        return;
-      }
-      
-      profileData.photos.push(event.target.result);
-      saveProfile(profileData);
-      
-      // Обновляем превью если есть
-      const preview = document.getElementById('profile-photo-preview');
-      if (preview) {
-        preview.src = event.target.result;
-        preview.style.display = 'block';
-      }
-      
-      showNotification('Фото профиля добавлено! 📸');
-    };
-    reader.readAsDataURL(file);
-  }
-  
-  // Загрузка фото в основном профиле
-  if (profilePhotoInput) {
-    profilePhotoInput.addEventListener('change', handleProfilePhotoUpload);
-  }
-  
-  // Загрузка фото в редакторе (если нужно)
-  if (editPhotoInput) {
-    editPhotoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        showNotification('Фото слишком большое (максимум 5MB)');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        // Добавляем как новое фото
-        if (!profileData) {
-          profileData = {};
-        }
-        
-        if (!profileData.photos) {
-          profileData.photos = [];
-        }
-        
-        if (profileData.photos.length >= 3) {
-          showNotification('Можно добавить не более 3 фото');
-          return;
-        }
-        
-        profileData.photos.push(event.target.result);
-        saveProfile(profileData);
-        
+      if (isEditMode) {
         const preview = document.getElementById('edit-photo-preview');
         if (preview) {
           preview.src = event.target.result;
           preview.style.display = 'block';
         }
         
-        showNotification('Фото добавлено! 📸');
-      };
-      reader.readAsDataURL(file);
+        profileData.custom_photo_url = event.target.result;
+      } else {
+        const preview = document.getElementById('profile-photo-preview');
+        if (preview) {
+          preview.src = event.target.result;
+          preview.style.display = 'block';
+        }
+        
+        profileData.custom_photo_url = event.target.result;
+        saveProfile(profileData);
+        showNotification('Фото загружено! 📸');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+      <div class="notification-content">
+        <div class="notification-text">${message.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 20px 25px;
+      border-radius: 15px;
+      z-index: 9999;
+      text-align: center;
+      max-width: 80%;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    const content = notification.querySelector('.notification-content');
+    content.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    const text = notification.querySelector('.notification-text');
+    text.style.cssText = `
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -60%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translate(-50%, -50%); }
+        to { opacity: 0; transform: translate(-50%, -40%); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'fadeOut 0.3s ease forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
+    }, 3000);
+    
+    notification.addEventListener('click', () => {
+      notification.style.animation = 'fadeOut 0.3s ease forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
     });
   }
   
-  profileData = loadProfile();
-  
-  if (profileData) {
-    console.log('✅ Профиль загружен, показываем анимированный экран приветствия');
-    setTimeout(() => {
+  // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
+  function initApp() {
+    if (hasInitialized) return;
+    hasInitialized = true;
+    
+    console.log('🎬 Инициализация приложения...');
+    
+    initTelegram();
+    setupStartButton();
+    setupTabButtons();
+    
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const saveChangesBtn = document.getElementById('save-profile-changes');
+    const cancelEditBtn = document.getElementById('cancel-profile-edit');
+    const profilePhotoInput = document.getElementById('profile-photo-upload');
+    const editPhotoInput = document.getElementById('edit-photo-upload');
+    
+    if (editProfileBtn) {
+      editProfileBtn.addEventListener('click', handleEditProfile);
+    }
+    
+    if (saveChangesBtn) {
+      saveChangesBtn.addEventListener('click', handleSaveProfileChanges);
+    }
+    
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', handleCancelEdit);
+    }
+    
+    if (profilePhotoInput) {
+      profilePhotoInput.addEventListener('change', handlePhotoUpload);
+    }
+    
+    if (editPhotoInput) {
+      editPhotoInput.addEventListener('change', handlePhotoUpload);
+    }
+    
+    profileData = loadProfile();
+    
+    if (profileData) {
       showAnimatedWelcomeScreen();
-    }, 500);
-  } else {
-    console.log('❌ Профиль не найден, показываем обычный приветственный экран');
-    if (welcomeScreen) {
-      welcomeScreen.classList.remove("hidden");
+    } else {
+      if (welcomeScreen) {
+        welcomeScreen.classList.remove("hidden");
+      }
     }
-  }
-  
-  // Скрываем все экраны кроме приветственного
-  if (onboardingScreen) onboardingScreen.classList.add("hidden");
-  if (animatedWelcomeScreen) animatedWelcomeScreen.classList.add("hidden");
-  document.querySelectorAll('.screen').forEach(screen => {
-    if (screen.id !== 'welcome-screen' && 
-        screen.id !== 'screen-interests' && 
-        screen.id !== 'welcome-animated-screen') {
-      screen.classList.add('hidden');
+    
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'welcome-screen' && 
+          screen.id !== 'screen-interests' && 
+          screen.id !== 'welcome-animated-screen') {
+        screen.classList.add('hidden');
+      }
+    });
+    
+    if (tabBar) tabBar.classList.add("hidden");
+    
+    if (isIOS) {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 300);
     }
-  });
-  
-  if (tabBar) tabBar.classList.add("hidden");
-  
-  if (isIOS) {
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 300);
+    
+    initSwipeSystem();
+    initLikesSystem();
+    initInterestsSystem();
+    initFiltersSystem();
+    initBoostSystem();
+    initSwipesSystem();
+    initChatsSystem();
+    initBonusSystem();
+    
+    console.log('✅ Приложение инициализировано');
   }
-  
-  console.log('✅ Приложение инициализировано');
-}
   
   // ===== ЗАПУСК =====
   setTimeout(initApp, 100);
 });
-
-} catch (error) {
-  console.error('❌ Критическая ошибка:', error);
-  document.body.innerHTML = `
-    <div style="padding: 40px; text-align: center; color: #dc2626;">
-      <h2>⚠️ Ошибка при загрузке приложения</h2>
-      <p>Пожалуйста, обновите страницу или попробуйте позже.</p>
-      <button onclick="window.location.reload()" style="
-        background: #dc2626;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 10px;
-        margin-top: 20px;
-        cursor: pointer;
-      ">
-        Обновить
-      </button>
-    </div>
-  `;
-}
