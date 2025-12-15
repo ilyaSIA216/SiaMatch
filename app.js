@@ -4282,47 +4282,48 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ TabBar активирован');
   }
   
-  function switchTab(index) {
-    console.log('🔄 Переключение вкладки:', index);
+function switchTab(index) {
+  console.log('🔄 Переключение вкладки:', index);
+  
+  // Скрываем все экраны
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+    screen.classList.add('hidden');
+  });
+  
+  // Деактивируем все вкладки
+  document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Показываем нужный экран
+  const screens = ['screen-swipes', 'screen-likes', 'screen-chats', 'screen-profile'];
+  const targetScreen = document.getElementById(screens[index]);
+  
+  if (targetScreen) {
+    targetScreen.classList.remove('hidden');
+    targetScreen.classList.add('active');
+    document.querySelectorAll('.tab-item')[index].classList.add('active');
     
-    // Скрываем все экраны
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    
-    // Удаляем активный класс со всех вкладок
-    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-    
-    // Определяем какие экраны показывать
-    const screens = ['screen-feed', 'screen-likes', 'screen-chats', 'screen-profile'];
-    const targetScreen = document.getElementById(screens[index]);
-    
-    if (targetScreen) {
-      targetScreen.classList.add('active');
-      
-      // Активируем соответствующую кнопку
-      const tabButtons = document.querySelectorAll('.tab-btn');
-      if (tabButtons[index]) {
-        tabButtons[index].classList.add('active');
-      }
-    }
-    
-    // Вызываем инициализацию для конкретной вкладки
+    // Инициализируем контент экрана
     switch(index) {
-      case 0: // feed
-        initFeed();
-        break;
-      case 1: // likes
-        updateLikesUI();
-        break;
-      case 2: // chats
-        updateChatsList();
-        updateLikesUI();
-        break;
-      case 3: // profile
-        initProfile();
-        break;
+      case 0: initSwiping(); break;      // Свайпы
+      case 1: updateLikesScreen(); break; // Лайки
+      case 2: updateChatsList(); break;   // Чаты
+      case 3: updateProfileScreen(); break; // Профиль
     }
   }
-  
+}
+
+  function updateLikesScreen() {
+  console.log('❤️ Обновление экрана лайков');
+  // Твоя логика лайков
+}
+
+function updateProfileScreen() {
+  console.log('👤 Обновление экрана профиля');
+  // Твоя логика профиля
+}
   // ===== ИСПРАВЛЕННАЯ ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
   async function initApp() {
     console.log('🚀 Инициализация SiaMatch...');
@@ -4352,7 +4353,7 @@ document.addEventListener('DOMContentLoaded', function() {
       hideWelcomeScreen();
       showMainApp();
       updateTabBar();  // ← ВАЖНО!
-   //   initSwiping();
+      initSwiping();
     }
     
     // Настраиваем обработчики
