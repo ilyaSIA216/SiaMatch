@@ -4285,33 +4285,38 @@ document.addEventListener('DOMContentLoaded', function() {
 function switchTab(index) {
   console.log('🔄 Переключение вкладки:', index);
   
-  // Скрываем все экраны
-  document.querySelectorAll('.screen').forEach(screen => {
-    screen.classList.remove('active');
-    screen.classList.add('hidden');
+  // 1. Скрываем ВСЕ экраны
+  document.querySelectorAll('.screen, [id*="screen-"]').forEach(el => {
+    el.classList.remove('active');
+    el.classList.add('hidden');
+    el.style.display = 'none';
   });
   
-  // Деактивируем все вкладки
-  document.querySelectorAll('.tab-item').forEach(tab => {
-    tab.classList.remove('active');
-  });
+  // 2. Деактивируем вкладки
+  document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
   
-  // Показываем нужный экран
+  // 3. Показываем нужный экран
   const screens = ['screen-swipes', 'screen-likes', 'screen-chats', 'screen-profile'];
-  const targetScreen = document.getElementById(screens[index]);
+  const targetScreenId = screens[index];
+  const targetScreen = document.getElementById(targetScreenId);
   
   if (targetScreen) {
     targetScreen.classList.remove('hidden');
     targetScreen.classList.add('active');
+    targetScreen.style.display = 'block';
     document.querySelectorAll('.tab-item')[index].classList.add('active');
     
-    // Инициализируем контент экрана
+    console.log(`✅ Показан экран: ${targetScreenId}`);
+    
+    // 4. Инициализация контента
     switch(index) {
-      case 0: initSwiping(); break;      // Свайпы
-      case 1: updateLikesScreen(); break; // Лайки
-      case 2: updateChatsList(); break;   // Чаты
-      case 3: updateProfileScreen(); break; // Профиль
+      case 0: initSwipingContent(); break;
+      case 1: updateLikesScreen(); break;
+      case 2: updateChatsList(); break;
+      case 3: updateProfileScreen(); break;
     }
+  } else {
+    console.error(`❌ Экран не найден: ${targetScreenId}`);
   }
 }
 
