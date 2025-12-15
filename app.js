@@ -1,5 +1,3 @@
-[file name]: app.js
-[file content begin]
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
   
