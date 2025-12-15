@@ -1990,9 +1990,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lastUpdated: Date.now()
       };
       localStorage.setItem("siamatch_likes", JSON.stringify(data));
-      console.log('💾 Сохранены данные о лайках');
+      console.log('💾 Сохранены данные о лайков:', usersWhoLikedMeCount);
     } catch (e) {
-      console.error("❌ Ошибка сохранения данных о лайков:", e);
+      console.error("❌ Ошибка сохранения данных о лайках:", e);
     }
   }
   
@@ -3196,131 +3196,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300);
   }
   
-  // ===== ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ЭКРАНАМИ =====
-  function showWelcomeScreen() {
-    if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.remove('hidden');
-    if (appRoot) appRoot.classList.add('hidden');
-    if (tabBar) tabBar.classList.add('hidden');
-    
-    console.log('📱 Показан экран приветствия');
-  }
-  
-  function hideWelcomeScreen() {
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
-    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.add('hidden');
-    if (appRoot) appRoot.classList.remove('hidden');
-    
-    console.log('📱 Скрыт экран приветствия');
-  }
-  
-  function showMainApp() {
-    if (tabBar) tabBar.classList.remove('hidden');
-    
-    // Скрываем все экраны
-    document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'welcome-screen' && 
-          screen.id !== 'welcome-animated-screen') {
-        screen.classList.add('hidden');
-      }
-    });
-    
-    // Показываем экран свайпов
-    const swipesScreen = document.getElementById('screen-feed');
-    if (swipesScreen) {
-      swipesScreen.classList.remove('hidden');
-    }
-    
-    console.log('✅ Главное приложение показано');
-  }
-  
-  // ===== ФУНКЦИИ ДЛЯ ВКЛАДОК =====
-  function updateTabBar() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs?.forEach((tab, index) => {
-      // Удаляем старые обработчики
-      const newTab = tab.cloneNode(true);
-      tab.parentNode.replaceChild(newTab, tab);
-      
-      // Добавляем новый обработчик
-      newTab.addEventListener('click', () => {
-        const tabName = newTab.dataset.tab;
-        setActiveTab(tabName);
-        
-        if (tg?.HapticFeedback) {
-          try {
-            tg.HapticFeedback.selectionChanged();
-          } catch (e) {}
-        }
-      });
-    });
-    
-    console.log('✅ Вкладки инициализированы');
-  }
-  
-  function setActiveTab(tab) {
-    // Скрываем все экраны
-    document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'welcome-screen' && 
-          screen.id !== 'chat-screen' && 
-          screen.id !== 'screen-interests' &&
-          screen.id !== 'welcome-animated-screen') {
-        screen.classList.add('hidden');
-      }
-    });
-    
-    // Если не чаты, скрываем экран чата
-    if (tab !== 'chats' && document.getElementById('chat-screen')) {
-      document.getElementById('chat-screen').classList.add('hidden');
-    }
-    
-    // Показываем нужный экран
-    const screenId = 'screen-' + tab;
-    const screen = document.getElementById(screenId);
-    if (screen) {
-      screen.classList.remove('hidden');
-    }
-    
-    // Обновляем активные кнопки
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
-    });
-    
-    if (tab === 'feed') {
-      initFeed();
-    } else if (tab === 'profile') {
-      initProfile();
-    } else if (tab === 'filters') {
-      initFiltersTab();
-    } else if (tab === 'chats') {
-      updateLikesUI();
-      updateChatsList();
-    }
-    
-    if (tabBar) {
-      tabBar.classList.remove('hidden');
-    }
-    
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 50);
-  }
-  
-  function setupTabButtons() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const tab = this.dataset.tab;
-        setActiveTab(tab);
-        
-        if (tg?.HapticFeedback) {
-          try {
-            tg.HapticFeedback.selectionChanged();
-          } catch (e) {}
-        }
-      });
-    });
-  }
-  
   // ===== ИНИЦИАЛИЗАЦИЯ СВАЙПИНГА =====
   function initSwiping() {
     console.log('🔄 Инициализация системы свайпов');
@@ -4369,18 +4244,89 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  // ===== ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ЭКРАНАМИ =====
+  function showWelcomeScreen() {
+    console.log('🖥️ Показан экран приветствия');
+    if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.remove('hidden');
+    if (appRoot) appRoot.classList.add('hidden');
+    if (tabBar) tabBar.classList.add('hidden');
+  }
+  
+  function hideWelcomeScreen() {
+    console.log('🖥️ Скрыт экран приветствия');
+    if (welcomeScreen) welcomeScreen.classList.add('hidden');
+    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.add('hidden');
+    if (appRoot) appRoot.classList.remove('hidden');
+  }
+  
+  function showMainApp() {
+    console.log('🖥️ Показано главное приложение');
+    if (tabBar) tabBar.classList.remove('hidden');
+    // Активируем первую вкладку
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-feed')?.classList.add('active');
+  }
+  
+  function updateTabBar() {
+    console.log('🔄 Обновление панели вкладок');
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs?.forEach((tab, index) => {
+      tab.onclick = () => switchTab(index);
+    });
+    console.log('✅ TabBar активирован');
+  }
+  
+  function switchTab(index) {
+    console.log('🔄 Переключение вкладки:', index);
+    
+    // Скрываем все экраны
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    
+    // Удаляем активный класс со всех вкладок
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    
+    // Определяем какие экраны показывать
+    const screens = ['screen-feed', 'screen-likes', 'screen-chats', 'screen-profile'];
+    const targetScreen = document.getElementById(screens[index]);
+    
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+      
+      // Активируем соответствующую кнопку
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      if (tabButtons[index]) {
+        tabButtons[index].classList.add('active');
+      }
+    }
+    
+    // Вызываем инициализацию для конкретной вкладки
+    switch(index) {
+      case 0: // feed
+        initFeed();
+        break;
+      case 1: // likes
+        updateLikesUI();
+        break;
+      case 2: // chats
+        updateChatsList();
+        updateLikesUI();
+        break;
+      case 3: // profile
+        initProfile();
+        break;
+    }
+  }
+  
   // ===== ИСПРАВЛЕННАЯ ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
   async function initApp() {
+    console.log('🚀 Инициализация SiaMatch...');
+    
     if (hasInitialized) return;
     hasInitialized = true;
     
-    console.log('🚀 Инициализация...');
-    
-    // iOS проверка
-    if (isIOS) {
-      checkIOSStorage();
-      cleanupIOSPhotos();
-    }
+    initTelegram();
+    if (isIOS) checkIOSStorage();
     
     // Добавить кнопку отладки
     addDebugButton();
@@ -4391,32 +4337,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Очистка слишком больших фото перед началом
     cleanupLargePhotos();
     
-    initTelegram();
-    
-    // ✅ КРИТИЧЕСКИЙ ФИКС: Загружаем профиль сразу
     profileData = await loadProfile();
-    console.log('Профиль:', profileData ? `${profileData.first_name} (${profileData.photos?.length} фото)` : 'ОТСУТСТВУЕТ');
+    console.log('Профиль:', profileData ? 'найден' : 'отсутствует');
     
-    // ✅ ПРОВЕРКА: Показываем приветствие если НЕТ полного профиля
-    if (!profileData || 
-        !profileData.first_name || 
-        !profileData.age || 
-        profileData.photos?.length === 0) {
-      console.log('➡️ Показываем приветствие (профиль неполный)');
+    // ✅ ИСПРАВЛЕНИЕ: правильная логика экранов
+    if (!profileData || !profileData.first_name || profileData.photos?.length === 0) {
       showWelcomeScreen();
-      
-      // Настраиваем обработчики кнопок приветствия
-      setupStartButton();
-      setupTabButtons();
-      
-      return;
+    } else {
+      hideWelcomeScreen();
+      showMainApp();
+      updateTabBar();  // ← ВАЖНО!
+      initSwiping();
     }
-    
-    // Профиль полный - показываем главное приложение
-    hideWelcomeScreen();
-    showMainApp();
-    initSwiping();
-    updateTabBar();
     
     // Настраиваем обработчики
     setupStartButton();
