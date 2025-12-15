@@ -4411,4 +4411,3 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== ЗАПУСК =====
   setTimeout(initApp, 100);
 });
-[file content end]
