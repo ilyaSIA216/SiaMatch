@@ -218,6 +218,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function loadProfile() {
+    if (!tg || tg.version < '6.1') {
+    console.log('📱 Telegram <6.1 → только localStorage');
+    return localLoad();
+  }
+    
     if (!tg) return localLoad();
     
     try {
