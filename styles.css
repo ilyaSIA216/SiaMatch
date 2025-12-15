@@ -3056,3 +3056,23 @@ select:focus {
     margin: 5px 0;
   }
 }
+
+/* ДОБАВЬ/ИСПРАВЬ в styles.css */
+.screen {
+  display: none !important;
+}
+
+.screen.active {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Для Telegram WebApp */
+#app-root .screen {
+  min-height: 100vh;
+}
