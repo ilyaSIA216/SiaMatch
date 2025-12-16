@@ -380,7 +380,7 @@
                 
                 <div class="profile-photo-controls">
                   <button id="add-photo-btn" class="add-photo-btn" onclick="document.getElementById('profile-photo-upload').click(); console.log('🔥 КНОПКА РАБОТАЕТ!');">📸 Добавить фото</button>
-                  <button id="remove-photo-btn" class="remove-photo-btn" onclick="if(window.profileData?.current?.photos?.length>1){window.profileData.current.photos.pop(); saveProfile(window.profileData.current); updateProfilePhotos(); showNotification('✅ Фото удалено!'); console.log('🗑️ Удалено!');} else {showNotification('❌ Нужно минимум 1 фото');}">🗑️ Удалить последнее</button>
+                  <button id="remove-photo-btn" class="remove-photo-btn" onclick="if(window.profileData?.current?.photos?.length>1){window.profileData.current.photos.pop(); localStorage.setItem('siamatch_profile', JSON.stringify(window.profileData.current)); document.querySelector('.profile-photos-container').innerHTML=''; document.getElementById('photos-count').textContent='2/3 фото'; console.log('🗑️ Удалено!'); alert('✅ Фото удалено!');} else {alert('❌ Нужно минимум 1 фото');}">🗑️ Удалить последнее</button>
                 </div>
                 
                 <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" onchange="handlePhotoUploadLogic(event); console.log('🚀 File выбран!');" />
