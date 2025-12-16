@@ -2659,37 +2659,27 @@ function handlePhotoUploadLogic(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (file.size > 5 * 1024 * 1024) {
-    showNotification('Фото слишком большое (максимум 5MB)');
-    return;
-  }
-
   const reader = new FileReader();
   reader.onload = function(ev) {
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
-      // СЖАТИЕ: максимум 400x400, качество 70%
-      canvas.width = Math.min(400, img.width);
-      canvas.height = Math.min(400, img.height);
-      
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
+      canvas.width = 400;
+      canvas.height = 400;
+      ctx.drawImage(img, 0, 0, 400, 400);
       const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
       
-      // СОХРАНЕНИЕ в профиль
-      if (!window.profileData.current) window.profileData.current = {};
-      window.profileData.current.custom_photo_url = compressedDataUrl;
-      
-      saveProfile(window.profileData.current);
-      
-      // Обновление UI
-      if (typeof updateProfileDisplay === 'function') updateProfileDisplay();
-      if (typeof updateEditForm === 'function') updateEditForm();
-      
-      showNotification('✅ Фото обновлено!');
+      // ✅ ДОБАВЛЯЕМ В ГАЛЕРЕЮ (максимум 3)
+      window.profileData.current.photos = window.profileData.current.photos || [];
+      if (window.profileData.current.photos.length < 3) {
+        window.profileData.current.photos.push(compressedDataUrl);
+        saveProfile(window.profileData.current);
+        updateProfilePhotos();  // ← Только галерея!
+        showNotification(`✅ Фото ${window.profileData.current.photos.length}/3 добавлено!`);
+      } else {
+        showNotification('Максимум 3 фото!');
+      }
     };
     img.src = ev.target.result;
   };
@@ -2916,9 +2906,6 @@ function initProfilePhotos() {
   
   if (!window.profileData.current.photos) {
     window.profileData.current.photos = [];
-    if (window.profileData.current.custom_photo_url) {
-      window.profileData.current.photos.push(window.profileData.current.custom_photo_url);
-    }
     saveProfile(window.profileData.current);
   }
   
