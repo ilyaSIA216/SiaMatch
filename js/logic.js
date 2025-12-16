@@ -2670,15 +2670,15 @@ function handlePhotoUploadLogic(e) {
       ctx.drawImage(img, 0, 0, 400, 400);
       const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
       
-      // ✅ ДОБАВЛЯЕМ В ГАЛЕРЕЮ (максимум 3)
+      // ✅ НОВАЯ ЛОГИКА: только photos[] массив
       window.profileData.current.photos = window.profileData.current.photos || [];
       if (window.profileData.current.photos.length < 3) {
         window.profileData.current.photos.push(compressedDataUrl);
         saveProfile(window.profileData.current);
-        updateProfilePhotos();  // ← Только галерея!
+        updateProfilePhotos();
         showNotification(`✅ Фото ${window.profileData.current.photos.length}/3 добавлено!`);
       } else {
-        showNotification('Максимум 3 фото!');
+        showNotification('❌ Максимум 3 фото!');
       }
     };
     img.src = ev.target.result;
