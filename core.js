@@ -119,6 +119,29 @@ export function initApp() {
     domElements.welcomeScreen?.classList.add("hidden");
     domElements.animatedWelcomeScreen?.classList.remove("hidden");
   }
+
+  // 🔥 ФИКС ТАБ-БАРА - ДОБАВЬТЕ В КОНЕЦ core.js
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 DOM готов - показываем таб-бар');
   
+  // ФОРСИРУЕМ показ таб-бара
+  const tabBar = document.getElementById('tab-bar');
+  if (tabBar) {
+    tabBar.classList.remove('hidden');
+    tabBar.style.display = 'flex';
+    tabBar.style.position = 'fixed';
+    tabBar.style.bottom = '0';
+    tabBar.style.left = '0';
+    tabBar.style.right = '0';
+    tabBar.style.zIndex = '9999';
+    console.log('✅ Tab-bar показан!');
+  } else {
+    console.error('❌ Tab-bar НЕ НАЙДЕН!');
+  }
+  
+  // Запускаем основную инициализацию
+  initApp();
+});
+
   console.log('✅ Core модуль инициализирован');
 }
