@@ -1,16 +1,7 @@
-// modules/chat.js
+// modules/chat.js - ПРОСТОЙ ИСПРАВЛЕННЫЙ ВАРИАНТ
 
 window.AppChat = {
-  // Состояние чатов
-  matchedUsers: [],
-  currentChatId: null,
-  chatMessages: {},
-  userReports: [],
-  usersWhoLikedMeCount: 0,
-  lastLikesCount: 0,
-  newLikesReceived: false,
-  
-  // Демо-данные
+  // ДЕМО-ДАННЫЕ
   demoMatches: [
     {
       id: 101,
@@ -25,91 +16,177 @@ window.AppChat = {
       matched_date: "2024-01-15",
       unread: 2
     },
-    // ... остальные мэтчи
+    {
+      id: 102,
+      name: "Мария",
+      age: 25,
+      gender: "female",
+      city: "Санкт-Петербург",
+      bio: "Программист, увлекаюсь спортом и музыкой",
+      photo: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800",
+      verified: true,
+      interests: ["sport", "music", "gaming", "workout"],
+      matched_date: "2024-01-14",
+      unread: 0
+    }
   ],
   
   demoMessages: {
     101: [
       { id: 1, sender: 'other', text: 'Привет! Как дела?', time: '10:30', date: '2024-01-15' },
-      // ... остальные сообщения
+      { id: 2, sender: 'me', text: 'Привет! Всё отлично, а у тебя?', time: '10:32', date: '2024-01-15' },
+      { id: 3, sender: 'other', text: 'Тоже хорошо! Вижу, ты любишь искусство?', time: '10:35', date: '2024-01-15' },
+      { id: 4, sender: 'me', text: 'Да, очень! Часто хожу на выставки', time: '10:40', date: '2024-01-15' },
+      { id: 5, sender: 'other', text: 'Круто! Может сходим вместе когда-нибудь?', time: '10:45', date: '2024-01-15' }
     ],
-    // ... остальные чаты
+    102: [
+      { id: 1, sender: 'me', text: 'Привет! Вижу, ты программист?', time: '14:20', date: '2024-01-14' },
+      { id: 2, sender: 'other', text: 'Да! Занимаюсь веб-разработкой 3 года', time: '14:25', date: '2024-01-14' },
+      { id: 3, sender: 'me', text: 'Круто! Я тоже в IT сфере', time: '14:30', date: '2024-01-14' },
+      { id: 4, sender: 'other', text: 'Отлично! Есть о чём поговорить 😊', time: '14:35', date: '2024-01-14' }
+    ]
   },
   
-  // Функции
+  // ФУНКЦИИ
   init: function() {
     console.log('💬 Инициализирую систему чатов');
+    
+    // Загружаем данные
     this.loadMatchedUsers();
     this.loadChatMessages();
     this.loadUserReports();
     this.loadLikesData();
-    this.initDemoData();
-    this.updateChatsList();
-    this.simulateNewLikes();
-  },
-  
-  initDemoData: function() {
+    
+    // Если нет данных - используем демо
     if (this.matchedUsers.length === 0) {
       this.matchedUsers = this.demoMatches;
       this.saveMatchedUsers();
     }
     
-    Object.keys(this.demoMessages).forEach(chatId => {
+    // Добавляем демо-сообщения
+    for (const chatId in this.demoMessages) {
       if (!this.chatMessages[chatId]) {
         this.chatMessages[chatId] = this.demoMessages[chatId];
       }
-    });
+    }
     
     this.saveChatMessages();
+    this.updateChatsList();
   },
   
-  // Функции для работы с лайками
+  // ГЛАВНЫЕ ПЕРЕМЕННЫЕ (объявляем их здесь)
+  matchedUsers: [],
+  currentChatId: null,
+  chatMessages: {},
+  userReports: [],
+  usersWhoLikedMeCount: 0,
+  lastLikesCount: 0,
+  newLikesReceived: false,
+  
+  // ЗАГРУЗКА ДАННЫХ
+  loadMatchedUsers: function() {
+    try {
+      const saved = localStorage.getItem("siamatch_matches");
+      if (saved) {
+        this.matchedUsers = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки мэтчей:", e);
+    }
+  },
+  
+  saveMatchedUsers: function() {
+    try {
+      localStorage.setItem("siamatch_matches", JSON.stringify(this.matchedUsers));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения мэтчей:", e);
+    }
+  },
+  
+  loadChatMessages: function() {
+    try {
+      const saved = localStorage.getItem("siamatch_chat_messages");
+      if (saved) {
+        this.chatMessages = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки сообщений:", e);
+    }
+  },
+  
+  saveChatMessages: function() {
+    try {
+      localStorage.setItem("siamatch_chat_messages", JSON.stringify(this.chatMessages));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения сообщений:", e);
+    }
+  },
+  
+  loadUserReports: function() {
+    try {
+      const saved = localStorage.getItem("siamatch_user_reports");
+      if (saved) {
+        this.userReports = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки жалоб:", e);
+    }
+  },
+  
+  saveUserReports: function() {
+    try {
+      localStorage.setItem("siamatch_user_reports", JSON.stringify(this.userReports));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения жалоб:", e);
+    }
+  },
+  
   loadLikesData: function() {
-    const saved = AppCore.loadLocalStorage("siamatch_likes");
-    if (saved) {
-      this.usersWhoLikedMeCount = saved.count || 0;
-      this.lastLikesCount = saved.lastCount || 0;
+    try {
+      const saved = localStorage.getItem("siamatch_likes");
+      if (saved) {
+        const data = JSON.parse(saved);
+        this.usersWhoLikedMeCount = data.count || 0;
+        this.lastLikesCount = data.lastCount || 0;
+      }
+    } catch (e) {
+      console.error("❌ Ошибка загрузки данных о лайках:", e);
     }
   },
   
   saveLikesData: function() {
-    const data = {
-      count: this.usersWhoLikedMeCount,
-      lastCount: this.lastLikesCount,
-      lastUpdated: Date.now()
-    };
-    AppCore.saveLocalStorage("siamatch_likes", data);
+    try {
+      const data = {
+        count: this.usersWhoLikedMeCount,
+        lastCount: this.lastLikesCount,
+        lastUpdated: Date.now()
+      };
+      localStorage.setItem("siamatch_likes", JSON.stringify(data));
+    } catch (e) {
+      console.error("❌ Ошибка сохранения данных о лайков:", e);
+    }
   },
   
+  // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
   updateLikesUI: function() {
     const count = this.usersWhoLikedMeCount;
     
+    // Обновляем счетчик лайков
     const likesCountElement = document.getElementById('likes-count');
-    const likesCountBadge = document.getElementById('likes-count-badge');
-    const tabChatsBadge = document.getElementById('tab-chats-badge');
-    
     if (likesCountElement) {
-      const currentCount = parseInt(likesCountElement.textContent) || 0;
-      if (currentCount !== count) {
-        likesCountElement.classList.remove('counter-animation');
-        void likesCountElement.offsetWidth;
-        likesCountElement.classList.add('counter-animation');
-        likesCountElement.textContent = count;
-      }
+      likesCountElement.textContent = count;
     }
     
+    // Обновляем бейдж
+    const likesCountBadge = document.getElementById('likes-count-badge');
     if (likesCountBadge) {
-      const currentBadgeCount = parseInt(likesCountBadge.textContent) || 0;
-      if (currentBadgeCount !== count) {
-        likesCountBadge.textContent = count;
-        likesCountBadge.style.animation = 'none';
-        setTimeout(() => {
-          likesCountBadge.style.animation = 'countPulse 2s infinite';
-        }, 10);
-      }
+      likesCountBadge.textContent = count;
     }
     
+    // Обновляем бейдж в табах
     this.updateTabChatsBadge();
+    
+    // Проверяем новые лайки
     this.checkForNewLikes();
   },
   
@@ -122,10 +199,6 @@ window.AppChat = {
     if (count > 0) {
       tabChatsBadge.textContent = count > 99 ? '99+' : count.toString();
       tabChatsBadge.classList.remove('hidden');
-      
-      if (this.newLikesReceived) {
-        tabChatsBadge.style.animation = 'badgePulse 1.5s infinite';
-      }
     } else {
       tabChatsBadge.classList.add('hidden');
     }
@@ -134,108 +207,9 @@ window.AppChat = {
   checkForNewLikes: function() {
     if (this.usersWhoLikedMeCount > this.lastLikesCount) {
       this.newLikesReceived = true;
-      this.showNewLikesNotification();
       this.lastLikesCount = this.usersWhoLikedMeCount;
       this.saveLikesData();
     }
-  },
-  
-  showNewLikesNotification: function() {
-    const newLikesNotification = document.getElementById('new-likes-notification');
-    if (!newLikesNotification || !this.newLikesReceived) return;
-    
-    newLikesNotification.classList.remove('hidden');
-    
-    if (AppCore.tg?.HapticFeedback) {
-      try {
-        AppCore.tg.HapticFeedback.impactOccurred('light');
-      } catch (e) {}
-    }
-    
-    setTimeout(() => {
-      newLikesNotification.classList.add('hidden');
-      this.newLikesReceived = false;
-    }, 5000);
-  },
-  
-  handleLikesBadgeClick: function() {
-    console.log('💗 Клик на бадж с лайками');
-    
-    if (this.usersWhoLikedMeCount > 0) {
-      const messages = [
-        `🎯 У вас ${this.usersWhoLikedMeCount} тайных поклонников! Продолжайте свайпать, чтобы найти их в ленте.`,
-        `✨ ${this.usersWhoLikedMeCount} человек уже оценили вашу анкету. Они где-то рядом!`,
-        `💝 Кто-то уже заинтересовался вами! Продолжайте свайпать, чтобы найти взаимную симпатию.`,
-        `🌟 У вас ${this.usersWhoLikedMeCount} потенциальных мэтчей! Они появятся в ленте впереди.`
-      ];
-      
-      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-      AppCore.showNotification(randomMessage);
-    } else {
-      AppCore.showNotification('Пока нет лайков, но это временно! Продолжайте активно использовать приложение, и скоро появятся первые симпатии! 💕');
-    }
-    
-    if (AppCore.tg?.HapticFeedback) {
-      try {
-        AppCore.tg.HapticFeedback.selectionChanged();
-      } catch (e) {}
-    }
-  },
-  
-  simulateNewLikes: function() {
-    if (this.usersWhoLikedMeCount === 0) {
-      setTimeout(() => {
-        this.usersWhoLikedMeCount = Math.floor(Math.random() * 5) + 3;
-        this.saveLikesData();
-        this.updateLikesUI();
-        console.log('🎲 Демо: добавлены лайки для мотивации');
-      }, 3000);
-    }
-    
-    setInterval(() => {
-      if (Math.random() > 0.7) {
-        const newLikes = Math.floor(Math.random() * 2) + 1;
-        this.usersWhoLikedMeCount += newLikes;
-        this.newLikesReceived = true;
-        this.saveLikesData();
-        this.updateLikesUI();
-        console.log(`🎲 Демо: добавлено ${newLikes} новых лайков`);
-      }
-    }, 30000);
-  },
-  
-  // Функции для работы с чатами
-  loadMatchedUsers: function() {
-    const saved = AppCore.loadLocalStorage("siamatch_matches");
-    if (saved) {
-      this.matchedUsers = saved;
-    }
-  },
-  
-  saveMatchedUsers: function() {
-    AppCore.saveLocalStorage("siamatch_matches", this.matchedUsers);
-  },
-  
-  loadChatMessages: function() {
-    const saved = AppCore.loadLocalStorage("siamatch_chat_messages");
-    if (saved) {
-      this.chatMessages = saved;
-    }
-  },
-  
-  saveChatMessages: function() {
-    AppCore.saveLocalStorage("siamatch_chat_messages", this.chatMessages);
-  },
-  
-  loadUserReports: function() {
-    const saved = AppCore.loadLocalStorage("siamatch_user_reports");
-    if (saved) {
-      this.userReports = saved;
-    }
-  },
-  
-  saveUserReports: function() {
-    AppCore.saveLocalStorage("siamatch_user_reports", this.userReports);
   },
   
   updateChatsList: function() {
@@ -256,7 +230,6 @@ window.AppChat = {
     this.matchedUsers.forEach(user => {
       const chatItem = document.createElement('li');
       chatItem.className = 'chat-item';
-      chatItem.dataset.userId = user.id;
       chatItem.innerHTML = `
         <div class="chat-item-content">
           <img src="${user.photo}" alt="${user.name}" class="chat-user-photo" />
@@ -279,5 +252,170 @@ window.AppChat = {
     });
   },
   
-  // ... остальные функции чатов (openChat, sendMessage и т.д.)
+  // ОСНОВНЫЕ ФУНКЦИИ ЧАТА
+  openChat: function(userId) {
+    this.currentChatId = userId;
+    
+    const user = this.matchedUsers.find(u => u.id === parseInt(userId));
+    if (!user) return;
+    
+    // Создаем экран чата если нужно
+    if (!document.getElementById('chat-screen')) {
+      this.createChatScreen();
+    }
+    
+    // Показываем чат
+    document.getElementById('screen-chats').classList.add('hidden');
+    document.getElementById('chat-screen').classList.remove('hidden');
+    document.getElementById('tab-bar').classList.add('hidden');
+    
+    // Заполняем информацию о пользователе
+    document.getElementById('chat-user-name').textContent = `${user.name}, ${user.age}`;
+    document.getElementById('chat-user-city').textContent = user.city;
+    document.getElementById('chat-user-photo').src = user.photo;
+    document.getElementById('chat-user-bio').textContent = user.bio;
+    
+    // Загружаем сообщения
+    this.loadMessagesForChat(userId);
+    
+    // Сбрасываем непрочитанные
+    user.unread = 0;
+    this.saveMatchedUsers();
+    this.updateChatsList();
+  },
+  
+  // ПРОСТЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+  loadMessagesForChat: function(userId) {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) return;
+    
+    messagesContainer.innerHTML = '';
+    
+    const messages = this.chatMessages[userId] || [];
+    
+    if (messages.length === 0) {
+      messagesContainer.innerHTML = '<div class="no-messages">Начните общение первым!</div>';
+      return;
+    }
+    
+    messages.forEach(msg => {
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${msg.sender === 'me' ? 'message-out' : 'message-in'}`;
+      messageElement.innerHTML = `
+        <div class="message-content">${msg.text}</div>
+        <div class="message-time">${msg.time}</div>
+      `;
+      messagesContainer.appendChild(messageElement);
+    });
+    
+    // Скроллим вниз
+    setTimeout(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 100);
+  },
+  
+  createChatScreen: function() {
+    // Простая версия экрана чата
+    const chatScreen = document.createElement('div');
+    chatScreen.id = 'chat-screen';
+    chatScreen.className = 'screen hidden';
+    chatScreen.innerHTML = `
+      <div class="chat-header">
+        <button id="back-to-chats" class="back-btn">← Назад</button>
+        <div class="chat-header-info">
+          <img id="chat-user-photo" class="chat-header-photo" />
+          <div>
+            <div id="chat-user-name" class="chat-header-name"></div>
+            <div id="chat-user-city" class="chat-header-status"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chat-messages-container">
+        <div class="chat-messages" id="chat-messages"></div>
+      </div>
+      
+      <div class="chat-input-container">
+        <input type="text" id="chat-message-input" placeholder="Напишите сообщение..." />
+        <button id="send-message-btn" class="send-btn">Отправить</button>
+      </div>
+    `;
+    
+    document.getElementById('card').appendChild(chatScreen);
+    
+    // Настраиваем кнопки
+    document.getElementById('back-to-chats').addEventListener('click', () => {
+      document.getElementById('chat-screen').classList.add('hidden');
+      document.getElementById('screen-chats').classList.remove('hidden');
+      document.getElementById('tab-bar').classList.remove('hidden');
+      this.currentChatId = null;
+    });
+    
+    document.getElementById('send-message-btn').addEventListener('click', () => {
+      this.sendMessage();
+    });
+  },
+  
+  sendMessage: function() {
+    const input = document.getElementById('chat-message-input');
+    const messageText = input.value.trim();
+    
+    if (!messageText || !this.currentChatId) return;
+    
+    // Создаем сообщение
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    
+    const newMessage = {
+      id: Date.now(),
+      sender: 'me',
+      text: messageText,
+      time: timeString,
+      date: now.toISOString().split('T')[0]
+    };
+    
+    // Добавляем в историю
+    if (!this.chatMessages[this.currentChatId]) {
+      this.chatMessages[this.currentChatId] = [];
+    }
+    
+    this.chatMessages[this.currentChatId].push(newMessage);
+    this.saveChatMessages();
+    
+    // Показываем в интерфейсе
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message message-out';
+    messageElement.innerHTML = `
+      <div class="message-content">${messageText}</div>
+      <div class="message-time">${timeString}</div>
+    `;
+    messagesContainer.appendChild(messageElement);
+    
+    // Очищаем поле
+    input.value = '';
+    
+    // Скроллим вниз
+    setTimeout(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 100);
+  },
+  
+  // ИМИТАЦИЯ НОВЫХ ЛАЙКОВ (для демо)
+  simulateNewLikes: function() {
+    if (this.usersWhoLikedMeCount === 0) {
+      setTimeout(() => {
+        this.usersWhoLikedMeCount = 3; // Стартовые лайки
+        this.saveLikesData();
+        this.updateLikesUI();
+      }, 3000);
+    }
+  },
+  
+  // ФУНКЦИЯ ДЛЯ ДОБАВЛЕНИЯ ЛАЙКОВ (вызывается из других модулей)
+  addLike: function() {
+    this.usersWhoLikedMeCount++;
+    this.saveLikesData();
+    this.updateLikesUI();
+  }
 };
