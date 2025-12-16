@@ -2658,35 +2658,40 @@ function handleSaveProfileChangesLogic() {
 function handlePhotoUploadLogic(e) {
   const file = e.target.files[0];
   if (!file) return;
-  
+
   if (file.size > 5 * 1024 * 1024) {
     showNotification('Фото слишком большое (максимум 5MB)');
     return;
   }
-  
+
   const reader = new FileReader();
-  reader.onload = function(event) {
-    const isEditMode = !document.getElementById('profile-edit').classList.contains('hidden');
-    
-    if (isEditMode) {
-      const preview = document.getElementById('edit-photo-preview');
-      if (preview) {
-        preview.src = event.target.result;
-        preview.style.display = 'block';
-      }
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
       
-      window.profileData.current.custom_photo_url = event.target.result;
-    } else {
-      const preview = document.getElementById('profile-photo-preview');
-      if (preview) {
-        preview.src = event.target.result;
-        preview.style.display = 'block';
-      }
+      // СЖАТИЕ: максимум 400x400, качество 70%
+      canvas.width = Math.min(400, img.width);
+      canvas.height = Math.min(400, img.height);
       
-      window.profileData.current.custom_photo_url = event.target.result;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      
+      // СОХРАНЕНИЕ в профиль
+      if (!window.profileData.current) window.profileData.current = {};
+      window.profileData.current.custom_photo_url = compressedDataUrl;
+      
       saveProfile(window.profileData.current);
-      showNotification('Фото загружено! 📸');
-    }
+      
+      // Обновление UI
+      if (typeof updateProfileDisplay === 'function') updateProfileDisplay();
+      if (typeof updateEditForm === 'function') updateEditForm();
+      
+      showNotification('✅ Фото обновлено!');
+    };
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 }
