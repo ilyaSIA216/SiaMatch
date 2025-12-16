@@ -163,7 +163,7 @@ html, body {
 
 /* ===== ОБЩИЕ СТИЛИ ДЛЯ ЭКРАНОВ ===== */
 .screen {
-  display: none;
+  display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
@@ -172,10 +172,6 @@ html, body {
   top: 0;
   left: 0;
   background: #f4fff7;
-}
-
-.screen.active {
-  display: flex;
 }
 
 .screen-content {
@@ -970,7 +966,7 @@ body.keyboard-open #saveProfileBtn {
 
 /* ===== ЭКРАН ЧАТА ===== */
 #chat-screen {
-  display: none;
+  display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
@@ -979,10 +975,6 @@ body.keyboard-open #saveProfileBtn {
   top: 0;
   left: 0;
   z-index: 1000;
-}
-
-#chat-screen.active {
-  display: flex;
 }
 
 .chat-header {
@@ -2298,7 +2290,7 @@ select:focus {
 
 /* ===== ЭКРАН ВЫБОРА ИНТЕРЕСОВ ===== */
 #screen-interests {
-  display: none;
+  display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
@@ -2307,10 +2299,6 @@ select:focus {
   top: 0;
   left: 0;
   z-index: 1000;
-}
-
-#screen-interests.active {
-  display: flex;
 }
 
 .interests-header {
@@ -2579,7 +2567,7 @@ select:focus {
 
 /* ===== НОВЫЙ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ ===== */
 #welcome-animated-screen {
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -2591,10 +2579,6 @@ select:focus {
   left: 0;
   z-index: 1001;
   padding: 20px;
-}
-
-#welcome-animated-screen.active {
-  display: flex;
 }
 
 /* Контейнер с колоннами */
@@ -2903,170 +2887,4 @@ select:focus {
 
 .photo-indicator:hover {
   background: rgba(255, 255, 255, 0.8);
-}
-
-/* ===== СТИЛИ ДЛЯ КОНТЕЙНЕРА ВСЕХ ФОТО ===== */
-.all-photos-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin: 15px 0;
-  padding: 15px;
-  background: rgba(34, 197, 94, 0.05);
-  border-radius: 15px;
-  border: 2px dashed rgba(34, 197, 94, 0.2);
-}
-
-.photo-item {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: grab;
-  transition: all 0.3s ease;
-  border: 3px solid transparent;
-}
-
-.photo-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-.photo-item:active {
-  cursor: grabbing;
-}
-
-.photo-item.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
-}
-
-.photo-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.photo-number {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  z-index: 2;
-}
-
-.photo-item.main-photo {
-  border-color: var(--siamatch-green);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
-}
-
-.photo-item.main-photo .photo-number {
-  background: var(--siamatch-green);
-}
-
-.photos-instruction {
-  text-align: center;
-  padding: 10px;
-  background: rgba(34, 197, 94, 0.1);
-  border-radius: 10px;
-  margin-top: 15px;
-  font-size: 14px;
-  color: #063b1f;
-}
-
-/* Анимация перетаскивания */
-@keyframes photoSlide {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-3px); }
-}
-
-.photo-item:hover {
-  animation: photoSlide 0.3s ease;
-}
-
-/* Адаптив для фото */
-@media (max-width: 380px) {
-  .all-photos-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    padding: 10px;
-  }
-  
-  .photo-number {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
-}
-
-/* Стили для выделенного фото */
-.photo-item.main-photo {
-  border-color: var(--siamatch-green) !important;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
-  position: relative;
-}
-
-.photo-item.main-photo::after {
-  content: '⭐';
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: rgba(255, 215, 0, 0.9);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  z-index: 3;
-}
-
-.photo-item:hover {
-  cursor: pointer;
-  transform: scale(1.02);
-  transition: transform 0.2s ease;
-}
-
-.photo-item:active {
-  transform: scale(0.98);
-}
-
-/* Кнопки управления фото */
-.photo-buttons {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.photo-buttons button {
-  margin: 5px;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.photo-buttons button:active {
-  transform: scale(0.95);
-}
-
-/* Адаптив для кнопок управления */
-@media (max-width: 380px) {
-  .photo-buttons button {
-    width: 100%;
-    margin: 5px 0;
-  }
 }
