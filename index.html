@@ -538,67 +538,94 @@
             </div>
           </div>
           
-          <!-- РЕДАКТИРОВАНИЕ ПРОФИЛЯ -->
-          <div id="profile-edit" class="hidden">
-            <div class="profile-edit-header">
-              <h2 class="screen-title">Редактирование профиля</h2>
-              <button id="save-profile-changes" class="save-edit-btn">💾</button>
-            </div>
-            
-            <div class="field">
-              <label for="edit-age">Возраст</label>
-              <input type="number" id="edit-age" min="18" max="99" />
-            </div>
+<!-- РЕДАКТИРОВАНИЕ ПРОФИЛЯ -->
+<div id="profile-edit" class="hidden">
+  <div class="profile-edit-header">
+    <h2 class="screen-title">Редактирование профиля</h2>
+    <button id="save-profile-changes" class="save-edit-btn">💾 Сохранить</button>
+  </div>
+  
+  <div class="field">
+    <label for="edit-age">Возраст</label>
+    <input type="number" id="edit-age" min="18" max="99" />
+  </div>
 
-            <div class="field">
-              <label for="edit-gender">Пол</label>
-              <select id="edit-gender">
-                <option value="">Выберите пол</option>
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-              </select>
-            </div>
+  <div class="field">
+    <label for="edit-gender">Пол</label>
+    <select id="edit-gender">
+      <option value="">Выберите пол</option>
+      <option value="male">Мужской</option>
+      <option value="female">Женский</option>
+    </select>
+  </div>
 
-            <div class="field">
-              <label for="edit-city">Город</label>
-              <select id="edit-city">
-                <option value="">Выберите город</option>
-                <option value="Москва">Москва</option>
-                <option value="Московская обл.">Московская обл.</option>
-                <option value="Санкт-Петербург">Санкт-Петербург</option>
-                <option value="Новосибирск">Новосибирск</option>
-                <option value="Екатеринбург">Екатеринбург</option>
-                <option value="Казань">Казань</option>
-                <option value="Нижний Новгород">Нижний Новгород</option>
-                <option value="Челябинск">Челябинск</option>
-                <option value="Самара">Самара</option>
-                <option value="Уфа">Уфа</option>
-                <option value="Ростов-на-Дону">Ростов-на-Дону</option>
-                <option value="Красноярск">Красноярск</option>
-                <option value="Воронеж">Воронеж</option>
-                <option value="Пермь">Пермь</option>
-                <option value="Волгоград">Волгоград</option>
-                <option value="Омск">Омск</option>
-                <option value="Краснодар">Краснодар</option>
-              </select>
-            </div>
+  <div class="field">
+    <label for="edit-city">Город</label>
+    <select id="edit-city">
+      <option value="">Выберите город</option>
+      <option value="Москва">Москва</option>
+      <option value="Московская обл.">Московская обл.</option>
+      <option value="Санкт-Петербург">Санкт-Петербург</option>
+      <option value="Новосибирск">Новосибирск</option>
+      <option value="Екатеринбург">Екатеринбург</option>
+      <option value="Казань">Казань</option>
+      <option value="Нижний Новгород">Нижний Новгород</option>
+      <option value="Челябинск">Челябинск</option>
+      <option value="Самара">Самара</option>
+      <option value="Уфа">Уфа</option>
+      <option value="Ростов-на-Дону">Ростов-на-Дону</option>
+      <option value="Красноярск">Красноярск</option>
+      <option value="Воронеж">Воронеж</option>
+      <option value="Пермь">Пермь</option>
+      <option value="Волгоград">Волгоград</option>
+      <option value="Омск">Омск</option>
+      <option value="Краснодар">Краснодар</option>
+    </select>
+  </div>
 
-            <div class="field">
-              <label for="edit-bio">О себе</label>
-              <textarea id="edit-bio" rows="4" maxlength="300"></textarea>
-            </div>
+  <div class="field">
+    <label for="edit-bio">О себе</label>
+    <textarea id="edit-bio" rows="4" maxlength="300"></textarea>
+  </div>
 
-            <div class="field">
-              <label>Фото профиля 📸</label>
-              <input type="file" id="edit-photo-upload" accept="image/*" />
-              <div class="hint">Выберите фото (до 5MB)</div>
-              <img id="edit-photo-preview" class="edit-photo-preview" />
-            </div>
-            
-            <button id="cancel-profile-edit" class="cancel-edit-btn">Отмена</button>
-          </div>
+  <!-- СЕКЦИЯ УПРАВЛЕНИЯ ФОТОГРАФИЯМИ В РЕДАКТИРОВАНИИ -->
+  <div class="profile-section">
+    <h3 class="section-title">📸 Управление фотографиями</h3>
+    
+    <!-- КОНТЕЙНЕР ФОТО В РЕДАКТИРОВАНИИ -->
+    <div class="edit-profile-photos-container">
+      <div class="edit-photos-list" id="edit-photos-list">
+        <!-- Фотографии будут добавлены динамически -->
+      </div>
+      
+      <!-- ЭЛЕМЕНТЫ УПРАВЛЕНИЯ ДЛЯ КАЖДОГО ФОТО -->
+      <div class="edit-photo-controls" id="edit-photo-controls">
+        <!-- Контролы будут добавлены динамически -->
+      </div>
+      
+      <!-- ИНФОРМАЦИЯ -->
+      <div class="photos-info">
+        <div class="hint">
+          • Можно загрузить до 3 фотографий<br>
+          • Перетащите фотографии для изменения порядка<br>
+          • Первое фото будет главным в профиле<br>
+          • Нажмите 🗑️ для удаления фото
+        </div>
+        <div class="photos-count-display">
+          Загружено: <span id="edit-photos-count">0</span>/3 фото
         </div>
       </div>
+      
+      <!-- КНОПКА ДОБАВЛЕНИЯ ФОТО -->
+      <button type="button" id="edit-add-photo-btn" class="secondary-btn">
+        📸 Добавить фото
+      </button>
+      <input type="file" id="edit-photo-upload" accept="image/*" class="hidden" multiple />
+    </div>
+  </div>
+  
+  <button id="cancel-profile-edit" class="cancel-edit-btn">Отмена</button>
+</div>
 
       <!-- ЭКРАН ВЫБОРА ИНТЕРЕСОВ -->
       <div id="screen-interests" class="screen hidden">
