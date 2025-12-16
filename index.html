@@ -12,6 +12,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" href="styles.css" />
 </head>
+<script>
+window.onerror = function(msg, url, line) {
+  alert('🚨 ОШИБКА: ' + msg + '\nФайл: ' + url + '\nСтрока: ' + line);
+};
+console.log = function(msg) { alert('Console: ' + msg); };
+</script>
 <body>
   <div id="app-root">
     <div id="card">
