@@ -257,10 +257,28 @@ function setupProfileEventHandlers() {
   // ✅ ДОБАВЛЕНО: обработчик для кнопки добавления фото
   const addPhotoBtn = document.getElementById('add-photo-btn');
   if (addPhotoBtn) {
-    addPhotoBtn.addEventListener('click', () => {
+    addPhotoBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🔥 КНОПКА "Добавить фото" КЛИКНУТА!');
+      
       const input = document.getElementById('profile-photo-upload');
-      if (input) input.click();
+      if (input) {
+        input.click();  // Открываем file picker
+        console.log('✅ File input кликнут!');
+      } else {
+        console.error('❌ input#profile-photo-upload не найден!');
+      }
     });
+    
+    // ДЛЯ МОБИЛЬНЫХ
+    addPhotoBtn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🔥 Touch на "Добавить фото"!');
+      const input = document.getElementById('profile-photo-upload');
+      input?.click();
+    }, { passive: false });
   }
 }
 
