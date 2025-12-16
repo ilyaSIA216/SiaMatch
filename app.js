@@ -11,10 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let keyboardHeight = 0;
   let originalHeight = window.innerHeight;
   
-  // Новые переменные для перетаскивания фотографий
-  let draggedPhotoIndex = null;
-  let draggedOverPhotoIndex = null;
-  
   // Фильтры поиска
   let searchFilters = {
     minAge: 18,
@@ -201,283 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const remainingSwipesElement = document.getElementById('remaining-swipes');
   const buySwipesBtn = document.getElementById('buy-swipes-btn');
   
-  // ===== ✅ СИНХРОНИЗАЦИЯ С CLOUDSTORAGE =====
-  async function saveProfile(obj) {
-    if (!tg) return localSave(obj); // fallback
-    
-    try {
-      const cloudData = {...obj, photos: obj.photos || []};
-      await tg.CloudStorage.setItem('siamatch_profile', JSON.stringify(cloudData));
-      localStorage.setItem('siamatchprofile', JSON.stringify(cloudData)); // дублируем
-      console.log('✅ CloudStorage сохранено:', cloudData.photos?.length);
-      return true;
-    } catch(e) {
-      console.error('CloudStorage ошибка:', e);
-      return localSave(obj);
-    }
-  }
-
-  async function loadProfile() {
-    if (!tg || tg.version < '6.1') {
-      console.log('📱 Telegram <6.1 → только localStorage');
-      return localLoad();
-    }
-    
-    if (!tg) return localLoad();
-    
-    try {
-      const cloudData = await tg.CloudStorage.getItem('siamatch_profile');
-      if (cloudData.value) {
-        const profile = JSON.parse(cloudData.value);
-        localStorage.setItem('siamatchprofile', cloudData.value);
-        console.log('✅ Загружено из CloudStorage:', profile.photos?.length);
-        return profile;
-      }
-    } catch(e) {
-      console.error('CloudStorage загрузка:', e);
-    }
-    return localLoad();
-  }
-
-  // Локальные заглушки
-  function localSave(obj) {
-    try {
-      console.log('🔄 Локальное сохранение профиля...', obj);
-      
-      if (!obj || typeof obj !== 'object') {
-        console.error('❌ Некорректный объект профиля');
-        return false;
-      }
-      
-      // Убедимся, что photos - это правильный массив
-      if (!obj.photos || !Array.isArray(obj.photos)) {
-        console.warn('⚠️ photos не является массивом, исправляем...');
-        obj.photos = [];
-      }
-      
-      // iOS ОПТИМИЗАЦИЯ: Обработка Data URL для iOS
-      let photosToSave = [];
-      
-      if (obj.photos.length > 0) {
-        console.log(`📸 iOS: Обработка ${obj.photos.length} фото...`);
-        
-        obj.photos.forEach((photo, index) => {
-          if (typeof photo === 'string' && photo.startsWith('data:image')) {
-            // Для iOS сохраняем фото в отдельном ключе localStorage
-            const photoKey = `siamatch_photo_${obj.tg_id || 1}_${index}`;
-            
-            try {
-              // Проверяем размер Data URL
-              if (photo.length > 1000000) { // Более 1MB
-                console.warn(`⚠️ Фото ${index} слишком большое для iOS: ${Math.round(photo.length / 1024)}KB`);
-                
-                // Сжимаем фото для iOS
-                const compressedPhoto = compressImageForIOS(photo);
-                if (compressedPhoto) {
-                  localStorage.setItem(photoKey, compressedPhoto);
-                  photosToSave.push(`local:${photoKey}`);
-                  console.log(`✅ Фото ${index} сжато и сохранено в отдельном ключе`);
-                } else {
-                  // Если не удалось сжать, сохраняем ссылку
-                  photosToSave.push(photo.substring(0, 50000)); // Обрезаем для безопасности
-                }
-              } else {
-                // Нормальный размер, сохраняем целиком
-                localStorage.setItem(photoKey, photo);
-                photosToSave.push(`local:${photoKey}`);
-                console.log(`✅ Фото ${index} сохранено в отдельном ключе`);
-              }
-            } catch (photoError) {
-              console.error(`❌ Ошибка сохранения фото ${index}:`, photoError);
-              // Сохраняем как обычный URL если есть
-              photosToSave.push(photo.substring(0, 50000));
-            }
-          } else if (typeof photo === 'string' && photo.startsWith('http')) {
-            // Внешние URL сохраняем как есть
-            photosToSave.push(photo);
-          } else {
-            // Другие типы - пропускаем
-            console.warn(`⚠️ Неизвестный тип фото ${index}:`, typeof photo);
-          }
-        });
-      } else {
-        photosToSave = [];
-      }
-      
-      // Создаем профиль с оптимизированными фото
-      const profileToSave = {
-        tg_id: obj.tg_id || 1,
-        first_name: obj.first_name || "Пользователь",
-        age: obj.age || 18,
-        gender: obj.gender || "",
-        city: obj.city || "",
-        bio: obj.bio || "",
-        photos: photosToSave, // Используем оптимизированный массив
-        verification_status: obj.verification_status || 'not_verified',
-        last_save: Date.now()
-      };
-      
-      // Сохраняем основную информацию профиля
-      const jsonString = JSON.stringify(profileToSave);
-      localStorage.setItem("siamatch_profile", jsonString);
-      
-      // iOS: Сохраняем дополнительную информацию о фото
-      if (isIOS) {
-        localStorage.setItem("siamatch_ios_photos_count", photosToSave.length.toString());
-        console.log(`📱 iOS: сохранено ${photosToSave.length} фото в отдельных ключах`);
-      }
-      
-      console.log('✅ Профиль сохранен для iOS');
-      return true;
-      
-    } catch (e) {
-      console.error("❌ Критическая ошибка сохранения профиля для iOS:", e);
-      
-      // Аварийное сохранение без фото
-      try {
-        const fallbackProfile = {
-          tg_id: obj.tg_id || 1,
-          first_name: obj.first_name || "Пользователь",
-          age: obj.age || 18,
-          gender: obj.gender || "",
-          city: obj.city || "",
-          bio: obj.bio || "",
-          photos: [], // Пустой массив для iOS
-          verification_status: obj.verification_status || 'not_verified',
-          emergency_save: true
-        };
-        localStorage.setItem("siamatch_profile", JSON.stringify(fallbackProfile));
-        console.log('✅ Аварийное сохранение профиля без фото для iOS');
-        return true;
-      } catch (e2) {
-        console.error("❌ Не удалось сохранить даже упрощенный профиль:", e2);
-        return false;
-      }
-    }
-  }
-
-  function localLoad() {
-    try {
-      const raw = localStorage.getItem("siamatch_profile");
-      if (!raw) return null;
-      
-      let profile = JSON.parse(raw);
-      
-      console.log('📂 iOS: Загружен профиль:', {
-        hasPhotos: !!profile.photos,
-        photosCount: profile.photos ? profile.photos.length : 0,
-        structure: Object.keys(profile)
-      });
-      
-      // iOS: Восстанавливаем фото из отдельных ключей
-      if (isIOS && profile.photos && Array.isArray(profile.photos)) {
-        const restoredPhotos = [];
-        
-        profile.photos.forEach((photoRef, index) => {
-          if (typeof photoRef === 'string' && photoRef.startsWith('local:')) {
-            // Фото сохранено в отдельном ключе
-            const photoKey = photoRef.replace('local:', '');
-            try {
-              const photoData = localStorage.getItem(photoKey);
-              if (photoData && photoData.startsWith('data:image')) {
-                restoredPhotos.push(photoData);
-                console.log(`✅ iOS: Восстановлено фото ${index} из ключа ${photoKey}`);
-              } else {
-                console.warn(`⚠️ iOS: Не удалось восстановить фото из ключа ${photoKey}`);
-              }
-            } catch (e) {
-              console.error(`❌ iOS: Ошибка загрузки фото ${index}:`, e);
-            }
-          } else if (typeof photoRef === 'string' && photoRef.startsWith('data:image')) {
-            // Прямой Data URL
-            restoredPhotos.push(photoRef);
-          } else if (typeof photoRef === 'string' && photoRef.startsWith('http')) {
-            // Внешний URL
-            restoredPhotos.push(photoRef);
-          }
-        });
-        
-        profile.photos = restoredPhotos;
-        console.log(`📱 iOS: Восстановлено ${restoredPhotos.length} фото`);
-      }
-      
-      // Убедимся, что photos - это массив
-      if (!profile.photos || !Array.isArray(profile.photos)) {
-        profile.photos = [];
-      }
-      
-      // Переносим старое фото в массив если нужно
-      if (profile.custom_photo_url && !profile.photos.includes(profile.custom_photo_url)) {
-        profile.photos.push(profile.custom_photo_url);
-        delete profile.custom_photo_url;
-        console.log('📸 Перенесено старое фото в массив');
-      }
-      
-      return profile;
-    } catch (e) {
-      console.error("❌ Ошибка загрузки профиля для iOS:", e);
-      return null;
-    }
-  }
-
-  // ===== ФУНКЦИИ ДЛЯ iOS LOCALSTORAGE =====
-  function checkIOSStorage() {
-    if (!isIOS) return;
-    
-    console.log('📱 Проверка localStorage для iOS...');
-    
-    try {
-      const keys = Object.keys(localStorage);
-      let totalSize = 0;
-      
-      keys.forEach(key => {
-        const itemSize = localStorage.getItem(key).length;
-        totalSize += itemSize;
-        
-        if (itemSize > 500000) { // Больше 500KB
-          console.warn(`📱 Большой элемент: ${key} - ${Math.round(itemSize / 1024)}KB`);
-          
-          if (key === 'siamatch_profile') {
-            const data = JSON.parse(localStorage.getItem(key));
-            if (data.photos && Array.isArray(data.photos)) {
-              // Оставляем только первое фото для iOS
-              if (data.photos.length > 1) {
-                data.photos = [data.photos[0]];
-                localStorage.setItem(key, JSON.stringify(data));
-                console.log('📱 Очищены фото для iOS, оставлено только первое');
-              }
-            }
-          }
-        }
-      });
-      
-      console.log(`📱 Общий размер localStorage: ${Math.round(totalSize / 1024)}KB`);
-      
-      if (totalSize > 2000000) { // Более 2MB
-        console.warn('📱 localStorage слишком большой для iOS, очищаем...');
-        // Очищаем старые данные
-        localStorage.removeItem('siamatch_admin_pending_bonuses');
-        localStorage.removeItem('siamatch_admin_reports');
-      }
-    } catch (e) {
-      console.error('📱 Ошибка проверки хранилища iOS:', e);
-    }
-  }
-  
-  function autoSaveForIOS() {
-    if (!isIOS || !profileData) return;
-    
-    console.log('📱 Автосохранение для iOS...');
-    
-    try {
-      // Используем обычное сохранение, которое уже оптимизировано для iOS
-      saveProfile(profileData);
-      console.log('📱 Автосохранение завершено для iOS');
-    } catch (e) {
-      console.error('📱 Ошибка автосохранения iOS:', e);
-    }
-  }
-  
   // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
   function initTelegram() {
     try {
@@ -594,109 +313,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Функция для сжатия изображений на iOS
-  function compressImageForIOS(dataUrl) {
-    if (!dataUrl.startsWith('data:image')) {
-      return dataUrl;
-    }
-    
+  // ===== LOCALSTORAGE ФУНКЦИИ =====
+  function loadProfile() {
     try {
-      // Простое обрезание для iOS - на клиенте полноценное сжатие сложно
-      // В реальном приложении нужно загружать фото на сервер
-      if (dataUrl.length > 500000) {
-        return dataUrl.substring(0, 300000) + '...[обрезано для iOS]';
-      }
-      return dataUrl;
+      const raw = localStorage.getItem("siamatch_profile");
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
-      console.error('❌ Ошибка обработки фото для iOS:', e);
-      return dataUrl.substring(0, 200000);
+      console.error("❌ Ошибка загрузки профиля:", e);
+      return null;
     }
   }
   
-  // Функция очистки старых фото для iOS
-  function cleanupIOSPhotos() {
-    if (!isIOS) return;
-    
-    console.log('🧹 iOS: Очистка старых фото...');
-    
+  function saveProfile(obj) {
     try {
-      // Получаем все ключи localStorage
-      const keys = Object.keys(localStorage);
-      const photoKeys = keys.filter(key => key.startsWith('siamatch_photo_'));
-      
-      // Получаем текущие используемые фото
-      const profile = localLoad();
-      const usedPhotoKeys = [];
-      
-      if (profile && profile.photos) {
-        profile.photos.forEach(photoRef => {
-          if (typeof photoRef === 'string' && photoRef.startsWith('local:')) {
-            usedPhotoKeys.push(photoRef.replace('local:', ''));
-          }
-        });
-      }
-      
-      // Удаляем неиспользуемые фото
-      photoKeys.forEach(key => {
-        if (!usedPhotoKeys.includes(key)) {
-          localStorage.removeItem(key);
-          console.log(`🗑️ iOS: Удален неиспользуемый ключ фото ${key}`);
-        }
-      });
-      
-      console.log(`🧹 iOS: Очищено ${photoKeys.length - usedPhotoKeys.length} неиспользуемых фото`);
+      localStorage.setItem("siamatch_profile", JSON.stringify(obj));
+      return true;
     } catch (e) {
-      console.error('❌ Ошибка очистки iOS фото:', e);
-    }
-  }
-  
-  // ===== ОТЛАДКА LOCALSTORAGE =====
-  function debugLocalStorage() {
-    console.log('🔍 Проверка localStorage:');
-    
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('siamatch')) {
-        try {
-          const data = JSON.parse(localStorage.getItem(key));
-          console.log(`📦 ${key}:`, {
-            тип: typeof data,
-            размер: localStorage.getItem(key).length,
-            фото: data.photos ? `${data.photos.length} шт` : 'нет',
-            ключи: Object.keys(data)
-          });
-        } catch (e) {
-          console.log(`📦 ${key}:`, localStorage.getItem(key).substring(0, 100) + '...');
-        }
-      }
-    });
-  }
-  
-  // ===== ПРИНУДИТЕЛЬНОЕ СОХРАНЕНИЕ И ПЕРЕЗАГРУЗКА =====
-  function forceSaveAndReload() {
-    console.log('💾 Принудительное сохранение...');
-    
-    if (!profileData) {
-      showNotification('Нет данных профиля для сохранения');
-      return;
-    }
-    
-    // Сохраняем текущее состояние
-    if (saveProfile(profileData)) {
-      console.log('✅ Профиль сохранен принудительно');
-      
-      // Перезагружаем данные
-      profileData = loadProfile();
-      
-      // Обновляем интерфейс
-      updateProfilePhotos();
-      
-      showNotification('✅ Данные сохранены и перезагружены');
-      
-      // Показываем отладку
-      debugLocalStorage();
-    } else {
-      showNotification('❌ Ошибка при сохранении');
+      console.error("❌ Ошибка сохранения профиля:", e);
+      return false;
     }
   }
   
@@ -1266,16 +900,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function initFiltersSystem() {
     console.log('🔍 Инициализирую систему фильтров');
     
-    loadSearchFilters();
-    
-    // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
-    const openFiltersBtn = document.getElementById("open-filters-btn");
-    if (openFiltersBtn && openFiltersBtn.parentNode) {
-      openFiltersBtn.parentNode.removeChild(openFiltersBtn);
-    }
-    
-    initSearchFilters();
+  loadSearchFilters();
+  
+  // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
+  const openFiltersBtn = document.getElementById("open-filters-btn");
+  if (openFiltersBtn && openFiltersBtn.parentNode) {
+    openFiltersBtn.parentNode.removeChild(openFiltersBtn);
   }
+  
+  initSearchFilters();
+}
   
   function initSearchFilters() {
     loadSearchFilters();
@@ -1974,9 +1608,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lastUpdated: Date.now()
       };
       localStorage.setItem("siamatch_likes", JSON.stringify(data));
-      console.log('💾 Сохранены данные о лайков:', usersWhoLikedMeCount);
+      console.log('💾 Сохранены данные о лайках');
     } catch (e) {
-      console.error("❌ Ошибка сохранения данных о лайках:", e);
+      console.error("❌ Ошибка сохранения данных о лайков:", e);
     }
   }
   
@@ -2543,459 +2177,459 @@ document.addEventListener('DOMContentLoaded', function() {
       showNotification('❌ Ошибка при сохранении цели');
     }
   }
-
-  // ===== СИСТЕМА СВАЙПОВ И УПРАВЛЕНИЯ ФОТОГРАФИЯМИ =====
-  function initSwipeSystem() {
-    console.log('🔄 Инициализирую систему свайпов и фотографий');
-    
-    const candidateCard = document.getElementById('candidate-card');
-    const photosContainer = document.querySelector('.candidate-photos-container');
-    
-    if (!candidateCard || !photosContainer) return;
-    
-    const actions = document.querySelector('.actions');
-    if (actions) {
-      actions.style.display = 'none';
-    }
-    
-    // Инициализируем свайпы
-    initSwipeGestures(candidateCard);
-    
-    // Инициализируем переключение фото по клику/тапу
-    initPhotoSwitching(photosContainer);
+  
+// ===== СИСТЕМА СВАЙПОВ И УПРАВЛЕНИЯ ФОТОГРАФИЯМИ =====
+function initSwipeSystem() {
+  console.log('🔄 Инициализирую систему свайпов и фотографий');
+  
+  const candidateCard = document.getElementById('candidate-card');
+  const photosContainer = document.querySelector('.candidate-photos-container');
+  
+  if (!candidateCard || !photosContainer) return;
+  
+  const actions = document.querySelector('.actions');
+  if (actions) {
+    actions.style.display = 'none';
   }
+  
+  // Инициализируем свайпы
+  initSwipeGestures(candidateCard);
+  
+  // Инициализируем переключение фото по клику/тапу
+  initPhotoSwitching(photosContainer);
+}
 
-  function initSwipeGestures(cardElement) {
-    // Для тач-устройств
-    cardElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-    cardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-    cardElement.addEventListener('touchend', handleTouchEnd, { passive: true });
-    
-    // Для десктопа
-    cardElement.addEventListener('mousedown', handleMouseDown);
-    cardElement.addEventListener('mousemove', handleMouseMove);
-    cardElement.addEventListener('mouseup', handleMouseEnd);
-    cardElement.addEventListener('mouseleave', handleMouseLeave);
-  }
+function initSwipeGestures(cardElement) {
+  // Для тач-устройств
+  cardElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+  cardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+  cardElement.addEventListener('touchend', handleTouchEnd, { passive: true });
+  
+  // Для десктопа
+  cardElement.addEventListener('mousedown', handleMouseDown);
+  cardElement.addEventListener('mousemove', handleMouseMove);
+  cardElement.addEventListener('mouseup', handleMouseEnd);
+  cardElement.addEventListener('mouseleave', handleMouseLeave);
+}
 
-  function initPhotoSwitching(photosContainer) {
-    // Добавляем обработчики кликов на фото
-    photosContainer.addEventListener('click', handlePhotoClick);
-    photosContainer.addEventListener('touchstart', handlePhotoTouchStart, { passive: true });
-    photosContainer.addEventListener('touchend', handlePhotoTouchEnd, { passive: true });
-    
-    // Создаем индикаторы свайпов для фото
-    createPhotoSwipeIndicators(photosContainer);
-  }
+function initPhotoSwitching(photosContainer) {
+  // Добавляем обработчики кликов на фото
+  photosContainer.addEventListener('click', handlePhotoClick);
+  photosContainer.addEventListener('touchstart', handlePhotoTouchStart, { passive: true });
+  photosContainer.addEventListener('touchend', handlePhotoTouchEnd, { passive: true });
+  
+  // Создаем индикаторы свайпов для фото
+  createPhotoSwipeIndicators(photosContainer);
+}
 
-  function createPhotoSwipeIndicators(container) {
-    // Добавляем подсказки для свайпа по фото
-    const leftIndicator = document.createElement('div');
-    leftIndicator.className = 'photo-swipe-indicator left';
-    leftIndicator.innerHTML = '◀';
-    leftIndicator.style.cssText = `
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 30px;
-      color: white;
-      background: rgba(0,0,0,0.3);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.7;
-      pointer-events: none;
-      z-index: 5;
-    `;
-    
-    const rightIndicator = document.createElement('div');
-    rightIndicator.className = 'photo-swipe-indicator right';
-    rightIndicator.innerHTML = '▶';
-    rightIndicator.style.cssText = `
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 30px;
-      color: white;
-      background: rgba(0,0,0,0.3);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.7;
-      pointer-events: none;
-      z-index: 5;
-    `;
-    
-    container.appendChild(leftIndicator);
-    container.appendChild(rightIndicator);
-  }
+function createPhotoSwipeIndicators(container) {
+  // Добавляем подсказки для свайпа по фото
+  const leftIndicator = document.createElement('div');
+  leftIndicator.className = 'photo-swipe-indicator left';
+  leftIndicator.innerHTML = '◀';
+  leftIndicator.style.cssText = `
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    color: white;
+    background: rgba(0,0,0,0.3);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 5;
+  `;
+  
+  const rightIndicator = document.createElement('div');
+  rightIndicator.className = 'photo-swipe-indicator right';
+  rightIndicator.innerHTML = '▶';
+  rightIndicator.style.cssText = `
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    color: white;
+    background: rgba(0,0,0,0.3);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 5;
+  `;
+  
+  container.appendChild(leftIndicator);
+  container.appendChild(rightIndicator);
+}
 
-  // Переменные для обработки свайпов
-  let touchStartTime = 0;
-  let isTouchForPhoto = false;
-  let photoSwipeStartX = 0;
-  let photoSwipeStartY = 0;
+// Переменные для обработки свайпов
+let touchStartTime = 0;
+let isTouchForPhoto = false;
+let photoSwipeStartX = 0;
+let photoSwipeStartY = 0;
 
-  function handlePhotoTouchStart(e) {
-    const touch = e.touches[0];
-    photoSwipeStartX = touch.clientX;
-    photoSwipeStartY = touch.clientY;
-    touchStartTime = Date.now();
-    isTouchForPhoto = true;
-  }
+function handlePhotoTouchStart(e) {
+  const touch = e.touches[0];
+  photoSwipeStartX = touch.clientX;
+  photoSwipeStartY = touch.clientY;
+  touchStartTime = Date.now();
+  isTouchForPhoto = true;
+}
 
-  function handlePhotoTouchEnd(e) {
-    if (!isTouchForPhoto) return;
-    
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - photoSwipeStartX;
-    const deltaY = touch.clientY - photoSwipeStartY;
-    const touchDuration = Date.now() - touchStartTime;
-    
-    // Если тап был короткий (не свайп) и смещение маленькое - это клик
-    if (touchDuration < 200 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
-      handlePhotoClick(e);
-    } else if (Math.abs(deltaX) > 30 && Math.abs(deltaY) < 50) {
-      // Это свайп по горизонтали
-      if (deltaX > 0) {
-        switchPhoto(-1); // Свайп вправо - предыдущее фото
-      } else {
-        switchPhoto(1); // Свайп влево - следующее фото
-      }
-    }
-    
-    isTouchForPhoto = false;
-  }
-
-  function handlePhotoClick(e) {
-    if (e.target.classList.contains('photo-swipe-indicator')) return;
-    
-    const photoRect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX || (e.touches && e.touches[0].clientX);
-    
-    if (clickX) {
-      const photoWidth = photoRect.width;
-      const clickPosition = clickX - photoRect.left;
-      
-      // Определяем, в какую часть фото кликнули
-      if (clickPosition < photoWidth / 3) {
-        // Левая треть - предыдущее фото
-        switchPhoto(-1);
-      } else if (clickPosition > (photoWidth / 3) * 2) {
-        // Правая треть - следующее фото
-        switchPhoto(1);
-      }
-      // Центральная треть - ничего не делаем (можно добавить зум в будущем)
-    }
-  }
-
-  function handleTouchStart(e) {
-    const touch = e.touches[0];
-    swipeStartX = touch.clientX;
-    swipeStartY = touch.clientY;
-    isSwiping = false; // Сбрасываем флаг свайпа
-    
-    const candidateCard = document.getElementById('candidate-card');
-    candidateCard.style.transition = 'none';
-  }
-
-  function handleTouchMove(e) {
-    if (!swipeStartX && !swipeStartY) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - swipeStartX;
-    const deltaY = touch.clientY - swipeStartY;
-    
-    // Если вертикальное движение значительное - это скролл страницы
-    if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-      isSwiping = false;
-      return; // Позволяем странице скроллиться
-    }
-    
-    // Если горизонтальное движение значительное - это свайп карточки
-    if (Math.abs(deltaX) > 10) {
-      e.preventDefault(); // Предотвращаем скролл только для горизонтальных свайпов
-      isSwiping = true;
-      
-      const candidateCard = document.getElementById('candidate-card');
-      const opacity = 1 - Math.abs(deltaX) / 300;
-      
-      candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
-      candidateCard.style.opacity = Math.max(opacity, 0.5);
-      
-      // Показываем подсказку
-      if (deltaX > 50) {
-        showSwipeFeedback('like');
-      } else if (deltaX < -50) {
-        showSwipeFeedback('dislike');
-      }
-    }
-  }
-
-  function handleTouchEnd(e) {
-    if (!swipeStartX && !swipeStartY) return;
-    
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - swipeStartX;
-    
-    const candidateCard = document.getElementById('candidate-card');
-    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-    
-    if (isSwiping && Math.abs(deltaX) > 100) {
-      // Свайп выполнен
-      if (deltaX > 0) {
-        handleSwipeRight();
-      } else {
-        handleSwipeLeft();
-      }
+function handlePhotoTouchEnd(e) {
+  if (!isTouchForPhoto) return;
+  
+  const touch = e.changedTouches[0];
+  const deltaX = touch.clientX - photoSwipeStartX;
+  const deltaY = touch.clientY - photoSwipeStartY;
+  const touchDuration = Date.now() - touchStartTime;
+  
+  // Если тап был короткий (не свайп) и смещение маленькое - это клик
+  if (touchDuration < 200 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+    handlePhotoClick(e);
+  } else if (Math.abs(deltaX) > 30 && Math.abs(deltaY) < 50) {
+    // Это свайп по горизонтали
+    if (deltaX > 0) {
+      switchPhoto(-1); // Свайп вправо - предыдущее фото
     } else {
-      // Возвращаем на место
-      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-      candidateCard.style.opacity = 1;
+      switchPhoto(1); // Свайп влево - следующее фото
     }
-    
-    // Сбрасываем переменные
-    swipeStartX = 0;
-    swipeStartY = 0;
-    isSwiping = false;
   }
+  
+  isTouchForPhoto = false;
+}
 
-  // Обработчики для мыши
-  function handleMouseDown(e) {
-    swipeStartX = e.clientX;
-    swipeStartY = e.clientY;
+function handlePhotoClick(e) {
+  if (e.target.classList.contains('photo-swipe-indicator')) return;
+  
+  const photoRect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX || (e.touches && e.touches[0].clientX);
+  
+  if (clickX) {
+    const photoWidth = photoRect.width;
+    const clickPosition = clickX - photoRect.left;
+    
+    // Определяем, в какую часть фото кликнули
+    if (clickPosition < photoWidth / 3) {
+      // Левая треть - предыдущее фото
+      switchPhoto(-1);
+    } else if (clickPosition > (photoWidth / 3) * 2) {
+      // Правая треть - следующее фото
+      switchPhoto(1);
+    }
+    // Центральная треть - ничего не делаем (можно добавить зум в будущем)
+  }
+}
+
+function handleTouchStart(e) {
+  const touch = e.touches[0];
+  swipeStartX = touch.clientX;
+  swipeStartY = touch.clientY;
+  isSwiping = false; // Сбрасываем флаг свайпа
+  
+  const candidateCard = document.getElementById('candidate-card');
+  candidateCard.style.transition = 'none';
+}
+
+function handleTouchMove(e) {
+  if (!swipeStartX && !swipeStartY) return;
+  
+  const touch = e.touches[0];
+  const deltaX = touch.clientX - swipeStartX;
+  const deltaY = touch.clientY - swipeStartY;
+  
+  // Если вертикальное движение значительное - это скролл страницы
+  if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
     isSwiping = false;
+    return; // Позволяем странице скроллиться
+  }
+  
+  // Если горизонтальное движение значительное - это свайп карточки
+  if (Math.abs(deltaX) > 10) {
+    e.preventDefault(); // Предотвращаем скролл только для горизонтальных свайпов
+    isSwiping = true;
     
     const candidateCard = document.getElementById('candidate-card');
-    candidateCard.style.transition = 'none';
-  }
-
-  function handleMouseMove(e) {
-    if (!swipeStartX && !swipeStartY) return;
+    const opacity = 1 - Math.abs(deltaX) / 300;
     
-    const deltaX = e.clientX - swipeStartX;
-    const deltaY = e.clientY - swipeStartY;
+    candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+    candidateCard.style.opacity = Math.max(opacity, 0.5);
     
-    // Если вертикальное движение значительное - это скролл страницы
-    if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-      isSwiping = false;
-      return;
-    }
-    
-    // Если горизонтальное движение значительное - это свайп карточки
-    if (Math.abs(deltaX) > 10) {
-      e.preventDefault();
-      isSwiping = true;
-      
-      const candidateCard = document.getElementById('candidate-card');
-      const opacity = 1 - Math.abs(deltaX) / 300;
-      
-      candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
-      candidateCard.style.opacity = Math.max(opacity, 0.5);
-      
-      if (deltaX > 50) {
-        showSwipeFeedback('like');
-      } else if (deltaX < -50) {
-        showSwipeFeedback('dislike');
-      }
+    // Показываем подсказку
+    if (deltaX > 50) {
+      showSwipeFeedback('like');
+    } else if (deltaX < -50) {
+      showSwipeFeedback('dislike');
     }
   }
+}
 
-  function handleMouseEnd(e) {
-    if (!swipeStartX && !swipeStartY) return;
-    
-    const deltaX = e.clientX - swipeStartX;
-    
-    const candidateCard = document.getElementById('candidate-card');
-    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-    
-    if (isSwiping && Math.abs(deltaX) > 100) {
-      if (deltaX > 0) {
-        handleSwipeRight();
-      } else {
-        handleSwipeLeft();
-      }
+function handleTouchEnd(e) {
+  if (!swipeStartX && !swipeStartY) return;
+  
+  const touch = e.changedTouches[0];
+  const deltaX = touch.clientX - swipeStartX;
+  
+  const candidateCard = document.getElementById('candidate-card');
+  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  
+  if (isSwiping && Math.abs(deltaX) > 100) {
+    // Свайп выполнен
+    if (deltaX > 0) {
+      handleSwipeRight();
     } else {
-      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-      candidateCard.style.opacity = 1;
+      handleSwipeLeft();
     }
-    
-    swipeStartX = 0;
-    swipeStartY = 0;
-    isSwiping = false;
-  }
-
-  function handleMouseLeave(e) {
-    if (!isSwiping) return;
-    
-    const candidateCard = document.getElementById('candidate-card');
-    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  } else {
+    // Возвращаем на место
     candidateCard.style.transform = 'translateX(0) rotate(0deg)';
     candidateCard.style.opacity = 1;
-    
-    swipeStartX = 0;
-    swipeStartY = 0;
+  }
+  
+  // Сбрасываем переменные
+  swipeStartX = 0;
+  swipeStartY = 0;
+  isSwiping = false;
+}
+
+// Обработчики для мыши
+function handleMouseDown(e) {
+  swipeStartX = e.clientX;
+  swipeStartY = e.clientY;
+  isSwiping = false;
+  
+  const candidateCard = document.getElementById('candidate-card');
+  candidateCard.style.transition = 'none';
+}
+
+function handleMouseMove(e) {
+  if (!swipeStartX && !swipeStartY) return;
+  
+  const deltaX = e.clientX - swipeStartX;
+  const deltaY = e.clientY - swipeStartY;
+  
+  // Если вертикальное движение значительное - это скролл страницы
+  if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
     isSwiping = false;
+    return;
   }
-
-  function handleSwipeRight() {
-    showSwipeAnimation('right');
+  
+  // Если горизонтальное движение значительное - это свайп карточки
+  if (Math.abs(deltaX) > 10) {
+    e.preventDefault();
+    isSwiping = true;
     
-    setTimeout(() => {
-      handleLike();
-    }, 300);
-  }
-
-  function handleSwipeLeft() {
-    showSwipeAnimation('left');
-    
-    setTimeout(() => {
-      handleDislike();
-    }, 300);
-  }
-
-  function showSwipeAnimation(direction) {
     const candidateCard = document.getElementById('candidate-card');
+    const opacity = 1 - Math.abs(deltaX) / 300;
     
-    if (direction === 'left') {
-      candidateCard.classList.add('swipe-left');
+    candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+    candidateCard.style.opacity = Math.max(opacity, 0.5);
+    
+    if (deltaX > 50) {
+      showSwipeFeedback('like');
+    } else if (deltaX < -50) {
+      showSwipeFeedback('dislike');
+    }
+  }
+}
+
+function handleMouseEnd(e) {
+  if (!swipeStartX && !swipeStartY) return;
+  
+  const deltaX = e.clientX - swipeStartX;
+  
+  const candidateCard = document.getElementById('candidate-card');
+  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  
+  if (isSwiping && Math.abs(deltaX) > 100) {
+    if (deltaX > 0) {
+      handleSwipeRight();
     } else {
-      candidateCard.classList.add('swipe-right');
+      handleSwipeLeft();
+    }
+  } else {
+    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+    candidateCard.style.opacity = 1;
+  }
+  
+  swipeStartX = 0;
+  swipeStartY = 0;
+  isSwiping = false;
+}
+
+function handleMouseLeave(e) {
+  if (!isSwiping) return;
+  
+  const candidateCard = document.getElementById('candidate-card');
+  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+  candidateCard.style.opacity = 1;
+  
+  swipeStartX = 0;
+  swipeStartY = 0;
+  isSwiping = false;
+}
+
+function handleSwipeRight() {
+  showSwipeAnimation('right');
+  
+  setTimeout(() => {
+    handleLike();
+  }, 300);
+}
+
+function handleSwipeLeft() {
+  showSwipeAnimation('left');
+  
+  setTimeout(() => {
+    handleDislike();
+  }, 300);
+}
+
+function showSwipeAnimation(direction) {
+  const candidateCard = document.getElementById('candidate-card');
+  
+  if (direction === 'left') {
+    candidateCard.classList.add('swipe-left');
+  } else {
+    candidateCard.classList.add('swipe-right');
+  }
+  
+  setTimeout(() => {
+    candidateCard.classList.remove('swipe-left', 'swipe-right');
+    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+    candidateCard.style.opacity = 1;
+  }, 500);
+}
+
+function showSwipeFeedback(type) {
+  const feedback = document.getElementById('swipe-feedback');
+  
+  if (!feedback) return;
+  
+  feedback.textContent = type === 'like' ? '❤️' : '✖️';
+  feedback.className = `swipe-feedback ${type}`;
+  feedback.classList.remove('hidden');
+  
+  setTimeout(() => {
+    feedback.classList.add('hidden');
+  }, 800);
+}
+
+function switchPhoto(direction) {
+  if (candidatePhotos.length <= 1) return;
+  
+  const oldIndex = currentPhotoIndex;
+  currentPhotoIndex += direction;
+  
+  if (currentPhotoIndex < 0) {
+    currentPhotoIndex = candidatePhotos.length - 1;
+  } else if (currentPhotoIndex >= candidatePhotos.length) {
+    currentPhotoIndex = 0;
+  }
+  
+  updateCandidatePhoto();
+  updatePhotoIndicators();
+  
+  // Анимация переключения
+  const photoElement = document.getElementById('candidate-photo');
+  photoElement.style.transition = 'opacity 0.3s ease';
+  photoElement.style.opacity = '0';
+  
+  setTimeout(() => {
+    photoElement.style.opacity = '1';
+  }, 50);
+  
+  // Вибрация (если доступно)
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+  
+  console.log(`🔄 Переключение фото: ${oldIndex} → ${currentPhotoIndex}`);
+}
+
+function updateCandidatePhoto() {
+  if (candidatePhotos.length > 0 && currentPhotoIndex < candidatePhotos.length) {
+    const photoUrl = candidatePhotos[currentPhotoIndex];
+    const photoElement = document.getElementById("candidate-photo");
+    
+    // Предзагрузка следующего фото для плавного переключения
+    if (candidatePhotos.length > 1) {
+      const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
+      const nextPhotoUrl = candidatePhotos[nextIndex];
+      const img = new Image();
+      img.src = nextPhotoUrl;
     }
     
-    setTimeout(() => {
-      candidateCard.classList.remove('swipe-left', 'swipe-right');
-      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-      candidateCard.style.opacity = 1;
-    }, 500);
+    photoElement.src = photoUrl;
   }
+}
 
-  function showSwipeFeedback(type) {
-    const feedback = document.getElementById('swipe-feedback');
-    
-    if (!feedback) return;
-    
-    feedback.textContent = type === 'like' ? '❤️' : '✖️';
-    feedback.className = `swipe-feedback ${type}`;
-    feedback.classList.remove('hidden');
-    
-    setTimeout(() => {
-      feedback.classList.add('hidden');
-    }, 800);
-  }
+function updateCandidateInterests() {
+  const interestsContainer = document.getElementById('candidate-interests');
+  if (!interestsContainer) return;
+  
+  interestsContainer.innerHTML = '';
+  
+  const interestLabels = {
+    'travel': 'Путешествия',
+    'movies': 'Кино',
+    'art': 'Искусство',
+    'sport': 'Спорт',
+    'photography': 'Фотография',
+    'dancing': 'Танцы',
+    'music': 'Музыка',
+    'cooking': 'Кулинария',
+    'business': 'Бизнес',
+    'gaming': 'Гейминг',
+    'cars': 'Автомобили',
+    'anime': 'Аниме',
+    'tattoos': 'Татуировки',
+    'piercing': 'Пирсинг',
+    'workout': 'Тренировки',
+    'wine': 'Вино',
+    'boardgames': 'Настольные игры'
+  };
+  
+  candidateInterests.forEach(interest => {
+    const tag = document.createElement('div');
+    tag.className = 'interest-tag-small';
+    tag.textContent = interestLabels[interest] || interest;
+    interestsContainer.appendChild(tag);
+  });
+}
 
-  function switchPhoto(direction) {
-    if (candidatePhotos.length <= 1) return;
+function updatePhotoIndicators() {
+  const indicatorsContainer = document.querySelector('.photo-indicators');
+  if (!indicatorsContainer) return;
+  
+  indicatorsContainer.innerHTML = '';
+  
+  for (let i = 0; i < candidatePhotos.length; i++) {
+    const indicator = document.createElement('div');
+    indicator.className = `photo-indicator ${i === currentPhotoIndex ? 'active' : ''}`;
+    indicator.dataset.index = i;
     
-    const oldIndex = currentPhotoIndex;
-    currentPhotoIndex += direction;
-    
-    if (currentPhotoIndex < 0) {
-      currentPhotoIndex = candidatePhotos.length - 1;
-    } else if (currentPhotoIndex >= candidatePhotos.length) {
-      currentPhotoIndex = 0;
-    }
-    
-    updateCandidatePhoto();
-    updatePhotoIndicators();
-    
-    // Анимация переключения
-    const photoElement = document.getElementById('candidate-photo');
-    photoElement.style.transition = 'opacity 0.3s ease';
-    photoElement.style.opacity = '0';
-    
-    setTimeout(() => {
-      photoElement.style.opacity = '1';
-    }, 50);
-    
-    // Вибрация (если доступно)
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-    
-    console.log(`🔄 Переключение фото: ${oldIndex} → ${currentPhotoIndex}`);
-  }
-
-  function updateCandidatePhoto() {
-    if (candidatePhotos.length > 0 && currentPhotoIndex < candidatePhotos.length) {
-      const photoUrl = candidatePhotos[currentPhotoIndex];
-      const photoElement = document.getElementById("candidate-photo");
-      
-      // Предзагрузка следующего фото для плавного переключения
-      if (candidatePhotos.length > 1) {
-        const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
-        const nextPhotoUrl = candidatePhotos[nextIndex];
-        const img = new Image();
-        img.src = nextPhotoUrl;
-      }
-      
-      photoElement.src = photoUrl;
-    }
-  }
-
-  function updateCandidateInterests() {
-    const interestsContainer = document.getElementById('candidate-interests');
-    if (!interestsContainer) return;
-    
-    interestsContainer.innerHTML = '';
-    
-    const interestLabels = {
-      'travel': 'Путешествия',
-      'movies': 'Кино',
-      'art': 'Искусство',
-      'sport': 'Спорт',
-      'photography': 'Фотография',
-      'dancing': 'Танцы',
-      'music': 'Музыка',
-      'cooking': 'Кулинария',
-      'business': 'Бизнес',
-      'gaming': 'Гейминг',
-      'cars': 'Автомобили',
-      'anime': 'Аниме',
-      'tattoos': 'Татуировки',
-      'piercing': 'Пирсинг',
-      'workout': 'Тренировки',
-      'wine': 'Вино',
-      'boardgames': 'Настольные игры'
-    };
-    
-    candidateInterests.forEach(interest => {
-      const tag = document.createElement('div');
-      tag.className = 'interest-tag-small';
-      tag.textContent = interestLabels[interest] || interest;
-      interestsContainer.appendChild(tag);
+    indicator.addEventListener('click', (e) => {
+      e.stopPropagation(); // Предотвращаем срабатывание клика на фото
+      currentPhotoIndex = i;
+      updateCandidatePhoto();
+      updatePhotoIndicators();
     });
-  }
-
-  function updatePhotoIndicators() {
-    const indicatorsContainer = document.querySelector('.photo-indicators');
-    if (!indicatorsContainer) return;
     
-    indicatorsContainer.innerHTML = '';
-    
-    for (let i = 0; i < candidatePhotos.length; i++) {
-      const indicator = document.createElement('div');
-      indicator.className = `photo-indicator ${i === currentPhotoIndex ? 'active' : ''}`;
-      indicator.dataset.index = i;
-      
-      indicator.addEventListener('click', (e) => {
-        e.stopPropagation(); // Предотвращаем срабатывание клика на фото
-        currentPhotoIndex = i;
-        updateCandidatePhoto();
-        updatePhotoIndicators();
-      });
-      
-      indicatorsContainer.appendChild(indicator);
-    }
+    indicatorsContainer.appendChild(indicator);
   }
+}
   
   // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
   function setupStartButton() {
@@ -3019,8 +2653,17 @@ document.addEventListener('DOMContentLoaded', function() {
       welcomeScreen.classList.add("hidden");
     }
     
-    // Показываем анимированный экран приветствия
-    showAnimatedWelcomeScreen();
+    if (animatedWelcomeScreen) {
+      animatedWelcomeScreen.classList.add('hidden');
+    }
+    
+    profileData = loadProfile();
+    
+    if (profileData) {
+      showMainApp();
+    } else {
+      showOnboarding();
+    }
   }
 
   // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
@@ -3054,22 +2697,32 @@ document.addEventListener('DOMContentLoaded', function() {
       animatedWelcomeScreen.classList.add('hidden');
       animatedWelcomeScreen.style.animation = '';
       
-      // После анимации показываем экран создания профиля
-      showOnboarding();
+      showMainApp();
+      
+      initVerification();
+      initLikesSystem();
+      initInterestsSystem();
+      initFiltersSystem();
+      initBoostSystem();
+      initSwipesSystem();
+      initChatsSystem();
+      initBonusSystem();
+      
+      setActiveTab("feed");
+      
+      setTimeout(() => {
+        showNotification("🍀 С возвращением в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
+      }, 500);
     }, 800);
   }
   
   // ===== ПОКАЗАТЬ АНКЕТУ =====
   function showOnboarding() {
-    console.log('🖥️ Показан экран создания профиля');
     if (onboardingScreen) {
       onboardingScreen.classList.remove("hidden");
     }
     if (tabBar) {
       tabBar.classList.add("hidden");
-    }
-    if (appRoot) {
-      appRoot.classList.add("hidden");
     }
     
     setTimeout(() => {
@@ -3129,7 +2782,6 @@ document.addEventListener('DOMContentLoaded', function() {
         gender,
         city,
         bio,
-        photos: [],
         verification_status: 'not_verified'
       };
       
@@ -3161,11 +2813,88 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300);
   }
   
-  // ===== ИНИЦИАЛИЗАЦИЯ СВАЙПИНГА =====
-  function initSwiping() {
-    console.log('🔄 Инициализация системы свайпов');
-    initSwipeSystem();
-    showCurrentCandidate();
+  // ===== ПОКАЗАТЬ ОСНОВНОЕ ПРИЛОЖЕНИЕ =====
+  function showMainApp() {
+    if (welcomeScreen) welcomeScreen.classList.add("hidden");
+    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.add("hidden");
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    
+    if (tabBar) {
+      tabBar.classList.remove("hidden");
+    }
+    
+    loadPendingBonuses();
+    
+    initVerification();
+    initLikesSystem();
+    initInterestsSystem();
+    initFiltersSystem();
+    initBoostSystem();
+    initSwipesSystem();
+    initChatsSystem();
+    initBonusSystem();
+    
+    setActiveTab("feed");
+  }
+  
+  // ===== УПРАВЛЕНИЕ ТАБАМИ =====
+  function setActiveTab(tab) {
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'welcome-screen' && 
+          screen.id !== 'chat-screen' && 
+          screen.id !== 'screen-interests' &&
+          screen.id !== 'welcome-animated-screen') {
+        screen.classList.add('hidden');
+      }
+    });
+    
+    if (tab !== 'chats' && document.getElementById('chat-screen')) {
+      document.getElementById('chat-screen').classList.add('hidden');
+    }
+    
+    const screenId = 'screen-' + tab;
+    const screen = document.getElementById(screenId);
+    if (screen) {
+      screen.classList.remove('hidden');
+    }
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    
+    if (tab === 'feed') {
+      initFeed();
+    } else if (tab === 'profile') {
+      initProfile();
+    } else if (tab === 'filters') {
+      initFiltersTab();
+    } else if (tab === 'chats') {
+      updateLikesUI();
+      updateChatsList();
+    }
+    
+    if (tabBar) {
+      tabBar.classList.remove('hidden');
+    }
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+  }
+  
+  function setupTabButtons() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        setActiveTab(tab);
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.selectionChanged();
+          } catch (e) {}
+        }
+      });
+    });
   }
   
   // ===== ЛЕНТА СВАЙПОВ С ФИЛЬТРАЦИЕЙ =====
@@ -3360,31 +3089,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // ===== ПРОФИЛЬ =====
   function initProfile() {
-    // Сначала загружаем профиль
     profileData = loadProfile();
-    
-    if (!profileData) {
-      console.error('❌ Нет данных профиля');
-      return;
-    }
-    
-    console.log('👤 Инициализация профиля:', {
-      имя: profileData.first_name,
-      фото: profileData.photos ? `${profileData.photos.length} шт` : 'нет',
-      все_данные: profileData
-    });
     
     if (profileData) {
       updateProfileDisplay();
       updateEditForm();
     }
     
-    // ВАЖНО: Инициализируем фото ПЕРЕД обновлением UI
-    initProfilePhotos();
-    
     updateVerificationUI();
     updateBoostUI();
     initInterestsSystem();
+    initProfilePhotos();
   }
 
   function initProfilePhotos() {
@@ -3392,17 +3107,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const removePhotoBtn = document.getElementById('remove-photo-btn');
     const photoUpload = document.getElementById('profile-photo-upload');
     
-    // ИНИЦИАЛИЗИРУЕМ МАССИВ ФОТО ПРАВИЛЬНО
-    if (!profileData.photos || !Array.isArray(profileData.photos)) {
+    if (!profileData.photos) {
       profileData.photos = [];
-      
-      // Если есть старое фото, добавляем его
       if (profileData.custom_photo_url) {
         profileData.photos.push(profileData.custom_photo_url);
-        // Очищаем старое поле, чтобы не было дублирования
-        delete profileData.custom_photo_url;
-        saveProfile(profileData);
       }
+      saveProfile(profileData);
     }
     
     updateProfilePhotos();
@@ -3428,110 +3138,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function handleProfilePhotoUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (file.size > 3 * 1024 * 1024) { // Уменьшили лимит для iOS
-      showNotification('Фото слишком большое (максимум 3MB)');
-      return;
-    }
-    
-    if (profileData.photos.length >= 3) {
-      showNotification('Можно добавить не более 3 фото');
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      let photoUrl = event.target.result;
-      
-      // iOS: Обрабатываем фото перед сохранением
-      if (isIOS) {
-        console.log('📱 iOS: Обработка загруженного фото...');
-        
-        // Сжимаем фото для iOS
-        const compressedPhoto = compressImageForIOS(photoUrl);
-        if (compressedPhoto) {
-          photoUrl = compressedPhoto;
-          
-          // Убедимся, что photos - это массив
-          if (!Array.isArray(profileData.photos)) {
-            profileData.photos = [];
-          }
-          
-          profileData.photos.push(photoUrl);
-          
-          // Сохраняем с специальной обработкой для iOS
-          if (saveProfile(profileData)) {
-            updateProfilePhotos();
-            
-            // Дополнительное сохранение для iOS
-            if (isIOS) {
-              setTimeout(() => {
-                // Пересохраняем для надежности
-                saveProfile(profileData);
-                showNotification('✅ Фото добавлено (iOS оптимизация) 📸');
-              }, 500);
-            } else {
-              showNotification('Фото добавлено! 📸');
-            }
-          } else {
-            showNotification('Ошибка при сохранении фото');
-          }
-        }
-      } else {
-        // Не iOS - обычная обработка
-        if (!Array.isArray(profileData.photos)) {
-          profileData.photos = [];
-        }
-        
-        profileData.photos.push(photoUrl);
-        
-        if (saveProfile(profileData)) {
-          updateProfilePhotos();
-          showNotification('Фото добавлено! 📸');
-        } else {
-          showNotification('Ошибка при сохранении фото');
-        }
-      }
-    };
-    
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  }
-
   function updateProfilePhotos() {
-    if (!profileData || !profileData.photos || profileData.photos.length === 0) {
-      console.log('🖼️ Нет фото для отображения');
-      return;
-    }
+    if (!profileData.photos || profileData.photos.length === 0) return;
     
     const container = document.querySelector('.profile-photos-container');
     const indicators = document.querySelector('.profile-photo-indicators');
     const photosCount = document.getElementById('photos-count');
     const removeBtn = document.getElementById('remove-photo-btn');
     
-    if (!container || !indicators) {
-      console.warn('⚠️ Нет элементов для отображения фото');
-      return;
-    }
-    
-    console.log('🖼️ Отображение фото:', profileData.photos.length);
+    if (!container || !indicators) return;
     
     container.innerHTML = '';
     
-    // Отображаем только первое фото (главное)
-    if (profileData.photos[0]) {
+    profileData.photos.forEach((photoUrl, index) => {
       const img = document.createElement('img');
-      img.className = 'profile-main-photo active';
-      img.src = profileData.photos[0];
-      img.alt = 'Главное фото';
+      img.className = `profile-main-photo ${index === 0 ? 'active' : ''}`;
+      img.src = photoUrl;
+      img.alt = `Фото ${index + 1}`;
       container.appendChild(img);
-    }
+    });
     
     indicators.innerHTML = '';
-    // Показываем индикаторы для всех фото
     profileData.photos.forEach((_, index) => {
       const indicator = document.createElement('div');
       indicator.className = `profile-photo-indicator ${index === 0 ? 'active' : ''}`;
@@ -3548,21 +3175,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function removeCurrentPhoto() {
-    if (!profileData.photos || profileData.photos.length <= 1) {
-      showNotification('Нужно оставить хотя бы одно фото');
+  function handleProfilePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('Фото слишком большое (максимум 5MB)');
       return;
     }
     
-    // Удаляем текущее (первое) фото
-    profileData.photos.shift();
-    
-    if (saveProfile(profileData)) {
-      updateProfilePhotos();
-      showNotification('Фото удалено');
-    } else {
-      showNotification('Ошибка при удалении фото');
+    if (profileData.photos.length >= 3) {
+      showNotification('Можно добавить не более 3 фото');
+      return;
     }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const photoUrl = event.target.result;
+      
+      if (!profileData.photos) {
+        profileData.photos = [];
+      }
+      
+      profileData.photos.push(photoUrl);
+      saveProfile(profileData);
+      updateProfilePhotos();
+      
+      showNotification('Фото добавлено! 📸');
+    };
+    reader.readAsDataURL(file);
+    
+    e.target.value = '';
+  }
+
+  function removeCurrentPhoto() {
+    if (!profileData.photos || profileData.photos.length <= 1) return;
+    
+    profileData.photos.splice(0, 1);
+    saveProfile(profileData);
+    updateProfilePhotos();
+    
+    showNotification('Фото удалено');
   }
 
   function handleProfilePhotoTouchStart(e) {
@@ -3598,16 +3251,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileCityElem = document.getElementById('profile-city-display');
     const profilePhotoElem = document.getElementById('profile-photo-preview');
     
-    if (!profileData) {
-      console.warn('⚠️ Нет данных профиля для отображения');
-      return;
-    }
-    
-    console.log('🔄 Обновление отображения профиля:', {
-      имя: profileData.first_name,
-      фото: profileData.photos?.length || 0
-    });
-    
     if (profileNameElem) {
       profileNameElem.textContent = profileData.first_name || "Пользователь";
     }
@@ -3628,9 +3271,9 @@ document.addEventListener('DOMContentLoaded', function() {
       profileCityElem.textContent = profileData.city || "";
     }
     
-    // Удалите эту часть - фото теперь отображаются через updateProfilePhotos
-    if (profilePhotoElem) {
-      profilePhotoElem.style.display = 'none';
+    if (profilePhotoElem && profileData.custom_photo_url) {
+      profilePhotoElem.src = profileData.custom_photo_url;
+      profilePhotoElem.style.display = 'block';
     }
   }
   
@@ -3656,9 +3299,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('profile-display').classList.add('hidden');
     document.getElementById('profile-edit').classList.remove('hidden');
     
-    // Инициализируем перетаскивание фото
-    initPhotoDragAndDrop();
-    
     if (tg?.HapticFeedback) {
       try {
         tg.HapticFeedback.selectionChanged();
@@ -3677,81 +3317,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      try {
-        // Получаем данные из формы
-        const age = Number(document.getElementById("edit-age").value);
-        const gender = document.getElementById("edit-gender").value;
-        const city = document.getElementById("edit-city").value;
-        const bio = document.getElementById("edit-bio").value.trim();
+      profileData.age = Number(document.getElementById("edit-age").value);
+      profileData.gender = document.getElementById("edit-gender").value;
+      profileData.city = document.getElementById("edit-city").value;
+      profileData.bio = document.getElementById("edit-bio").value.trim();
+      
+      if (saveProfile(profileData)) {
+        updateProfileDisplay();
         
-        // Проверяем данные
-        if (!age || age < 18 || age > 99) {
-          showNotification("Возраст должен быть от 18 до 99 лет");
-          return;
+        document.getElementById('profile-display').classList.remove('hidden');
+        document.getElementById('profile-edit').classList.add('hidden');
+        
+        showNotification("✅ Профиль обновлён!");
+        
+        if (tg?.HapticFeedback) {
+          try {
+            tg.HapticFeedback.impactOccurred('light');
+        } catch (e) {}
         }
-        
-        if (!gender) {
-          showNotification("Выберите пол");
-          return;
-        }
-        
-        if (!city) {
-          showNotification("Выберите город");
-          return;
-        }
-        
-        if (!bio || bio.length < 10) {
-          showNotification("О себе минимум 10 символов");
-          return;
-        }
-        
-        // Важно: сохраняем фото отдельно, они не в форме
-        const currentPhotos = profileData.photos || [];
-        
-        // Создаем обновленный объект профиля
-        const updatedProfile = {
-          ...profileData,
-          age: age,
-          gender: gender,
-          city: city,
-          bio: bio,
-          photos: currentPhotos // Сохраняем текущие фото
-        };
-        
-        // Сохраняем
-        if (saveProfile(updatedProfile)) {
-          // Обновляем глобальную переменную
-          profileData = updatedProfile;
-          
-          updateProfileDisplay();
-          updateProfilePhotos(); // Важно: обновляем отображение фото
-          
-          // iOS автосохранение
-          if (isIOS) {
-            autoSaveForIOS();
-          }
-          
-          // Плавно скрываем режим редактирования
-          document.getElementById('profile-edit').style.opacity = '0';
-          setTimeout(() => {
-            document.getElementById('profile-display').classList.remove('hidden');
-            document.getElementById('profile-edit').classList.add('hidden');
-            document.getElementById('profile-edit').style.opacity = '1';
-          }, 300);
-          
-          showNotification("✅ Профиль обновлён!");
-          
-          if (tg?.HapticFeedback) {
-            try {
-              tg.HapticFeedback.impactOccurred('light');
-            } catch (e) {}
-          }
-        } else {
-          showNotification("❌ Ошибка при сохранении профиля");
-        }
-      } catch (error) {
-        console.error('Ошибка при сохранении профиля:', error);
-        showNotification("❌ Ошибка при обновлении профиля: " + error.message);
+      } else {
+        showNotification("❌ Ошибка при обновлении профиля");
       }
     }, 300);
   }
@@ -3795,303 +3380,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
     reader.readAsDataURL(file);
-  }
-  
-  // ===== ФУНКЦИИ ПЕРЕТАСКИВАНИЯ ФОТОГРАФИЙ =====
-  
-  function initPhotoDragAndDrop() {
-    const container = document.getElementById('all-photos-container');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    if (!profileData.photos || profileData.photos.length === 0) {
-      container.innerHTML = `
-        <div class="no-photos-message">
-          <div class="no-photos-icon">📸</div>
-          <div class="no-photos-text">У вас нет фотографий</div>
-        </div>
-      `;
-      return;
-    }
-    
-    // Отображаем все фото
-    profileData.photos.forEach((photoUrl, index) => {
-      const photoItem = document.createElement('div');
-      photoItem.className = `photo-item`;
-      photoItem.draggable = true;
-      photoItem.dataset.index = index;
-      
-      // Пометим первое фото как главное
-      if (index === 0) {
-        photoItem.classList.add('main-photo');
-      }
-      
-      photoItem.innerHTML = `
-        <div class="photo-number">${index + 1}</div>
-        <img src="${photoUrl}" alt="Фото ${index + 1}" />
-      `;
-      
-      // События для перетаскивания
-      photoItem.addEventListener('dragstart', handleDragStart);
-      photoItem.addEventListener('dragover', handleDragOver);
-      photoItem.addEventListener('dragenter', handleDragEnter);
-      photoItem.addEventListener('dragleave', handleDragLeave);
-      photoItem.addEventListener('drop', handleDrop);
-      photoItem.addEventListener('dragend', handleDragEnd);
-      
-      // Обработчик клика для выбора главного фото
-      photoItem.addEventListener('click', (e) => {
-        if (e.target.closest('.photo-number')) return; // Не сработает на номере
-        
-        // Снимаем выделение со всех фото
-        document.querySelectorAll('.photo-item').forEach(item => {
-          item.classList.remove('main-photo');
-        });
-        
-        // Выделяем текущее фото
-        photoItem.classList.add('main-photo');
-      });
-      
-      container.appendChild(photoItem);
-    });
-    
-    // Создаем кнопки управления
-    createPhotoControls();
-  }
-
-  function handleDragStart(e) {
-    draggedPhotoIndex = parseInt(e.target.dataset.index);
-    e.target.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    
-    // Для мобильных устройств
-    if (isIOS) {
-      e.dataTransfer.setData('text/plain', draggedPhotoIndex.toString());
-    }
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
-
-  function handleDragEnter(e) {
-    e.preventDefault();
-    if (e.target.classList.contains('photo-item')) {
-      draggedOverPhotoIndex = parseInt(e.target.dataset.index);
-      e.target.style.border = '3px dashed var(--siamatch-green)';
-    }
-  }
-
-  function handleDragLeave(e) {
-    if (e.target.classList.contains('photo-item')) {
-      e.target.style.border = '3px solid transparent';
-    }
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    
-    if (e.target.classList.contains('photo-item')) {
-      draggedOverPhotoIndex = parseInt(e.target.dataset.index);
-      
-      if (draggedPhotoIndex !== null && draggedOverPhotoIndex !== null && 
-          draggedPhotoIndex !== draggedOverPhotoIndex) {
-        // Меняем фото местами
-        swapPhotos(draggedPhotoIndex, draggedOverPhotoIndex);
-      }
-      
-      e.target.style.border = '3px solid transparent';
-    }
-  }
-
-  function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    
-    // Сбрасываем стили всех фото
-    document.querySelectorAll('.photo-item').forEach(item => {
-      item.style.border = '3px solid transparent';
-    });
-    
-    draggedPhotoIndex = null;
-    draggedOverPhotoIndex = null;
-  }
-
-  function swapPhotos(index1, index2) {
-    if (!profileData.photos || profileData.photos.length < 2) return;
-    
-    // Проверяем индексы
-    if (index1 < 0 || index1 >= profileData.photos.length || 
-        index2 < 0 || index2 >= profileData.photos.length) {
-      return;
-    }
-    
-    // Меняем местами
-    const temp = profileData.photos[index1];
-    profileData.photos[index1] = profileData.photos[index2];
-    profileData.photos[index2] = temp;
-    
-    // Сохраняем изменения
-    saveProfile(profileData);
-    
-    // iOS автосохранение
-    if (isIOS) {
-      autoSaveForIOS();
-    }
-    
-    // Обновляем отображение
-    initPhotoDragAndDrop();
-    
-    // Показываем уведомление
-    showNotification(`🔄 Фото ${index1 + 1} и ${index2 + 1} поменялись местами!`);
-    
-    // Вибрация (если доступно)
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-  }
-  
-  function createPhotoControls() {
-    const controlsContainer = document.getElementById('photo-controls');
-    if (!controlsContainer) return;
-    
-    controlsContainer.innerHTML = '';
-    
-    if (!profileData.photos || profileData.photos.length < 2) return;
-    
-    const controls = document.createElement('div');
-    controls.className = 'photo-buttons';
-    controls.innerHTML = `
-      <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center; flex-wrap: wrap;">
-        <button id="move-up-btn" class="primary" style="flex: 1; min-width: 120px; padding: 12px;">⬆ Поднять</button>
-        <button id="move-down-btn" class="primary" style="flex: 1; min-width: 120px; padding: 12px;">⬇ Опустить</button>
-        <button id="set-main-btn" class="primary" style="flex: 1; min-width: 140px; padding: 12px;">⭐ Главное</button>
-      </div>
-    `;
-    
-    controlsContainer.appendChild(controls);
-    
-    // Обработчики для кнопок
-    document.getElementById('move-up-btn').addEventListener('click', function() {
-      movePhotoUp();
-    });
-    
-    document.getElementById('move-down-btn').addEventListener('click', function() {
-      movePhotoDown();
-    });
-    
-    document.getElementById('set-main-btn').addEventListener('click', function() {
-      setAsMainPhoto();
-    });
-  }
-
-  function movePhotoUp() {
-    const activePhoto = document.querySelector('.photo-item.main-photo');
-    if (!activePhoto) {
-      showNotification('Сначала выберите фото, нажав на него');
-      return;
-    }
-    
-    const currentIndex = parseInt(activePhoto.dataset.index);
-    if (currentIndex <= 0) {
-      showNotification('Фото уже наверху');
-      return;
-    }
-    
-    swapPhotos(currentIndex, currentIndex - 1);
-  }
-
-  function movePhotoDown() {
-    const activePhoto = document.querySelector('.photo-item.main-photo');
-    if (!activePhoto) {
-      showNotification('Сначала выберите фото, нажав на него');
-      return;
-    }
-    
-    const currentIndex = parseInt(activePhoto.dataset.index);
-    if (currentIndex >= profileData.photos.length - 1) {
-      showNotification('Фото уже внизу');
-      return;
-    }
-    
-    swapPhotos(currentIndex, currentIndex + 1);
-  }
-
-  function setAsMainPhoto() {
-    const activePhoto = document.querySelector('.photo-item.main-photo');
-    if (!activePhoto) {
-      showNotification('Сначала выберите фото, нажав на него');
-      return;
-    }
-    
-    const currentIndex = parseInt(activePhoto.dataset.index);
-    
-    // Если фото уже первое, ничего не делаем
-    if (currentIndex === 0) {
-      showNotification('Это фото уже главное');
-      return;
-    }
-    
-    // Перемещаем фото на первую позицию
-    const photoToMove = profileData.photos[currentIndex];
-    profileData.photos.splice(currentIndex, 1); // Удаляем с текущей позиции
-    profileData.photos.unshift(photoToMove); // Добавляем в начало
-    
-    // Сохраняем изменения
-    saveProfile(profileData);
-    
-    // iOS автосохранение
-    if (isIOS) {
-      autoSaveForIOS();
-    }
-    
-    // Обновляем отображение
-    initPhotoDragAndDrop();
-    
-    showNotification(`📸 Фото ${currentIndex + 1} теперь главное!`);
-    
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-  }
-  
-  function setupPhotoTouchEvents() {
-    if (!isIOS) return;
-    
-    let touchStartIndex = null;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchMoveThreshold = 50;
-    
-    document.addEventListener('touchstart', function(e) {
-      const photoItem = e.target.closest('.photo-item');
-      if (photoItem) {
-        touchStartIndex = parseInt(photoItem.dataset.index);
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-    
-    document.addEventListener('touchend', function(e) {
-      if (touchStartIndex === null) return;
-      
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaX = Math.abs(touchEndX - touchStartX);
-      const deltaY = Math.abs(touchEndY - touchStartY);
-      
-      const photoItem = e.target.closest('.photo-item');
-      if (photoItem && deltaX > touchMoveThreshold && deltaY < touchMoveThreshold) {
-        const touchEndIndex = parseInt(photoItem.dataset.index);
-        
-        if (touchStartIndex !== touchEndIndex) {
-          swapPhotos(touchStartIndex, touchEndIndex);
-        }
-      }
-      
-      touchStartIndex = null;
-    }, { passive: true });
   }
   
   // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
@@ -4176,193 +3464,80 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // ===== ФУНКЦИЯ ДЛЯ ОЧИСТКИ СЛИШКОМ БОЛЬШИХ ФОТО =====
-  function cleanupLargePhotos() {
-    try {
-      const saved = localStorage.getItem("siamatch_profile");
-      if (saved) {
-        const data = JSON.parse(saved);
-        
-        if (data.photos && Array.isArray(data.photos)) {
-          let hasLargePhotos = false;
-          
-          data.photos = data.photos.filter(photo => {
-            if (typeof photo === 'string' && photo.startsWith('data:image')) {
-              if (photo.length > 500000) { // Более 500KB
-                console.warn('⚠️ Удаляем слишком большое фото:', photo.length);
-                hasLargePhotos = true;
-                return false;
-              }
-            }
-            return true;
-          });
-          
-          if (hasLargePhotos) {
-            localStorage.setItem("siamatch_profile", JSON.stringify(data));
-            console.log('✅ Очищены слишком большие фото');
-            showNotification('⚠️ Некоторые фото были слишком большими и удалены для стабильной работы приложения');
-          }
-        }
-      }
-    } catch (e) {
-      console.error('❌ Ошибка при очистке фото:', e);
-    }
-  }
-  
-  // ===== ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ЭКРАНАМИ =====
-  function showWelcomeScreen() {
-    console.log('🖥️ Показан экран приветствия');
-    if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.remove('hidden');
-    if (appRoot) appRoot.classList.add('hidden');
-    if (tabBar) tabBar.classList.add('hidden');
-  }
-  
-  function hideWelcomeScreen() {
-    console.log('🖥️ Скрыт экран приветствия');
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
-    if (animatedWelcomeScreen) animatedWelcomeScreen.classList.add('hidden');
-    if (appRoot) appRoot.classList.remove('hidden');
-  }
-  
-  function showMainApp() {
-    console.log('🖥️ Показано главное приложение');
-    if (tabBar) tabBar.classList.remove('hidden');
-    
-    // Устанавливаем активной вкладку ленты (вторая кнопка)
-    setActiveTab("feed");
-  }
-  
-  function updateTabBar() {
-    console.log('🔄 Обновление панели вкладок');
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs?.forEach((tab, index) => {
-      tab.addEventListener('click', () => switchTab(index));
-    });
-    console.log('✅ TabBar активирован');
-  }
-  
-  // ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК =====
-  function switchTab(index) {
-    console.log('🔄 Переключение вкладки:', index);
-    
-    // 1. Скрываем ВСЕ экраны
-    document.querySelectorAll('.screen, [id*="screen-"]').forEach(el => {
-      el.classList.remove('active');
-      el.classList.add('hidden');
-      el.style.display = 'none';
-    });
-    
-    // 2. Деактивируем все кнопки
-    document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active'));
-    
-    // 3. Показываем нужный экран
-    const screens = ['screen-chats', 'screen-feed', 'screen-filters', 'screen-profile'];
-    const targetScreenId = screens[index];
-    const targetScreen = document.getElementById(targetScreenId);
-    
-    if (targetScreen) {
-      targetScreen.classList.remove('hidden');
-      targetScreen.classList.add('active');
-      targetScreen.style.display = 'block';
-      
-      // Активируем соответствующую кнопку
-      document.querySelectorAll('.tab-btn')[index].classList.add('active');
-      
-      console.log(`✅ Показан экран: ${targetScreenId}`);
-      
-      // 4. Инициализация контента для каждого экрана
-      switch(index) {
-        case 0: // ЧАТЫ
-          updateChatsList();
-          break;
-        case 1: // ЛЕНТА
-          initSwiping();
-          break;
-        case 2: // ФИЛЬТРЫ
-          initFiltersTab();
-          break;
-        case 3: // ПРОФИЛЬ
-          initProfile();
-          break;
-      }
-    } else {
-      console.error(`❌ Экран не найден: ${targetScreenId}`);
-    }
-  }
-  
-  // ===== ФУНКЦИЯ ДЛЯ АКТИВАЦИИ КОНКРЕТНОЙ ВКЛАДКИ =====
-  function setActiveTab(tabName) {
-    const tabs = {
-      'chats': 0,
-      'feed': 1,
-      'filters': 2,
-      'profile': 3
-    };
-    
-    if (tabs[tabName] !== undefined) {
-      switchTab(tabs[tabName]);
-    }
-  }
-
-  function updateLikesScreen() {
-    console.log('❤️ Обновление экрана лайков');
-    // Логика для экрана лайков
-  }
-
-  function updateProfileScreen() {
-    console.log('👤 Обновление экрана профиля');
-    // Логика для экрана профиля
-  }
-  
-  // ===== ИСПРАВЛЕННАЯ ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
-  async function initApp() {
-    console.log('🚀 Инициализация SiaMatch...');
-    
+  // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
+  function initApp() {
     if (hasInitialized) return;
     hasInitialized = true;
     
+    console.log('🎬 Инициализация приложения...');
+    
     initTelegram();
-    if (isIOS) checkIOSStorage();
-        
+    setupStartButton();
+    setupTabButtons();
     
-    // Очистка слишком больших фото перед началом
-    cleanupLargePhotos();
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const saveChangesBtn = document.getElementById('save-profile-changes');
+    const cancelEditBtn = document.getElementById('cancel-profile-edit');
+    const profilePhotoInput = document.getElementById('profile-photo-upload');
+    const editPhotoInput = document.getElementById('edit-photo-upload');
     
-    profileData = await loadProfile();
-    console.log('Профиль:', profileData ? 'найден' : 'отсутствует');
-    
-    // ✅ ИСПРАВЛЕННАЯ ЛОГИКА:
-    if (!profileData || !profileData.first_name) {
-      console.log('Профиль отсутствует - показываем экран приветствия');
-      showWelcomeScreen();
-    } else {
-      console.log('Профиль найден - показываем основное приложение');
-      hideWelcomeScreen();
-      updateTabBar();
-      setActiveTab("feed");
-      showMainApp();
+    if (editProfileBtn) {
+      editProfileBtn.addEventListener('click', handleEditProfile);
     }
     
-    // Настраиваем обработчики
-    setupStartButton();
-    updateTabBar();
+    if (saveChangesBtn) {
+      saveChangesBtn.addEventListener('click', handleSaveProfileChanges);
+    }
     
-    // Инициализируем все системы (только если есть профиль)
-    setTimeout(() => {
-      if (profileData && profileData.first_name) {
-        initVerification();
-        initLikesSystem();
-        initInterestsSystem();
-        initFiltersSystem();
-        initBoostSystem();
-        initSwipesSystem();
-        initChatsSystem();
-        initBonusSystem();
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', handleCancelEdit);
+    }
+    
+    if (profilePhotoInput) {
+      profilePhotoInput.addEventListener('change', handlePhotoUpload);
+    }
+    
+    if (editPhotoInput) {
+      editPhotoInput.addEventListener('change', handlePhotoUpload);
+    }
+    
+    profileData = loadProfile();
+    
+    if (profileData) {
+      showAnimatedWelcomeScreen();
+    } else {
+      if (welcomeScreen) {
+        welcomeScreen.classList.remove("hidden");
       }
-      
-      console.log('✅ Все системы инициализированы');
-    }, 100);
+    }
+    
+    if (onboardingScreen) onboardingScreen.classList.add("hidden");
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'welcome-screen' && 
+          screen.id !== 'screen-interests' && 
+          screen.id !== 'welcome-animated-screen') {
+        screen.classList.add('hidden');
+      }
+    });
+    
+    if (tabBar) tabBar.classList.add("hidden");
+    
+    if (isIOS) {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 300);
+    }
+    
+    initSwipeSystem();
+    initLikesSystem();
+    initInterestsSystem();
+    initFiltersSystem();
+    initBoostSystem();
+    initSwipesSystem();
+    initChatsSystem();
+    initBonusSystem();
+    
+    console.log('✅ Приложение инициализировано');
   }
   
   // ===== ЗАПУСК =====
