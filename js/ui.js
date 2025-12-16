@@ -28,6 +28,24 @@ function initUI() {
   setupStartButton();
   setupTabButtons();
   setupProfileEventHandlers();
+  
+  // ✅ ДОБАВЛЕНО: обновление UI после загрузки профиля
+  setTimeout(() => {
+    if (window.profileData && window.profileData.current) {
+      // Обновляем отображение профиля если он есть
+      if (typeof updateProfileDisplay === 'function') {
+        updateProfileDisplay();
+      }
+      if (typeof updateEditForm === 'function') {
+        updateEditForm();
+      }
+      if (typeof updateProfilePhotos === 'function') {
+        updateProfilePhotos();
+      }
+    }
+  }, 50);
+  
+  console.log('✅ Интерфейс инициализирован');
 }
 
 // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
@@ -56,7 +74,7 @@ function handleStartClick() {
     animatedWelcomeScreen.classList.add('hidden');
   }
   
-  if (window.profileData.current) {
+  if (window.profileData && window.profileData.current) {
     showMainApp();
   } else {
     showOnboarding();
@@ -108,9 +126,6 @@ function hideAnimatedWelcomeScreen() {
     animatedWelcomeScreen.style.animation = '';
     
     showMainApp();
-    
-    // Инициализация всех систем
-    initAllSystems();
     
     setTimeout(() => {
       showNotification("🍀 С возвращением в SiaMatch!\n\nЖелаем вам найти свою идеальную пару! ❤️");
@@ -193,14 +208,14 @@ function setActiveTab(tab) {
   
   // Инициализация контента вкладки
   if (tab === 'feed') {
-    initFeed();
+    if (typeof initFeed === 'function') initFeed();
   } else if (tab === 'profile') {
-    initProfile();
+    if (typeof initProfile === 'function') initProfile();
   } else if (tab === 'filters') {
-    initFiltersTab();
+    if (typeof initFiltersTab === 'function') initFiltersTab();
   } else if (tab === 'chats') {
-    updateLikesUI();
-    updateChatsList();
+    if (typeof updateLikesUI === 'function') updateLikesUI();
+    if (typeof updateChatsList === 'function') updateChatsList();
   }
   
   // Показываем панель навигации
@@ -261,7 +276,9 @@ function handleSaveProfileChanges() {
   if (card) card.style.transform = 'translateY(0)';
   
   setTimeout(() => {
-    handleSaveProfileChangesLogic();
+    if (typeof handleSaveProfileChangesLogic === 'function') {
+      handleSaveProfileChangesLogic();
+    }
   }, 300);
 }
 
@@ -271,7 +288,104 @@ function handleCancelEdit() {
 }
 
 function handlePhotoUpload(e) {
-  handlePhotoUploadLogic(e);
+  if (typeof handlePhotoUploadLogic === 'function') {
+    handlePhotoUploadLogic(e);
+  }
+}
+
+// ===== ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ ПРОФИЛЯ =====
+function updateProfileDisplay() {
+  const profileNameElem = document.getElementById('profile-name');
+  const profileAgeElem = document.getElementById('profile-age-display');
+  const profileGenderElem = document.getElementById('profile-gender-display');
+  const profileCityElem = document.getElementById('profile-city-display');
+  const profilePhotoElem = document.getElementById('profile-photo-preview');
+  
+  if (!window.profileData || !window.profileData.current) return;
+  
+  if (profileNameElem) {
+    profileNameElem.textContent = window.profileData.current.first_name || "Пользователь";
+  }
+  
+  if (profileAgeElem) {
+    profileAgeElem.textContent = window.profileData.current.age ? `${window.profileData.current.age} лет` : "";
+  }
+  
+  if (profileGenderElem) {
+    const genderMap = {
+      'male': 'Мужской',
+      'female': 'Женский'
+    };
+    profileGenderElem.textContent = window.profileData.current.gender ? 
+      genderMap[window.profileData.current.gender] || window.profileData.current.gender : "";
+  }
+  
+  if (profileCityElem) {
+    profileCityElem.textContent = window.profileData.current.city || "";
+  }
+  
+  if (profilePhotoElem && window.profileData.current.custom_photo_url) {
+    profilePhotoElem.src = window.profileData.current.custom_photo_url;
+    profilePhotoElem.style.display = 'block';
+  }
+}
+
+function updateEditForm() {
+  const editAgeElem = document.getElementById("edit-age");
+  const editGenderElem = document.getElementById("edit-gender");
+  const editCityElem = document.getElementById("edit-city");
+  const editBioElem = document.getElementById("edit-bio");
+  const editPhotoElem = document.getElementById('edit-photo-preview');
+  
+  if (!window.profileData || !window.profileData.current) return;
+  
+  if (editAgeElem) editAgeElem.value = window.profileData.current.age || "";
+  if (editGenderElem) editGenderElem.value = window.profileData.current.gender || "";
+  if (editCityElem) editCityElem.value = window.profileData.current.city || "";
+  if (editBioElem) editBioElem.value = window.profileData.current.bio || "";
+  
+  if (editPhotoElem && window.profileData.current.custom_photo_url) {
+    editPhotoElem.src = window.profileData.current.custom_photo_url;
+    editPhotoElem.style.display = 'block';
+  }
+}
+
+function updateProfilePhotos() {
+  if (!window.profileData || !window.profileData.current || 
+      !window.profileData.current.photos || window.profileData.current.photos.length === 0) return;
+  
+  const container = document.querySelector('.profile-photos-container');
+  const indicators = document.querySelector('.profile-photo-indicators');
+  const photosCount = document.getElementById('photos-count');
+  const removeBtn = document.getElementById('remove-photo-btn');
+  
+  if (!container || !indicators) return;
+  
+  container.innerHTML = '';
+  
+  window.profileData.current.photos.forEach((photoUrl, index) => {
+    const img = document.createElement('img');
+    img.className = `profile-main-photo ${index === 0 ? 'active' : ''}`;
+    img.src = photoUrl;
+    img.alt = `Фото ${index + 1}`;
+    container.appendChild(img);
+  });
+  
+  indicators.innerHTML = '';
+  window.profileData.current.photos.forEach((_, index) => {
+    const indicator = document.createElement('div');
+    indicator.className = `profile-photo-indicator ${index === 0 ? 'active' : ''}`;
+    indicator.dataset.index = index;
+    indicators.appendChild(indicator);
+  });
+  
+  if (photosCount) {
+    photosCount.textContent = `${window.profileData.current.photos.length}/3 фото`;
+  }
+  
+  if (removeBtn) {
+    removeBtn.disabled = window.profileData.current.photos.length <= 1;
+  }
 }
 
 // ===== УВЕДОМЛЕНИЯ =====
@@ -356,55 +470,28 @@ function showNotification(message) {
   });
 }
 
-// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
-function updateProfileDisplay() {
-  const profileNameElem = document.getElementById('profile-name');
-  const profileAgeElem = document.getElementById('profile-age-display');
-  const profileGenderElem = document.getElementById('profile-gender-display');
-  const profileCityElem = document.getElementById('profile-city-display');
-  const profilePhotoElem = document.getElementById('profile-photo-preview');
-  
-  if (profileNameElem && window.profileData.current) {
-    profileNameElem.textContent = window.profileData.current.first_name || "Пользователь";
-  }
-  
-  if (profileAgeElem && window.profileData.current) {
-    profileAgeElem.textContent = window.profileData.current.age ? `${window.profileData.current.age} лет` : "";
-  }
-  
-  if (profileGenderElem && window.profileData.current) {
-    const genderMap = {
-      'male': 'Мужской',
-      'female': 'Женский'
-    };
-    profileGenderElem.textContent = window.profileData.current.gender ? 
-      genderMap[window.profileData.current.gender] || window.profileData.current.gender : "";
-  }
-  
-  if (profileCityElem && window.profileData.current) {
-    profileCityElem.textContent = window.profileData.current.city || "";
-  }
-  
-  if (profilePhotoElem && window.profileData.current && window.profileData.current.custom_photo_url) {
-    profilePhotoElem.src = window.profileData.current.custom_photo_url;
-    profilePhotoElem.style.display = 'block';
-  }
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ДРУГИХ МОДУЛЕЙ =====
+function updateLikesUI() {
+  // Заглушка - реализация в likes.js
 }
 
-function updateEditForm() {
-  const editAgeElem = document.getElementById("edit-age");
-  const editGenderElem = document.getElementById("edit-gender");
-  const editCityElem = document.getElementById("edit-city");
-  const editBioElem = document.getElementById("edit-bio");
-  const editPhotoElem = document.getElementById('edit-photo-preview');
-  
-  if (editAgeElem && window.profileData.current) editAgeElem.value = window.profileData.current.age || "";
-  if (editGenderElem && window.profileData.current) editGenderElem.value = window.profileData.current.gender || "";
-  if (editCityElem && window.profileData.current) editCityElem.value = window.profileData.current.city || "";
-  if (editBioElem && window.profileData.current) editBioElem.value = window.profileData.current.bio || "";
-  
-  if (editPhotoElem && window.profileData.current && window.profileData.current.custom_photo_url) {
-    editPhotoElem.src = window.profileData.current.custom_photo_url;
-    editPhotoElem.style.display = 'block';
-  }
+function updateChatsList() {
+  // Заглушка - реализация в chats.js
 }
+
+// ===== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ВИДИМОСТИ =====
+window.initUI = initUI;
+window.showAnimatedWelcomeScreen = showAnimatedWelcomeScreen;
+window.showOnboarding = showOnboarding;
+window.showMainApp = showMainApp;
+window.setActiveTab = setActiveTab;
+window.showNotification = showNotification;
+window.updateProfileDisplay = updateProfileDisplay;
+window.updateEditForm = updateEditForm;
+window.updateProfilePhotos = updateProfilePhotos;
+window.handleEditProfile = handleEditProfile;
+window.handleSaveProfileChanges = handleSaveProfileChanges;
+window.handleCancelEdit = handleCancelEdit;
+window.handlePhotoUpload = handlePhotoUpload;
+window.updateLikesUI = updateLikesUI;
+window.updateChatsList = updateChatsList;
