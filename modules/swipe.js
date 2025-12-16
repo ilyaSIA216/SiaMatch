@@ -26,9 +26,9 @@ window.AppSwipe = (function() {
       city: "Москва",
       bio: "Люблю кофе ☕ Москва ❤️. Ищу серьезные отношения.",
       photos: [
-        "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?auto=compress&cs=tinysrgb&w=800"
+        "https://i.pravatar.cc/800?img=1",
+        "https://i.pravatar.cc/800?img=1",
+        "https://i.pravatar.cc/800?img=1"
       ],
       verified: true,
       verification_status: 'verified',
@@ -45,8 +45,8 @@ window.AppSwipe = (function() {
       city: "Санкт-Петербург",
       bio: "Инженер, люблю спорт и путешествия. Ищу активную девушку.",
       photos: [
-        "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800"
+        "https://i.pravatar.cc/800?img=1",
+        "https://i.pravatar.cc/800?img=1"
       ],
       verified: false,
       verification_status: 'pending',
@@ -62,9 +62,9 @@ window.AppSwipe = (function() {
       city: "Москва",
       bio: "Фотограф, люблю искусство и природу. Ищу творческого человека.",
       photos: [
-        "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800"
+        "https://i.pravatar.cc/800?img=1",
+        "https://i.pravatar.cc/800?img=1",
+        "https://i.pravatar.cc/800?img=1"
       ],
       verified: true,
       verification_status: 'verified',
