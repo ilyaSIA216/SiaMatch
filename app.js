@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
   
+    // ==== КРИТИЧНО ДЛЯ iOS ====
+  if (window.Telegram?.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+    if (Telegram.WebApp.MainButton) {
+      Telegram.WebApp.MainButton.hide();
+    }
+    console.log('✅ Telegram WebApp инициализирован для iOS');
+  }
+  // ==========================
+  
   let hasInitialized = false;
   
   // ===== ОСНОВНЫЕ ФУНКЦИИ =====
