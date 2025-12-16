@@ -1,29 +1,9 @@
-// app.js - Упрощенная версия
-// ДОБАВЬ ЭТО ПЕРВЫМИ СТРОЧКАМИ В app.js
-(function initTelegram() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        // КРИТИЧНО для iOS
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-        
-        // Отключаем кнопку если есть
-        if (window.Telegram.WebApp.MainButton) {
-            window.Telegram.WebApp.MainButton.hide();
-        }
-        
-        console.log('✅ Telegram WebApp готов для iOS');
-    } else {
-        console.log('⚠️ Не в Telegram WebView, режим демо');
-        // Создаем заглушку для тестирования
-        window.Telegram = {
-            WebApp: {
-                ready: () => console.log('DEMO: ready'),
-                expand: () => console.log('DEMO: expand'),
-                initDataUnsafe: { user: { id: 1, first_name: 'Демо' } }
-            }
-        };
-    }
-})();
+if (window.Telegram?.WebApp) {
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+  window.Telegram.WebApp.enableClosingConfirmation();
+  console.log('Telegram Mini App готов на iPhone');
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SiaMatch запускается...');
