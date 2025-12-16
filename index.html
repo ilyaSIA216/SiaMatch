@@ -739,7 +739,191 @@
   <!-- ДОБАВИМ ЭЛЕМЕНТЫ ДЛЯ АНИМАЦИЙ СВАЙПОВ -->
   <div id="swipe-feedback" class="swipe-feedback hidden"></div>
 
+  <!-- ✅ ИСПРАВЛЕННЫЙ ПОРЯДОК СКРИПТОВ -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="app.js"></script>
+  <script>
+    // Минимальная критичная логика инициализации
+    let tg;
+    
+    window.addEventListener('DOMContentLoaded', function() {
+      // Инициализация Telegram Web App
+      tg = window.Telegram.WebApp;
+      
+      if (tg) {
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.setHeaderColor('#f43f5e');
+        tg.setBackgroundColor('#ffffff');
+        
+        // Получаем данные пользователя из Telegram
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+          const username = user.username ? `@${user.username}` : user.first_name || 'Пользователь';
+          const usernameElement = document.getElementById('username');
+          if (usernameElement) {
+            usernameElement.textContent = username;
+          }
+        }
+        
+        // Инициализация элементов интерфейса
+        initApp();
+      } else {
+        console.log('Telegram Web App не инициализирован');
+        // Запасной режим для тестирования в браузере
+        setTimeout(() => {
+          showScreen('welcome-screen');
+        }, 300);
+      }
+    });
+    
+    function initApp() {
+      // Показываем экран приветствия
+      setTimeout(() => {
+        showScreen('welcome-screen');
+      }, 300);
+      
+      // Основные обработчики событий
+      setupEventListeners();
+    }
+    
+    function showScreen(screenId) {
+      // Скрываем все экраны
+      const screens = document.querySelectorAll('.screen, #welcome-screen');
+      screens.forEach(screen => {
+        screen.classList.add('hidden');
+      });
+      
+      // Показываем нужный экран
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) {
+        targetScreen.classList.remove('hidden');
+      }
+      
+      // Управляем таб-баром
+      const tabBar = document.getElementById('tab-bar');
+      if (screenId.includes('screen-')) {
+        const tabName = screenId.replace('screen-', '');
+        updateActiveTab(tabName);
+        if (tabBar) tabBar.classList.remove('hidden');
+      } else {
+        if (tabBar) tabBar.classList.add('hidden');
+      }
+    }
+    
+    function updateActiveTab(tabName) {
+      const tabs = document.querySelectorAll('.tab-btn');
+      tabs.forEach(tab => {
+        const isActive = tab.dataset.tab === tabName;
+        tab.classList.toggle('active', isActive);
+      });
+    }
+    
+    function setupEventListeners() {
+      const startBtn = document.getElementById('startBtn');
+      if (startBtn) {
+        startBtn.addEventListener('click', () => {
+          // Показываем анимированный экран
+          const welcomeAnimatedScreen = document.getElementById('welcome-animated-screen');
+          if (welcomeAnimatedScreen) {
+            welcomeAnimatedScreen.classList.remove('hidden');
+            document.getElementById('welcome-screen').classList.add('hidden');
+            
+            // Запускаем анимацию
+            setTimeout(() => {
+              startHeartAnimation();
+            }, 100);
+            
+            // Через 3 секунды переходим к анкете
+            setTimeout(() => {
+              showScreen('onboarding-screen');
+            }, 3000);
+          } else {
+            showScreen('onboarding-screen');
+          }
+        });
+      }
+      
+      // Обработчики для табов
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabName = btn.dataset.tab;
+          showScreen(`screen-${tabName}`);
+        });
+      });
+      
+      // Обработчик сохранения профиля
+      const saveProfileBtn = document.getElementById('saveProfileBtn');
+      if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', () => {
+          // Простая валидация
+          const age = document.getElementById('age');
+          const gender = document.getElementById('gender');
+          const city = document.getElementById('city');
+          const bio = document.getElementById('bio');
+          
+          if (!age.value || !gender.value || !city.value) {
+            alert('Пожалуйста, заполните обязательные поля');
+            return;
+          }
+          
+          if (bio.value && bio.value.length < 10) {
+            alert('Описание должно содержать минимум 10 символов');
+            return;
+          }
+          
+          // Сохраняем данные
+          const userProfile = {
+            age: age.value,
+            gender: gender.value,
+            city: city.value,
+            bio: bio.value || '',
+            createdAt: new Date().toISOString()
+          };
+          
+          // В реальном приложении здесь был бы запрос к серверу
+          console.log('Profile saved:', userProfile);
+          
+          // Показываем ленту свайпов
+          showScreen('screen-feed');
+        });
+      }
+      
+      // Обработчик кнопки редактирования профиля
+      const editProfileBtn = document.getElementById('edit-profile-btn');
+      if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', () => {
+          const profileDisplay = document.getElementById('profile-display');
+          const profileEdit = document.getElementById('profile-edit');
+          
+          if (profileDisplay && profileEdit) {
+            profileDisplay.classList.add('hidden');
+            profileEdit.classList.remove('hidden');
+          }
+        });
+      }
+    }
+    
+    function startHeartAnimation() {
+      const heartPath = document.querySelector('.heart-path');
+      if (heartPath) {
+        // Анимируем рисование сердца
+        const length = heartPath.getTotalLength();
+        heartPath.style.strokeDasharray = length;
+        heartPath.style.strokeDashoffset = length;
+        
+        setTimeout(() => {
+          heartPath.style.transition = 'stroke-dashoffset 1.5s ease-in-out';
+          heartPath.style.strokeDashoffset = '0';
+        }, 500);
+      }
+    }
+    
+    // Экспортируем функции для использования в других скриптах
+    window.app = {
+      showScreen,
+      tg: () => tg
+    };
+  </script>
 </body>
 </html>
