@@ -4351,18 +4351,17 @@ document.addEventListener('DOMContentLoaded', function() {
     profileData = await loadProfile();
     console.log('Профиль:', profileData ? 'найден' : 'отсутствует');
     
-    // ✅ ИСПРАВЛЕНИЕ: правильная логика экранов
-    if (!profileData || !profileData.first_name || profileData.photos?.length === 0) {
-      showWelcomeScreen();
-    } else {
-      hideWelcomeScreen();
-      updateTabBar();  // ← ВАЖНО! Инициализируем табы ПЕРЕД показом
-      
-      // Сначала показываем экран ленты
-      setActiveTab("feed");
-      
-      showMainApp();
-    }
+// ✅ ИСПРАВЛЕННАЯ ЛОГИКА: проверяем только наличие профиля
+if (!profileData || !profileData.first_name) {
+  console.log('Профиль: отсутствует - показываем экран приветствия');
+  showWelcomeScreen();
+} else {
+  console.log('Профиль: найден - показываем основное приложение');
+  hideWelcomeScreen();
+  updateTabBar();
+  setActiveTab("feed");
+  showMainApp();
+}
     
     // Настраиваем обработчики
     setupStartButton();
