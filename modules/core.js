@@ -20,9 +20,6 @@ window.AppCore = {
         tg = Telegram.WebApp;
         console.log('✅ Telegram WebApp обнаружен');
         
-        tg.ready();
-        tg.expand();
-        
         if (tg.MainButton) {
           tg.MainButton.hide();
         }
