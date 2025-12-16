@@ -4344,8 +4344,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initTelegram();
     if (isIOS) checkIOSStorage();
         
-    // Отладка
-    debugLocalStorage();
     
     // Очистка слишком больших фото перед началом
     cleanupLargePhotos();
