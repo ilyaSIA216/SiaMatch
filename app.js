@@ -900,16 +900,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function initFiltersSystem() {
     console.log('🔍 Инициализирую систему фильтров');
     
-  loadSearchFilters();
-  
-  // УДАЛЯЕМ КНОПКУ ФИЛЬТРОВ ИЗ ЗАГОЛОВКА ЛЕНТЫ
-  const openFiltersBtn = document.getElementById("open-filters-btn");
-  if (openFiltersBtn && openFiltersBtn.parentNode) {
-    openFiltersBtn.parentNode.removeChild(openFiltersBtn);
+    loadSearchFilters();
+    initSearchFilters();
   }
-  
-  initSearchFilters();
-}
   
   function initSearchFilters() {
     loadSearchFilters();
@@ -2178,458 +2171,458 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-// ===== СИСТЕМА СВАЙПОВ И УПРАВЛЕНИЯ ФОТОГРАФИЯМИ =====
-function initSwipeSystem() {
-  console.log('🔄 Инициализирую систему свайпов и фотографий');
-  
-  const candidateCard = document.getElementById('candidate-card');
-  const photosContainer = document.querySelector('.candidate-photos-container');
-  
-  if (!candidateCard || !photosContainer) return;
-  
-  const actions = document.querySelector('.actions');
-  if (actions) {
-    actions.style.display = 'none';
-  }
-  
-  // Инициализируем свайпы
-  initSwipeGestures(candidateCard);
-  
-  // Инициализируем переключение фото по клику/тапу
-  initPhotoSwitching(photosContainer);
-}
-
-function initSwipeGestures(cardElement) {
-  // Для тач-устройств
-  cardElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-  cardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-  cardElement.addEventListener('touchend', handleTouchEnd, { passive: true });
-  
-  // Для десктопа
-  cardElement.addEventListener('mousedown', handleMouseDown);
-  cardElement.addEventListener('mousemove', handleMouseMove);
-  cardElement.addEventListener('mouseup', handleMouseEnd);
-  cardElement.addEventListener('mouseleave', handleMouseLeave);
-}
-
-function initPhotoSwitching(photosContainer) {
-  // Добавляем обработчики кликов на фото
-  photosContainer.addEventListener('click', handlePhotoClick);
-  photosContainer.addEventListener('touchstart', handlePhotoTouchStart, { passive: true });
-  photosContainer.addEventListener('touchend', handlePhotoTouchEnd, { passive: true });
-  
-  // Создаем индикаторы свайпов для фото
-  createPhotoSwipeIndicators(photosContainer);
-}
-
-function createPhotoSwipeIndicators(container) {
-  // Добавляем подсказки для свайпа по фото
-  const leftIndicator = document.createElement('div');
-  leftIndicator.className = 'photo-swipe-indicator left';
-  leftIndicator.innerHTML = '◀';
-  leftIndicator.style.cssText = `
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 30px;
-    color: white;
-    background: rgba(0,0,0,0.3);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.7;
-    pointer-events: none;
-    z-index: 5;
-  `;
-  
-  const rightIndicator = document.createElement('div');
-  rightIndicator.className = 'photo-swipe-indicator right';
-  rightIndicator.innerHTML = '▶';
-  rightIndicator.style.cssText = `
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 30px;
-    color: white;
-    background: rgba(0,0,0,0.3);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.7;
-    pointer-events: none;
-    z-index: 5;
-  `;
-  
-  container.appendChild(leftIndicator);
-  container.appendChild(rightIndicator);
-}
-
-// Переменные для обработки свайпов
-let touchStartTime = 0;
-let isTouchForPhoto = false;
-let photoSwipeStartX = 0;
-let photoSwipeStartY = 0;
-
-function handlePhotoTouchStart(e) {
-  const touch = e.touches[0];
-  photoSwipeStartX = touch.clientX;
-  photoSwipeStartY = touch.clientY;
-  touchStartTime = Date.now();
-  isTouchForPhoto = true;
-}
-
-function handlePhotoTouchEnd(e) {
-  if (!isTouchForPhoto) return;
-  
-  const touch = e.changedTouches[0];
-  const deltaX = touch.clientX - photoSwipeStartX;
-  const deltaY = touch.clientY - photoSwipeStartY;
-  const touchDuration = Date.now() - touchStartTime;
-  
-  // Если тап был короткий (не свайп) и смещение маленькое - это клик
-  if (touchDuration < 200 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
-    handlePhotoClick(e);
-  } else if (Math.abs(deltaX) > 30 && Math.abs(deltaY) < 50) {
-    // Это свайп по горизонтали
-    if (deltaX > 0) {
-      switchPhoto(-1); // Свайп вправо - предыдущее фото
-    } else {
-      switchPhoto(1); // Свайп влево - следующее фото
-    }
-  }
-  
-  isTouchForPhoto = false;
-}
-
-function handlePhotoClick(e) {
-  if (e.target.classList.contains('photo-swipe-indicator')) return;
-  
-  const photoRect = e.currentTarget.getBoundingClientRect();
-  const clickX = e.clientX || (e.touches && e.touches[0].clientX);
-  
-  if (clickX) {
-    const photoWidth = photoRect.width;
-    const clickPosition = clickX - photoRect.left;
-    
-    // Определяем, в какую часть фото кликнули
-    if (clickPosition < photoWidth / 3) {
-      // Левая треть - предыдущее фото
-      switchPhoto(-1);
-    } else if (clickPosition > (photoWidth / 3) * 2) {
-      // Правая треть - следующее фото
-      switchPhoto(1);
-    }
-    // Центральная треть - ничего не делаем (можно добавить зум в будущем)
-  }
-}
-
-function handleTouchStart(e) {
-  const touch = e.touches[0];
-  swipeStartX = touch.clientX;
-  swipeStartY = touch.clientY;
-  isSwiping = false; // Сбрасываем флаг свайпа
-  
-  const candidateCard = document.getElementById('candidate-card');
-  candidateCard.style.transition = 'none';
-}
-
-function handleTouchMove(e) {
-  if (!swipeStartX && !swipeStartY) return;
-  
-  const touch = e.touches[0];
-  const deltaX = touch.clientX - swipeStartX;
-  const deltaY = touch.clientY - swipeStartY;
-  
-  // Если вертикальное движение значительное - это скролл страницы
-  if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-    isSwiping = false;
-    return; // Позволяем странице скроллиться
-  }
-  
-  // Если горизонтальное движение значительное - это свайп карточки
-  if (Math.abs(deltaX) > 10) {
-    e.preventDefault(); // Предотвращаем скролл только для горизонтальных свайпов
-    isSwiping = true;
+  // ===== СИСТЕМА СВАЙПОВ И УПРАВЛЕНИЯ ФОТОГРАФИЯМИ =====
+  function initSwipeSystem() {
+    console.log('🔄 Инициализирую систему свайпов и фотографий');
     
     const candidateCard = document.getElementById('candidate-card');
-    const opacity = 1 - Math.abs(deltaX) / 300;
+    const photosContainer = document.querySelector('.candidate-photos-container');
     
-    candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
-    candidateCard.style.opacity = Math.max(opacity, 0.5);
+    if (!candidateCard || !photosContainer) return;
     
-    // Показываем подсказку
-    if (deltaX > 50) {
-      showSwipeFeedback('like');
-    } else if (deltaX < -50) {
-      showSwipeFeedback('dislike');
+    const actions = document.querySelector('.actions');
+    if (actions) {
+      actions.style.display = 'none';
+    }
+    
+    // Инициализируем свайпы
+    initSwipeGestures(candidateCard);
+    
+    // Инициализируем переключение фото по клику/тапу
+    initPhotoSwitching(photosContainer);
+  }
+  
+  function initSwipeGestures(cardElement) {
+    // Для тач-устройств
+    cardElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+    cardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    cardElement.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    // Для десктопа
+    cardElement.addEventListener('mousedown', handleMouseDown);
+    cardElement.addEventListener('mousemove', handleMouseMove);
+    cardElement.addEventListener('mouseup', handleMouseEnd);
+    cardElement.addEventListener('mouseleave', handleMouseLeave);
+  }
+  
+  function initPhotoSwitching(photosContainer) {
+    // Добавляем обработчики кликов на фото
+    photosContainer.addEventListener('click', handlePhotoClick);
+    photosContainer.addEventListener('touchstart', handlePhotoTouchStart, { passive: true });
+    photosContainer.addEventListener('touchend', handlePhotoTouchEnd, { passive: true });
+    
+    // Создаем индикаторы свайпов для фото
+    createPhotoSwipeIndicators(photosContainer);
+  }
+  
+  function createPhotoSwipeIndicators(container) {
+    // Добавляем подсказки для свайпа по фото
+    const leftIndicator = document.createElement('div');
+    leftIndicator.className = 'photo-swipe-indicator left';
+    leftIndicator.innerHTML = '◀';
+    leftIndicator.style.cssText = `
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 30px;
+      color: white;
+      background: rgba(0,0,0,0.3);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 5;
+    `;
+    
+    const rightIndicator = document.createElement('div');
+    rightIndicator.className = 'photo-swipe-indicator right';
+    rightIndicator.innerHTML = '▶';
+    rightIndicator.style.cssText = `
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 30px;
+      color: white;
+      background: rgba(0,0,0,0.3);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 5;
+    `;
+    
+    container.appendChild(leftIndicator);
+    container.appendChild(rightIndicator);
+  }
+  
+  // Переменные для обработки свайпов
+  let touchStartTime = 0;
+  let isTouchForPhoto = false;
+  let photoSwipeStartX = 0;
+  let photoSwipeStartY = 0;
+  
+  function handlePhotoTouchStart(e) {
+    const touch = e.touches[0];
+    photoSwipeStartX = touch.clientX;
+    photoSwipeStartY = touch.clientY;
+    touchStartTime = Date.now();
+    isTouchForPhoto = true;
+  }
+  
+  function handlePhotoTouchEnd(e) {
+    if (!isTouchForPhoto) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - photoSwipeStartX;
+    const deltaY = touch.clientY - photoSwipeStartY;
+    const touchDuration = Date.now() - touchStartTime;
+    
+    // Если тап был короткий (не свайп) и смещение маленькое - это клик
+    if (touchDuration < 200 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+      handlePhotoClick(e);
+    } else if (Math.abs(deltaX) > 30 && Math.abs(deltaY) < 50) {
+      // Это свайп по горизонтали
+      if (deltaX > 0) {
+        switchPhoto(-1); // Свайп вправо - предыдущее фото
+      } else {
+        switchPhoto(1); // Свайп влево - следующее фото
+      }
+    }
+    
+    isTouchForPhoto = false;
+  }
+  
+  function handlePhotoClick(e) {
+    if (e.target.classList.contains('photo-swipe-indicator')) return;
+    
+    const photoRect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX || (e.touches && e.touches[0].clientX);
+    
+    if (clickX) {
+      const photoWidth = photoRect.width;
+      const clickPosition = clickX - photoRect.left;
+      
+      // Определяем, в какую часть фото кликнули
+      if (clickPosition < photoWidth / 3) {
+        // Левая треть - предыдущее фото
+        switchPhoto(-1);
+      } else if (clickPosition > (photoWidth / 3) * 2) {
+        // Правая треть - следующее фото
+        switchPhoto(1);
+      }
+      // Центральная треть - ничего не делаем (можно добавить зум в будущем)
     }
   }
-}
-
-function handleTouchEnd(e) {
-  if (!swipeStartX && !swipeStartY) return;
   
-  const touch = e.changedTouches[0];
-  const deltaX = touch.clientX - swipeStartX;
-  
-  const candidateCard = document.getElementById('candidate-card');
-  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-  
-  if (isSwiping && Math.abs(deltaX) > 100) {
-    // Свайп выполнен
-    if (deltaX > 0) {
-      handleSwipeRight();
-    } else {
-      handleSwipeLeft();
-    }
-  } else {
-    // Возвращаем на место
-    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-    candidateCard.style.opacity = 1;
-  }
-  
-  // Сбрасываем переменные
-  swipeStartX = 0;
-  swipeStartY = 0;
-  isSwiping = false;
-}
-
-// Обработчики для мыши
-function handleMouseDown(e) {
-  swipeStartX = e.clientX;
-  swipeStartY = e.clientY;
-  isSwiping = false;
-  
-  const candidateCard = document.getElementById('candidate-card');
-  candidateCard.style.transition = 'none';
-}
-
-function handleMouseMove(e) {
-  if (!swipeStartX && !swipeStartY) return;
-  
-  const deltaX = e.clientX - swipeStartX;
-  const deltaY = e.clientY - swipeStartY;
-  
-  // Если вертикальное движение значительное - это скролл страницы
-  if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-    isSwiping = false;
-    return;
-  }
-  
-  // Если горизонтальное движение значительное - это свайп карточки
-  if (Math.abs(deltaX) > 10) {
-    e.preventDefault();
-    isSwiping = true;
+  function handleTouchStart(e) {
+    const touch = e.touches[0];
+    swipeStartX = touch.clientX;
+    swipeStartY = touch.clientY;
+    isSwiping = false; // Сбрасываем флаг свайпа
     
     const candidateCard = document.getElementById('candidate-card');
-    const opacity = 1 - Math.abs(deltaX) / 300;
+    candidateCard.style.transition = 'none';
+  }
+  
+  function handleTouchMove(e) {
+    if (!swipeStartX && !swipeStartY) return;
     
-    candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
-    candidateCard.style.opacity = Math.max(opacity, 0.5);
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - swipeStartX;
+    const deltaY = touch.clientY - swipeStartY;
     
-    if (deltaX > 50) {
-      showSwipeFeedback('like');
-    } else if (deltaX < -50) {
-      showSwipeFeedback('dislike');
+    // Если вертикальное движение значительное - это скролл страницы
+    if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      isSwiping = false;
+      return; // Позволяем странице скроллиться
+    }
+    
+    // Если горизонтальное движение значительное - это свайп карточки
+    if (Math.abs(deltaX) > 10) {
+      e.preventDefault(); // Предотвращаем скролл только для горизонтальных свайпов
+      isSwiping = true;
+      
+      const candidateCard = document.getElementById('candidate-card');
+      const opacity = 1 - Math.abs(deltaX) / 300;
+      
+      candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+      candidateCard.style.opacity = Math.max(opacity, 0.5);
+      
+      // Показываем подсказку
+      if (deltaX > 50) {
+        showSwipeFeedback('like');
+      } else if (deltaX < -50) {
+        showSwipeFeedback('dislike');
+      }
     }
   }
-}
-
-function handleMouseEnd(e) {
-  if (!swipeStartX && !swipeStartY) return;
   
-  const deltaX = e.clientX - swipeStartX;
-  
-  const candidateCard = document.getElementById('candidate-card');
-  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-  
-  if (isSwiping && Math.abs(deltaX) > 100) {
-    if (deltaX > 0) {
-      handleSwipeRight();
+  function handleTouchEnd(e) {
+    if (!swipeStartX && !swipeStartY) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartX;
+    
+    const candidateCard = document.getElementById('candidate-card');
+    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    
+    if (isSwiping && Math.abs(deltaX) > 100) {
+      // Свайп выполнен
+      if (deltaX > 0) {
+        handleSwipeRight();
+      } else {
+        handleSwipeLeft();
+      }
     } else {
-      handleSwipeLeft();
-    }
-  } else {
-    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-    candidateCard.style.opacity = 1;
-  }
-  
-  swipeStartX = 0;
-  swipeStartY = 0;
-  isSwiping = false;
-}
-
-function handleMouseLeave(e) {
-  if (!isSwiping) return;
-  
-  const candidateCard = document.getElementById('candidate-card');
-  candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-  candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-  candidateCard.style.opacity = 1;
-  
-  swipeStartX = 0;
-  swipeStartY = 0;
-  isSwiping = false;
-}
-
-function handleSwipeRight() {
-  showSwipeAnimation('right');
-  
-  setTimeout(() => {
-    handleLike();
-  }, 300);
-}
-
-function handleSwipeLeft() {
-  showSwipeAnimation('left');
-  
-  setTimeout(() => {
-    handleDislike();
-  }, 300);
-}
-
-function showSwipeAnimation(direction) {
-  const candidateCard = document.getElementById('candidate-card');
-  
-  if (direction === 'left') {
-    candidateCard.classList.add('swipe-left');
-  } else {
-    candidateCard.classList.add('swipe-right');
-  }
-  
-  setTimeout(() => {
-    candidateCard.classList.remove('swipe-left', 'swipe-right');
-    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
-    candidateCard.style.opacity = 1;
-  }, 500);
-}
-
-function showSwipeFeedback(type) {
-  const feedback = document.getElementById('swipe-feedback');
-  
-  if (!feedback) return;
-  
-  feedback.textContent = type === 'like' ? '❤️' : '✖️';
-  feedback.className = `swipe-feedback ${type}`;
-  feedback.classList.remove('hidden');
-  
-  setTimeout(() => {
-    feedback.classList.add('hidden');
-  }, 800);
-}
-
-function switchPhoto(direction) {
-  if (candidatePhotos.length <= 1) return;
-  
-  const oldIndex = currentPhotoIndex;
-  currentPhotoIndex += direction;
-  
-  if (currentPhotoIndex < 0) {
-    currentPhotoIndex = candidatePhotos.length - 1;
-  } else if (currentPhotoIndex >= candidatePhotos.length) {
-    currentPhotoIndex = 0;
-  }
-  
-  updateCandidatePhoto();
-  updatePhotoIndicators();
-  
-  // Анимация переключения
-  const photoElement = document.getElementById('candidate-photo');
-  photoElement.style.transition = 'opacity 0.3s ease';
-  photoElement.style.opacity = '0';
-  
-  setTimeout(() => {
-    photoElement.style.opacity = '1';
-  }, 50);
-  
-  // Вибрация (если доступно)
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
-  }
-  
-  console.log(`🔄 Переключение фото: ${oldIndex} → ${currentPhotoIndex}`);
-}
-
-function updateCandidatePhoto() {
-  if (candidatePhotos.length > 0 && currentPhotoIndex < candidatePhotos.length) {
-    const photoUrl = candidatePhotos[currentPhotoIndex];
-    const photoElement = document.getElementById("candidate-photo");
-    
-    // Предзагрузка следующего фото для плавного переключения
-    if (candidatePhotos.length > 1) {
-      const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
-      const nextPhotoUrl = candidatePhotos[nextIndex];
-      const img = new Image();
-      img.src = nextPhotoUrl;
+      // Возвращаем на место
+      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+      candidateCard.style.opacity = 1;
     }
     
-    photoElement.src = photoUrl;
+    // Сбрасываем переменные
+    swipeStartX = 0;
+    swipeStartY = 0;
+    isSwiping = false;
   }
-}
-
-function updateCandidateInterests() {
-  const interestsContainer = document.getElementById('candidate-interests');
-  if (!interestsContainer) return;
   
-  interestsContainer.innerHTML = '';
-  
-  const interestLabels = {
-    'travel': 'Путешествия',
-    'movies': 'Кино',
-    'art': 'Искусство',
-    'sport': 'Спорт',
-    'photography': 'Фотография',
-    'dancing': 'Танцы',
-    'music': 'Музыка',
-    'cooking': 'Кулинария',
-    'business': 'Бизнес',
-    'gaming': 'Гейминг',
-    'cars': 'Автомобили',
-    'anime': 'Аниме',
-    'tattoos': 'Татуировки',
-    'piercing': 'Пирсинг',
-    'workout': 'Тренировки',
-    'wine': 'Вино',
-    'boardgames': 'Настольные игры'
-  };
-  
-  candidateInterests.forEach(interest => {
-    const tag = document.createElement('div');
-    tag.className = 'interest-tag-small';
-    tag.textContent = interestLabels[interest] || interest;
-    interestsContainer.appendChild(tag);
-  });
-}
-
-function updatePhotoIndicators() {
-  const indicatorsContainer = document.querySelector('.photo-indicators');
-  if (!indicatorsContainer) return;
-  
-  indicatorsContainer.innerHTML = '';
-  
-  for (let i = 0; i < candidatePhotos.length; i++) {
-    const indicator = document.createElement('div');
-    indicator.className = `photo-indicator ${i === currentPhotoIndex ? 'active' : ''}`;
-    indicator.dataset.index = i;
+  // Обработчики для мыши
+  function handleMouseDown(e) {
+    swipeStartX = e.clientX;
+    swipeStartY = e.clientY;
+    isSwiping = false;
     
-    indicator.addEventListener('click', (e) => {
-      e.stopPropagation(); // Предотвращаем срабатывание клика на фото
-      currentPhotoIndex = i;
-      updateCandidatePhoto();
-      updatePhotoIndicators();
+    const candidateCard = document.getElementById('candidate-card');
+    candidateCard.style.transition = 'none';
+  }
+  
+  function handleMouseMove(e) {
+    if (!swipeStartX && !swipeStartY) return;
+    
+    const deltaX = e.clientX - swipeStartX;
+    const deltaY = e.clientY - swipeStartY;
+    
+    // Если вертикальное движение значительное - это скролл страницы
+    if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      isSwiping = false;
+      return;
+    }
+    
+    // Если горизонтальное движение значительное - это свайп карточки
+    if (Math.abs(deltaX) > 10) {
+      e.preventDefault();
+      isSwiping = true;
+      
+      const candidateCard = document.getElementById('candidate-card');
+      const opacity = 1 - Math.abs(deltaX) / 300;
+      
+      candidateCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+      candidateCard.style.opacity = Math.max(opacity, 0.5);
+      
+      if (deltaX > 50) {
+        showSwipeFeedback('like');
+      } else if (deltaX < -50) {
+        showSwipeFeedback('dislike');
+      }
+    }
+  }
+  
+  function handleMouseEnd(e) {
+    if (!swipeStartX && !swipeStartY) return;
+    
+    const deltaX = e.clientX - swipeStartX;
+    
+    const candidateCard = document.getElementById('candidate-card');
+    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    
+    if (isSwiping && Math.abs(deltaX) > 100) {
+      if (deltaX > 0) {
+        handleSwipeRight();
+      } else {
+        handleSwipeLeft();
+      }
+    } else {
+      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+      candidateCard.style.opacity = 1;
+    }
+    
+    swipeStartX = 0;
+    swipeStartY = 0;
+    isSwiping = false;
+  }
+  
+  function handleMouseLeave(e) {
+    if (!isSwiping) return;
+    
+    const candidateCard = document.getElementById('candidate-card');
+    candidateCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+    candidateCard.style.opacity = 1;
+    
+    swipeStartX = 0;
+    swipeStartY = 0;
+    isSwiping = false;
+  }
+  
+  function handleSwipeRight() {
+    showSwipeAnimation('right');
+    
+    setTimeout(() => {
+      handleLike();
+    }, 300);
+  }
+  
+  function handleSwipeLeft() {
+    showSwipeAnimation('left');
+    
+    setTimeout(() => {
+      handleDislike();
+    }, 300);
+  }
+  
+  function showSwipeAnimation(direction) {
+    const candidateCard = document.getElementById('candidate-card');
+    
+    if (direction === 'left') {
+      candidateCard.classList.add('swipe-left');
+    } else {
+      candidateCard.classList.add('swipe-right');
+    }
+    
+    setTimeout(() => {
+      candidateCard.classList.remove('swipe-left', 'swipe-right');
+      candidateCard.style.transform = 'translateX(0) rotate(0deg)';
+      candidateCard.style.opacity = 1;
+    }, 500);
+  }
+  
+  function showSwipeFeedback(type) {
+    const feedback = document.getElementById('swipe-feedback');
+    
+    if (!feedback) return;
+    
+    feedback.textContent = type === 'like' ? '❤️' : '✖️';
+    feedback.className = `swipe-feedback ${type}`;
+    feedback.classList.remove('hidden');
+    
+    setTimeout(() => {
+      feedback.classList.add('hidden');
+    }, 800);
+  }
+  
+  function switchPhoto(direction) {
+    if (candidatePhotos.length <= 1) return;
+    
+    const oldIndex = currentPhotoIndex;
+    currentPhotoIndex += direction;
+    
+    if (currentPhotoIndex < 0) {
+      currentPhotoIndex = candidatePhotos.length - 1;
+    } else if (currentPhotoIndex >= candidatePhotos.length) {
+      currentPhotoIndex = 0;
+    }
+    
+    updateCandidatePhoto();
+    updatePhotoIndicators();
+    
+    // Анимация переключения
+    const photoElement = document.getElementById('candidate-photo');
+    photoElement.style.transition = 'opacity 0.3s ease';
+    photoElement.style.opacity = '0';
+    
+    setTimeout(() => {
+      photoElement.style.opacity = '1';
+    }, 50);
+    
+    // Вибрация (если доступно)
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    console.log(`🔄 Переключение фото: ${oldIndex} → ${currentPhotoIndex}`);
+  }
+  
+  function updateCandidatePhoto() {
+    if (candidatePhotos.length > 0 && currentPhotoIndex < candidatePhotos.length) {
+      const photoUrl = candidatePhotos[currentPhotoIndex];
+      const photoElement = document.getElementById("candidate-photo");
+      
+      // Предзагрузка следующего фото для плавного переключения
+      if (candidatePhotos.length > 1) {
+        const nextIndex = (currentPhotoIndex + 1) % candidatePhotos.length;
+        const nextPhotoUrl = candidatePhotos[nextIndex];
+        const img = new Image();
+        img.src = nextPhotoUrl;
+      }
+      
+      photoElement.src = photoUrl;
+    }
+  }
+  
+  function updateCandidateInterests() {
+    const interestsContainer = document.getElementById('candidate-interests');
+    if (!interestsContainer) return;
+    
+    interestsContainer.innerHTML = '';
+    
+    const interestLabels = {
+      'travel': 'Путешествия',
+      'movies': 'Кино',
+      'art': 'Искусство',
+      'sport': 'Спорт',
+      'photography': 'Фотография',
+      'dancing': 'Танцы',
+      'music': 'Музыка',
+      'cooking': 'Кулинария',
+      'business': 'Бизнес',
+      'gaming': 'Гейминг',
+      'cars': 'Автомобили',
+      'anime': 'Аниме',
+      'tattoos': 'Татуировки',
+      'piercing': 'Пирсинг',
+      'workout': 'Тренировки',
+      'wine': 'Вино',
+      'boardgames': 'Настольные игры'
+    };
+    
+    candidateInterests.forEach(interest => {
+      const tag = document.createElement('div');
+      tag.className = 'interest-tag-small';
+      tag.textContent = interestLabels[interest] || interest;
+      interestsContainer.appendChild(tag);
     });
-    
-    indicatorsContainer.appendChild(indicator);
   }
-}
+  
+  function updatePhotoIndicators() {
+    const indicatorsContainer = document.querySelector('.photo-indicators');
+    if (!indicatorsContainer) return;
+    
+    indicatorsContainer.innerHTML = '';
+    
+    for (let i = 0; i < candidatePhotos.length; i++) {
+      const indicator = document.createElement('div');
+      indicator.className = `photo-indicator ${i === currentPhotoIndex ? 'active' : ''}`;
+      indicator.dataset.index = i;
+      
+      indicator.addEventListener('click', (e) => {
+        e.stopPropagation(); // Предотвращаем срабатывание клика на фото
+        currentPhotoIndex = i;
+        updateCandidatePhoto();
+        updatePhotoIndicators();
+      });
+      
+      indicatorsContainer.appendChild(indicator);
+    }
+  }
   
   // ===== ОБРАБОТЧИК КНОПКИ "НАЧАТЬ ЗНАКОМСТВО" =====
   function setupStartButton() {
@@ -2665,7 +2658,7 @@ function updatePhotoIndicators() {
       showOnboarding();
     }
   }
-
+  
   // ===== ПОКАЗАТЬ АНИМИРОВАННЫЙ ЭКРАН ПРИВЕТСТВИЯ =====
   function showAnimatedWelcomeScreen() {
     if (!animatedWelcomeScreen) return;
