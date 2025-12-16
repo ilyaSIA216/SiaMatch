@@ -235,7 +235,6 @@ function setupProfileEventHandlers() {
   const saveChangesBtn = document.getElementById('save-profile-changes');
   const cancelEditBtn = document.getElementById('cancel-profile-edit');
   const profilePhotoInput = document.getElementById('profile-photo-upload');
-  const editPhotoInput = document.getElementById('edit-photo-upload');
   
   if (editProfileBtn) {
     editProfileBtn.addEventListener('click', handleEditProfile);
@@ -253,9 +252,7 @@ function setupProfileEventHandlers() {
     profilePhotoInput.addEventListener('change', handlePhotoUpload);
   }
   
-  if (editPhotoInput) {
-    editPhotoInput.addEventListener('change', handlePhotoUpload);
-  }
+  // ❌ УДАЛЕНО: editPhotoInput обработчик
 }
 
 // ===== УПРАВЛЕНИЕ ПРОФИЛЕМ =====
@@ -299,7 +296,6 @@ function updateProfileDisplay() {
   const profileAgeElem = document.getElementById('profile-age-display');
   const profileGenderElem = document.getElementById('profile-gender-display');
   const profileCityElem = document.getElementById('profile-city-display');
-  const profilePhotoElem = document.getElementById('profile-photo-preview');
   
   if (!window.profileData || !window.profileData.current) return;
   
@@ -324,10 +320,8 @@ function updateProfileDisplay() {
     profileCityElem.textContent = window.profileData.current.city || "";
   }
   
-  if (profilePhotoElem && window.profileData.current.custom_photo_url) {
-    profilePhotoElem.src = window.profileData.current.custom_photo_url;
-    profilePhotoElem.style.display = 'block';
-  }
+  // ✅ ТОЛЬКО ГАЛЕРЕЯ
+  updateProfilePhotos();  // Показывает photos[0..2] в .profile-photos-container
 }
 
 function updateEditForm() {
@@ -335,7 +329,6 @@ function updateEditForm() {
   const editGenderElem = document.getElementById("edit-gender");
   const editCityElem = document.getElementById("edit-city");
   const editBioElem = document.getElementById("edit-bio");
-  const editPhotoElem = document.getElementById('edit-photo-preview');
   
   if (!window.profileData || !window.profileData.current) return;
   
@@ -344,10 +337,7 @@ function updateEditForm() {
   if (editCityElem) editCityElem.value = window.profileData.current.city || "";
   if (editBioElem) editBioElem.value = window.profileData.current.bio || "";
   
-  if (editPhotoElem && window.profileData.current.custom_photo_url) {
-    editPhotoElem.src = window.profileData.current.custom_photo_url;
-    editPhotoElem.style.display = 'block';
-  }
+  // ❌ УДАЛЕНО: код с custom_photo_url
 }
 
 function updateProfilePhotos() {
@@ -368,6 +358,7 @@ function updateProfilePhotos() {
     img.className = `profile-main-photo ${index === 0 ? 'active' : ''}`;
     img.src = photoUrl;
     img.alt = `Фото ${index + 1}`;
+    img.dataset.index = index;
     container.appendChild(img);
   });
   
@@ -385,6 +376,106 @@ function updateProfilePhotos() {
   
   if (removeBtn) {
     removeBtn.disabled = window.profileData.current.photos.length <= 1;
+  }
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ ПРОФИЛЯ =====
+function initProfile() {
+  updateProfileDisplay();
+  updateProfilePhotos();
+  
+  // ✅ Простой тач-драг без Sortable.js
+  const container = document.querySelector('.profile-photos-container');
+  if (container && window.profileData?.current?.photos?.length > 1) {
+    let dragIndex = -1;
+    let touchStartY = 0;
+    
+    container.addEventListener('touchstart', (e) => {
+      const img = e.target.closest('img');
+      if (!img) return;
+      
+      dragIndex = parseInt(img.dataset.index);
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    container.addEventListener('touchmove', (e) => {
+      if (dragIndex >= 0 && window.profileData?.current?.photos?.length > 1) {
+        const touchY = e.touches[0].clientY;
+        const deltaY = touchY - touchStartY;
+        
+        // Простая логика перестановки
+        if (Math.abs(deltaY) > 50) {
+          const newIndex = deltaY > 0 ? 
+            Math.min(dragIndex + 1, window.profileData.current.photos.length - 1) : 
+            Math.max(dragIndex - 1, 0);
+          
+          if (newIndex !== dragIndex) {
+            // Меняем местами в массиве
+            [window.profileData.current.photos[dragIndex], window.profileData.current.photos[newIndex]] = 
+            [window.profileData.current.photos[newIndex], window.profileData.current.photos[dragIndex]];
+            
+            // Сохраняем изменения
+            if (typeof saveProfile === 'function') {
+              saveProfile(window.profileData.current);
+            }
+            
+            // Обновляем UI
+            updateProfilePhotos();
+            showNotification('✅ Порядок изменён!');
+          }
+          dragIndex = -1;
+        }
+      }
+    }, { passive: true });
+    
+    container.addEventListener('touchend', () => {
+      dragIndex = -1;
+    }, { passive: true });
+  }
+  
+  // Инициализируем слайдер фото если есть
+  const profilePhotos = document.querySelectorAll('.profile-main-photo');
+  const photoIndicators = document.querySelectorAll('.profile-photo-indicator');
+  
+  if (profilePhotos.length > 0) {
+    let currentPhotoIndex = 0;
+    
+    // Добавляем обработчики свайпа
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    container?.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    container?.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+      
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0 && currentPhotoIndex < profilePhotos.length - 1) {
+          // Свайп влево - следующее фото
+          currentPhotoIndex++;
+        } else if (diff < 0 && currentPhotoIndex > 0) {
+          // Свайп вправо - предыдущее фото
+          currentPhotoIndex--;
+        }
+        
+        // Обновляем отображение
+        profilePhotos.forEach((photo, index) => {
+          photo.classList.toggle('active', index === currentPhotoIndex);
+        });
+        
+        photoIndicators.forEach((indicator, index) => {
+          indicator.classList.toggle('active', index === currentPhotoIndex);
+        });
+      }
+    }
   }
 }
 
@@ -495,3 +586,4 @@ window.handleCancelEdit = handleCancelEdit;
 window.handlePhotoUpload = handlePhotoUpload;
 window.updateLikesUI = updateLikesUI;
 window.updateChatsList = updateChatsList;
+window.initProfile = initProfile;
