@@ -367,16 +367,17 @@
             
             <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
             <div class="profile-info-card">
-              <!-- ✅ ДОБАВЛЕНО: Основное фото профиля -->
-              <div class="profile-photo-section">
-                <img id="profile-photo-preview" class="profile-photo" src="" alt="Фото профиля" style="display: none;">
-                
-                <!-- Контейнер для галереи фото -->
-                <div class="profile-photos-container">
-                  <!-- Фото будут добавлены динамически -->
-                </div>
-                
-                <div class="profile-photo-indicators"></div>
+  <!-- ✅ IPHONE ФИКС: input ПЕРВЫМ -->
+            <div class="profile-photo-section">
+    <!-- INPUT ПЕРВЫМ (ловит клики на iPhone) -->
+            <input type="file" id="profile-photo-upload" accept="image/*" onchange="handlePhotoUploadLogic(event); console.log('🚀 iPhone файл выбран!');" />
+    
+    <!-- Старое аватарное фото (убрать потом) -->
+            <img id="profile-photo-preview" class="profile-photo" src="" alt="Фото профиля" style="display: none;">
+    
+    <!-- Галерея -->
+            <div class="profile-photos-container"></div>
+            <div class="profile-photo-indicators"></div>
                 
                 <div class="profile-photo-controls">
                 <button id="add-photo-btn" class="add-photo-btn" onclick="document.getElementById('profile-photo-upload').click(); console.log('🔥 КНОПКА РАБОТАЕТ!');">📸 Добавить фото</button>
