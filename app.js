@@ -3766,8 +3766,6 @@ function updateEditForm() {
     const editProfileBtn = document.getElementById('edit-profile-btn');
     const saveChangesBtn = document.getElementById('save-profile-changes');
     const cancelEditBtn = document.getElementById('cancel-profile-edit');
-    const profilePhotoInput = document.getElementById('profile-photo-upload');
-    const editPhotoInput = document.getElementById('edit-photo-upload');
     
     if (editProfileBtn) {
       editProfileBtn.addEventListener('click', handleEditProfile);
@@ -3779,14 +3777,6 @@ function updateEditForm() {
     
     if (cancelEditBtn) {
       cancelEditBtn.addEventListener('click', handleCancelEdit);
-    }
-    
-    if (profilePhotoInput) {
-      profilePhotoInput.addEventListener('change', handlePhotoUpload);
-    }
-    
-    if (editPhotoInput) {
-      editPhotoInput.addEventListener('change', handlePhotoUpload);
     }
     
     profileData = loadProfile();
