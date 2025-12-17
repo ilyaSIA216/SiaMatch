@@ -806,7 +806,7 @@ function handlePhotoUpload(e, isEditMode = false) {
   if (!file) return;
   
   // ✅ ЖЕСТКОЕ ОГРАНИЧЕНИЕ РАЗМЕРА ДЛЯ iOS
-  if (file.size > 2 * 1024 * 1024) { // Максимум 2MB
+  if (file.size > 5 * 1024 * 1024) { // Максимум 2MB
     showNotification('❌ Фото слишком большое (максимум 2MB)');
     return;
   }
