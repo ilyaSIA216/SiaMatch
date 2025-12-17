@@ -420,26 +420,33 @@ function initEditPhotosDragAndDrop() {
   const container = document.getElementById('edit-photos-container');
   if (!container) return;
   
-  let dragSrcIndex = -1;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let draggedItem = null;
+  let draggedIndex = -1;
   
+  // Для десктопов оставляем drag-and-drop
   container.addEventListener('dragstart', (e) => {
     if (e.target.classList.contains('edit-photo-item')) {
-      dragSrcIndex = parseInt(e.target.dataset.index);
+      draggedIndex = parseInt(e.target.dataset.index);
       e.target.classList.add('dragging');
+      draggedItem = e.target;
     }
   });
   
   container.addEventListener('dragend', (e) => {
-    if (e.target.classList.contains('edit-photo-item')) {
-      e.target.classList.remove('dragging');
-      dragSrcIndex = -1;
+    if (draggedItem) {
+      draggedItem.classList.remove('dragging');
+      draggedItem = null;
+      draggedIndex = -1;
     }
   });
   
   container.addEventListener('dragover', (e) => {
     e.preventDefault();
     const target = e.target.closest('.edit-photo-item');
-    if (target) {
+    if (target && draggedItem) {
       target.classList.add('dragover');
     }
   });
@@ -455,37 +462,115 @@ function initEditPhotosDragAndDrop() {
     e.preventDefault();
     const target = e.target.closest('.edit-photo-item');
     
-    if (target && dragSrcIndex !== -1) {
+    if (target && draggedIndex !== -1) {
       target.classList.remove('dragover');
-      const dragDstIndex = parseInt(target.dataset.index);
+      const dropIndex = parseInt(target.dataset.index);
       
-      if (dragSrcIndex !== dragDstIndex) {
-        // Меняем местами фото в массиве
-        const photosArray = window.profileData.current.photos;
-        [photosArray[dragSrcIndex], photosArray[dragDstIndex]] = 
-        [photosArray[dragDstIndex], photosArray[dragSrcIndex]];
-        
-        // Сохраняем изменения
-        if (typeof saveProfile === 'function') {
-          saveProfile(window.profileData.current);
-        }
-        
-        // Обновляем отображение в обоих местах
-        updateEditPhotosDisplay();
-        updateProfilePhotos();
-        
-        showNotification('✅ Порядок фото изменён!');
+      if (draggedIndex !== dropIndex) {
+        swapPhotos(draggedIndex, dropIndex);
       }
     }
   });
   
-  // Обработчик удаления фото в режиме редактирования
+  // ✅ ДОБАВЛЯЕМ TOCH-СОБЫТИЯ ДЛЯ iOS
+  container.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('edit-photo-item')) {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+      draggedItem = e.target.closest('.edit-photo-item');
+      draggedIndex = parseInt(draggedItem.dataset.index);
+      
+      // Визуальная обратная связь
+      draggedItem.classList.add('dragging');
+      draggedItem.style.transform = 'scale(1.05)';
+      draggedItem.style.zIndex = '100';
+      draggedItem.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+      
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  container.addEventListener('touchmove', (e) => {
+    if (draggedItem) {
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      
+      // Перемещаем элемент
+      draggedItem.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
+      
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  container.addEventListener('touchend', (e) => {
+    if (draggedItem) {
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const touchDuration = Date.now() - touchStartTime;
+      
+      // Сбрасываем стили
+      draggedItem.classList.remove('dragging');
+      draggedItem.style.transform = '';
+      draggedItem.style.zIndex = '';
+      draggedItem.style.boxShadow = '';
+      
+      // Находим элемент, над которым отпустили палец
+      if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
+        const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+        const targetElement = elements.find(el => 
+          el.classList.contains('edit-photo-item') && el !== draggedItem
+        );
+        
+        if (targetElement) {
+          const dropIndex = parseInt(targetElement.dataset.index);
+          if (draggedIndex !== dropIndex) {
+            swapPhotos(draggedIndex, dropIndex);
+          }
+        }
+      }
+      
+      draggedItem = null;
+      draggedIndex = -1;
+    }
+  }, { passive: true });
+  
+  // Обработчик удаления фото
   container.addEventListener('click', (e) => {
     if (e.target.classList.contains('edit-photo-remove')) {
       const index = parseInt(e.target.dataset.index);
-      removePhotoByIndex(index, true); // true = режим редактирования
+      removePhotoByIndex(index, true);
+      e.stopPropagation();
     }
   });
+}
+
+// ✅ Вспомогательная функция для замены фото
+function swapPhotos(index1, index2) {
+  if (!window.profileData.current || 
+      !window.profileData.current.photos) {
+    return;
+  }
+  
+  const photosArray = window.profileData.current.photos;
+  
+  // Меняем местами
+  [photosArray[index1], photosArray[index2]] = 
+  [photosArray[index2], photosArray[index1]];
+  
+  // Сохраняем
+  if (typeof saveProfile === 'function') {
+    saveProfile(window.profileData.current);
+  }
+  
+  // Обновляем отображение
+  updateEditPhotosDisplay();
+  updateProfilePhotos();
+  
+  showNotification('✅ Порядок фото изменён!');
 }
 
 function removePhotoByIndex(index, isEditMode = false) {
@@ -928,3 +1013,4 @@ window.updateChatsList = updateChatsList;
 window.initProfile = initProfile;
 window.initEditProfilePhotos = initEditProfilePhotos;
 window.updateEditPhotosDisplay = updateEditPhotosDisplay;
+window.swapPhotos = swapPhotos;
