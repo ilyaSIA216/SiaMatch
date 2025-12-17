@@ -2349,7 +2349,7 @@ function initPhotoSwitching(photosContainer) {
   photosContainer.addEventListener('touchstart', handlePhotoTouchStart, { passive: true });
   photosContainer.addEventListener('touchend', handlePhotoTouchEnd, { passive: true });
   
-  createPhotoSwipeIndicators(photosContainer);
+ // createPhotoSwipeIndicators(photosContainer);
 }
 
 function createPhotoSwipeIndicators(container) {
