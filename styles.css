@@ -3032,3 +3032,54 @@ select:focus {
   gap: 10px;
   margin-top: 15px;
 }
+
+/* Улучшения для touch-устройств */
+.edit-photo-item {
+  -webkit-user-drag: none;
+  user-select: none;
+  touch-action: none; /* Отключаем стандартные жесты браузера */
+}
+
+/* Анимация при перетаскивании на touch */
+.edit-photo-item.dragging {
+  transition: transform 0.1s ease;
+}
+
+/* Индикатор перетаскивания для мобильных */
+.edit-photo-item::after {
+  content: '↕';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.edit-photo-item:hover::after,
+.edit-photo-item:active::after {
+  opacity: 1;
+}
+
+/* Улучшения для iOS */
+@media (hover: none) and (pointer: coarse) {
+  .edit-photo-item {
+    cursor: pointer;
+  }
+  
+  .edit-photo-item::after {
+    opacity: 0.7; /* Всегда показываем на touch-устройствах */
+  }
+  
+  .edit-photo-item:active {
+    transform: scale(0.98);
+  }
+}
