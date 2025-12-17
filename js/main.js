@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.hasInitialized = false;
   
   // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
-  function initApp() {
+  async function initApp() {
     if (window.hasInitialized) return;
     window.hasInitialized = true;
     
@@ -22,12 +22,18 @@ document.addEventListener('DOMContentLoaded', function() {
     window.profileData.current = loadProfile() || null;
     console.log('📂 Загружен профиль:', window.profileData.current ? 'Да' : 'Нет');
     
+    // Инициализация хранилища фото
+    setTimeout(async () => {
+      if (typeof initPhotoStorage === 'function') {
+        await initPhotoStorage();
+      }
+    }, 500);
+    
     // 3. Инициализация интерфейса (UI уже видит profileData.current)
     initUI();
     
     // 4. Показ экрана в зависимости от состояния
     const welcomeScreen = document.getElementById("welcome-screen");
-    const animatedWelcomeScreen = document.getElementById("welcome-animated-screen");
     
     if (window.profileData.current) {
       showAnimatedWelcomeScreen();
