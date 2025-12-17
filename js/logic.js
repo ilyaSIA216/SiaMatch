@@ -2353,6 +2353,9 @@ function initPhotoSwitching(photosContainer) {
 }
 
 function createPhotoSwipeIndicators(container) {
+  // Удалить все старые индикаторы
+  container.querySelectorAll('.photo-swipe-indicator').forEach(el => el.remove());
+  
   const leftIndicator = document.createElement('div');
   leftIndicator.className = 'photo-swipe-indicator left';
   leftIndicator.innerHTML = '◀';
@@ -2373,6 +2376,7 @@ function createPhotoSwipeIndicators(container) {
     opacity: 0.7;
     pointer-events: none;
     z-index: 5;
+    transition: opacity 0.3s ease;
   `;
   
   const rightIndicator = document.createElement('div');
@@ -2395,10 +2399,14 @@ function createPhotoSwipeIndicators(container) {
     opacity: 0.7;
     pointer-events: none;
     z-index: 5;
+    transition: opacity 0.3s ease;
   `;
   
   container.appendChild(leftIndicator);
   container.appendChild(rightIndicator);
+  
+  // Возвращаем элементы для управления видимостью
+  return { leftIndicator, rightIndicator };
 }
 
 let touchStartTime = 0;
