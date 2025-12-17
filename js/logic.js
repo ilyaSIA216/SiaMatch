@@ -273,6 +273,14 @@ function handleFocusOut(e) {
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const killer = setInterval(() => {
+    document.querySelectorAll('.photo-swipe-indicator, [class*="indicator"], [class*="arrow"]').forEach(el => el.remove());
+  }, 500);
+  
+  setTimeout(() => clearInterval(killer), 10000); // работает 10 сек
+});
+
 function handleTouchOutside(e) {
   if (!e.target.closest('input, textarea, select, button')) {
     document.activeElement?.blur();
@@ -2328,7 +2336,7 @@ function initSwipeSystem() {
   }
   
   initSwipeGestures(candidateCard);
-  initPhotoSwitching(photosContainer);
+ // initPhotoSwitching(photosContainer);
 }
 
 function initSwipeGestures(cardElement) {
