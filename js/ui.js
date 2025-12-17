@@ -630,13 +630,50 @@ function removePhotoByIndex(index, isEditMode = false) {
   showNotification('✅ Фото удалено');
 }
 
+// ===== ФУНКЦИЯ СЖАТИЯ ИЗОБРАЖЕНИЯ =====
+function compressImage(dataUrl, quality, maxWidth, callback) {
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    
+    // Рассчитываем новые размеры
+    let width = img.width;
+    let height = img.height;
+    
+    if (width > maxWidth) {
+      height = Math.round((height * maxWidth) / width);
+      width = maxWidth;
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    
+    // Сжимаем в JPEG
+    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+    
+    console.log(`📊 Сжатие: ${Math.round(dataUrl.length / 1024)}KB → ${Math.round(compressedDataUrl.length / 1024)}KB`);
+    
+    callback(compressedDataUrl);
+  };
+  
+  img.onerror = function() {
+    console.error('❌ Ошибка загрузки изображения для сжатия');
+    callback(dataUrl); // Возвращаем оригинал если ошибка
+  };
+  
+  img.src = dataUrl;
+}
+
 // Обновим handlePhotoUpload для поддержки режима редактирования
 function handlePhotoUpload(e, isEditMode = false) {
   const file = e.target.files[0];
   if (!file) return;
   
-  if (file.size > 5 * 1024 * 1024) {
-    showNotification('❌ Фото слишком большое (максимум 5MB)');
+  if (file.size > 3 * 1024 * 1024) { // Уменьшили до 3MB
+    showNotification('❌ Фото слишком большое (максимум 3MB)');
     return;
   }
   
@@ -651,26 +688,27 @@ function handlePhotoUpload(e, isEditMode = false) {
   
   const reader = new FileReader();
   reader.onload = function(event) {
-    const photoUrl = event.target.result;
-    
-    // Добавляем фото в массив
-    window.profileData.current.photos.push(photoUrl);
-    
-    // Сохраняем
-    if (typeof saveProfile === 'function') {
-      saveProfile(window.profileData.current);
-    }
-    
-    // Обновляем отображение
-    updateProfilePhotos();
-    if (isEditMode) {
-      updateEditPhotosDisplay();
-    }
-    
-    showNotification(`✅ Фото добавлено! (${window.profileData.current.photos.length}/3)`);
-    
-    // Очищаем input
-    e.target.value = '';
+    // СЖИМАЕМ ФОТО ПЕРЕД СОХРАНЕНИЕМ
+    compressImage(event.target.result, 0.6, 800, function(compressedPhotoUrl) {
+      // Добавляем сжатое фото в массив
+      window.profileData.current.photos.push(compressedPhotoUrl);
+      
+      // Сохраняем
+      if (typeof saveProfile === 'function') {
+        saveProfile(window.profileData.current);
+      }
+      
+      // Обновляем отображение
+      updateProfilePhotos();
+      if (isEditMode) {
+        updateEditPhotosDisplay();
+      }
+      
+      showNotification(`✅ Фото добавлено! (${window.profileData.current.photos.length}/3)`);
+      
+      // Очищаем input
+      e.target.value = '';
+    });
   };
   
   reader.onerror = function() {
@@ -1044,3 +1082,4 @@ window.initProfile = initProfile;
 window.initEditProfilePhotos = initEditProfilePhotos;
 window.updateEditPhotosDisplay = updateEditPhotosDisplay;
 window.swapPhotos = swapPhotos;
+window.compressImage = compressImage;
