@@ -371,26 +371,23 @@
             </div>
             
             <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
-            <div class="profile-info-card">
-  <!-- ✅ IPHONE ФИКС: input ПЕРВЫМ -->
-            <div class="profile-photo-section">
-    <!-- INPUT ПЕРВЫМ (ловит клики на iPhone) -->
-            <input type="file" id="profile-photo-upload" accept="image/*" onchange="handlePhotoUploadLogic(event); console.log('🚀 iPhone файл выбран!');" />
+<div class="profile-info-card">
+  <div class="profile-photo-section">
+    <!-- СКРЫТЫЙ INPUT для загрузки файлов -->
+    <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" />
     
-    <!-- Старое аватарное фото (убрать потом) -->
-            <img id="profile-photo-preview" class="profile-photo" src="" alt="Фото профиля" style="display: none;">
+    <!-- Контейнер для фотографий -->
+    <div class="profile-photos-container"></div>
+    <div class="profile-photo-indicators"></div>
     
-    <!-- Галерея -->
-            <div class="profile-photos-container"></div>
-            <div class="profile-photo-indicators"></div>
-                
-                <div class="profile-photo-controls">
-                <button id="add-photo-btn" class="add-photo-btn" onclick="document.getElementById('profile-photo-upload').click(); console.log('🔥 КНОПКА РАБОТАЕТ!');">📸 Добавить фото</button>
-                <button id="remove-photo-btn" class="remove-photo-btn" onclick="if(window.profileData?.current?.photos?.length>1){window.profileData.current.photos.pop(); localStorage.setItem('siamatch_profile', JSON.stringify(window.profileData.current)); let count=window.profileData.current.photos.length; document.getElementById('photos-count').textContent=count+'/3 фото'; document.querySelector('.profile-photos-container').innerHTML=''; console.log('🗑️ Удалено! '+count+' фото'); alert('✅ '+count+'/3 фото осталось!');} else {alert('❌ Нужно минимум 1 фото');}">🗑️ Удалить последнее</button>
-                </div>
-                
-                <div id="photos-count" class="photos-count">0/3 фото</div>
-              </div>
+    <!-- КНОПКИ УПРАВЛЕНИЯ -->
+    <div class="profile-photo-controls">
+      <button id="add-photo-btn" class="add-photo-btn">📸 Добавить фото</button>
+      <button id="remove-photo-btn" class="remove-photo-btn">🗑️ Удалить фото</button>
+    </div>
+    
+    <div id="photos-count" class="photos-count">0/3 фото</div>
+  </div>
               
               <div class="profile-details">
                 <div class="profile-name">
