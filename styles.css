@@ -3083,3 +3083,56 @@ select:focus {
     transform: scale(0.98);
   }
 }
+
+/* Стили для кнопок порядка фото */
+.photo-order-controls {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: flex;
+  gap: 5px;
+  z-index: 20;
+}
+
+.order-up-btn, .order-down-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(34, 197, 94, 0.95);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.order-up-btn:hover, .order-down-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  background: rgba(22, 163, 74, 0.95);
+}
+
+.order-up-btn:active, .order-down-btn:active {
+  transform: scale(0.95);
+}
+
+/* Для мобильных улучшаем кнопки */
+@media (max-width: 768px) {
+  .order-up-btn, .order-down-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .edit-photo-remove {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
