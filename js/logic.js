@@ -3038,3 +3038,16 @@ function handleProfilePhotoTouchEnd(e) {
     showNotification('Фото изменено местами');
   }
 }
+
+// ===== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ =====
+window.switchPhoto = switchPhoto;
+window.initSwipeSystem = initSwipeSystem;
+window.initFeed = initFeed;
+window.initProfile = initProfile;
+window.initFiltersTab = initFiltersTab;
+window.initAllSystems = initAllSystems;
+window.handleSaveProfile = handleSaveProfile;
+window.handleSaveProfileChangesLogic = handleSaveProfileChangesLogic;
+window.handlePhotoUploadLogic = handlePhotoUploadLogic;
+window.saveProfile = saveProfile;
+window.loadProfile = loadProfile;
