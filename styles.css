@@ -3159,3 +3159,17 @@ select:focus {
   cursor: pointer;
   opacity: 0.9;
 }
+
+@media (max-width: 480px) {
+  html, body {
+    height: 100vh !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  
+  /* Для кнопок навигации фото */
+  .photo-nav-left, .photo-nav-right {
+    position: fixed !important; /* вместо absolute */
+    z-index: 1000 !important;
+  }
+}
