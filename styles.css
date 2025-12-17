@@ -2847,15 +2847,18 @@ select:focus {
 .photo-swipe-indicator {
   opacity: 0;
   transition: opacity 0.3s ease;
+  display: none !important; /* Скрываем по умолчанию */
 }
 
 .candidate-photos-container:hover .photo-swipe-indicator {
   opacity: 0.7;
+  display: flex !important; /* Показываем при наведении на десктопе */
 }
 
 @media (max-width: 768px) {
   .photo-swipe-indicator {
     opacity: 0.7 !important; /* Всегда показываем на мобильных */
+    display: flex !important; /* Всегда показываем на мобильных */
   }
 }
 
