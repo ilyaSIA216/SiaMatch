@@ -276,6 +276,9 @@ function handleEditProfile() {
   document.getElementById('profile-display').classList.add('hidden');
   document.getElementById('profile-edit').classList.remove('hidden');
   
+  // Инициализируем редактирование фото
+  initEditProfilePhotos();
+  
   if (window.tg?.HapticFeedback) {
     try {
       window.tg.HapticFeedback.selectionChanged();
@@ -291,6 +294,13 @@ function handleSaveProfileChanges() {
   setTimeout(() => {
     if (typeof handleSaveProfileChangesLogic === 'function') {
       handleSaveProfileChangesLogic();
+      
+      // После сохранения возвращаемся к основному отображению профиля
+      document.getElementById('profile-display').classList.remove('hidden');
+      document.getElementById('profile-edit').classList.add('hidden');
+      
+      // Обновляем отображение фото в основном профиле
+      updateProfilePhotos();
     }
   }, 300);
 }
@@ -300,7 +310,171 @@ function handleCancelEdit() {
   document.getElementById('profile-edit').classList.add('hidden');
 }
 
-function handlePhotoUpload(e) {
+// ===== ФУНКЦИИ ДЛЯ РЕДАКТИРОВАНИЯ ФОТО =====
+
+function initEditProfilePhotos() {
+  const editPhotosContainer = document.getElementById('edit-photos-container');
+  const editAddPhotoBtn = document.getElementById('edit-add-photo-btn');
+  
+  if (!editPhotosContainer) return;
+  
+  updateEditPhotosDisplay();
+  
+  // Кнопка добавления фото в режиме редактирования
+  if (editAddPhotoBtn) {
+    editAddPhotoBtn.addEventListener('click', function() {
+      // Используем тот же input, что и в основном профиле
+      const photoUpload = document.getElementById('profile-photo-upload');
+      if (photoUpload) {
+        photoUpload.click();
+        
+        // Обновляем обработчик для режима редактирования
+        photoUpload.onchange = function(e) {
+          handlePhotoUpload(e, true); // true = режим редактирования
+        };
+      }
+    });
+  }
+  
+  // Инициализируем drag-and-drop для редактирования
+  initEditPhotosDragAndDrop();
+}
+
+function updateEditPhotosDisplay() {
+  const container = document.getElementById('edit-photos-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!window.profileData.current || 
+      !window.profileData.current.photos || 
+      window.profileData.current.photos.length === 0) {
+    
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'hint';
+    emptyMsg.textContent = 'Нет фотографий. Добавьте хотя бы одну.';
+    emptyMsg.style.cssText = 'text-align: center; padding: 20px; width: 100%;';
+    container.appendChild(emptyMsg);
+    return;
+  }
+  
+  const photos = window.profileData.current.photos;
+  
+  photos.forEach((photoUrl, index) => {
+    const photoItem = document.createElement('div');
+    photoItem.className = 'edit-photo-item';
+    photoItem.dataset.index = index;
+    photoItem.draggable = true;
+    
+    photoItem.innerHTML = `
+      <img src="${photoUrl}" alt="Фото ${index + 1}" />
+      <div class="edit-photo-number">${index + 1}</div>
+      <div class="edit-photo-remove" data-index="${index}">×</div>
+    `;
+    
+    container.appendChild(photoItem);
+  });
+}
+
+function initEditPhotosDragAndDrop() {
+  const container = document.getElementById('edit-photos-container');
+  if (!container) return;
+  
+  let dragSrcIndex = -1;
+  
+  container.addEventListener('dragstart', (e) => {
+    if (e.target.classList.contains('edit-photo-item')) {
+      dragSrcIndex = parseInt(e.target.dataset.index);
+      e.target.classList.add('dragging');
+    }
+  });
+  
+  container.addEventListener('dragend', (e) => {
+    if (e.target.classList.contains('edit-photo-item')) {
+      e.target.classList.remove('dragging');
+      dragSrcIndex = -1;
+    }
+  });
+  
+  container.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.edit-photo-item');
+    if (target) {
+      target.classList.add('dragover');
+    }
+  });
+  
+  container.addEventListener('dragleave', (e) => {
+    const target = e.target.closest('.edit-photo-item');
+    if (target) {
+      target.classList.remove('dragover');
+    }
+  });
+  
+  container.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.edit-photo-item');
+    
+    if (target && dragSrcIndex !== -1) {
+      target.classList.remove('dragover');
+      const dragDstIndex = parseInt(target.dataset.index);
+      
+      if (dragSrcIndex !== dragDstIndex) {
+        // Меняем местами фото в массиве
+        const photosArray = window.profileData.current.photos;
+        [photosArray[dragSrcIndex], photosArray[dragDstIndex]] = 
+        [photosArray[dragDstIndex], photosArray[dragSrcIndex]];
+        
+        // Сохраняем изменения
+        if (typeof saveProfile === 'function') {
+          saveProfile(window.profileData.current);
+        }
+        
+        // Обновляем отображение в обоих местах
+        updateEditPhotosDisplay();
+        updateProfilePhotos();
+        
+        showNotification('✅ Порядок фото изменён!');
+      }
+    }
+  });
+  
+  // Обработчик удаления фото в режиме редактирования
+  container.addEventListener('click', (e) => {
+    if (e.target.classList.contains('edit-photo-remove')) {
+      const index = parseInt(e.target.dataset.index);
+      removePhotoByIndex(index, true); // true = режим редактирования
+    }
+  });
+}
+
+function removePhotoByIndex(index, isEditMode = false) {
+  if (!window.profileData.current || 
+      !window.profileData.current.photos || 
+      window.profileData.current.photos.length <= 1) {
+    showNotification('❌ Нужно минимум 1 фото');
+    return;
+  }
+  
+  // Удаляем фото по индексу
+  window.profileData.current.photos.splice(index, 1);
+  
+  // Сохраняем
+  if (typeof saveProfile === 'function') {
+    saveProfile(window.profileData.current);
+  }
+  
+  // Обновляем отображение
+  updateProfilePhotos();
+  if (isEditMode) {
+    updateEditPhotosDisplay();
+  }
+  
+  showNotification('✅ Фото удалено');
+}
+
+// Обновим handlePhotoUpload для поддержки режима редактирования
+function handlePhotoUpload(e, isEditMode = false) {
   const file = e.target.files[0];
   if (!file) return;
   
@@ -332,10 +506,13 @@ function handlePhotoUpload(e) {
     
     // Обновляем отображение
     updateProfilePhotos();
+    if (isEditMode) {
+      updateEditPhotosDisplay();
+    }
     
     showNotification(`✅ Фото добавлено! (${window.profileData.current.photos.length}/3)`);
     
-    // Очищаем input для возможности повторной загрузки того же файла
+    // Очищаем input
     e.target.value = '';
   };
   
@@ -705,6 +882,9 @@ window.handleSaveProfileChanges = handleSaveProfileChanges;
 window.handleCancelEdit = handleCancelEdit;
 window.handlePhotoUpload = handlePhotoUpload;
 window.removeCurrentPhoto = removeCurrentPhoto;
+window.removePhotoByIndex = removePhotoByIndex;
 window.updateLikesUI = updateLikesUI;
 window.updateChatsList = updateChatsList;
 window.initProfile = initProfile;
+window.initEditProfilePhotos = initEditProfilePhotos;
+window.updateEditPhotosDisplay = updateEditPhotosDisplay;
