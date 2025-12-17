@@ -280,23 +280,201 @@ function handleTouchOutside(e) {
 }
 
 // ===== LOCALSTORAGE ФУНКЦИИ =====
-function loadProfile() {
+
+// ✅ Функция сжатия фото для хранения
+function compressPhotoForStorage(photoUrl, maxSize = 30000) {
+  if (!photoUrl || typeof photoUrl !== 'string') return '';
+  
+  // Если фото уже маленькое, оставляем как есть
+  if (photoUrl.length <= maxSize) return photoUrl;
+  
+  // Обрезаем до разумного размера
+  console.log(`✂️ Сжимаем фото: ${Math.round(photoUrl.length/1024)}KB → ${Math.round(maxSize/1024)}KB`);
+  return photoUrl.substring(0, maxSize) + '...[T]';
+}
+
+// ✅ Сохраняем дополнительные фото отдельно
+function saveExtraPhotosToSeparateStorage(photos) {
+  if (!photos || photos.length < 2) return;
+  
   try {
-    const raw = localStorage.getItem("siamatch_profile");
-    return raw ? JSON.parse(raw) : null;
+    // Сохраняем каждое фото под уникальным ключом
+    photos.forEach((photo, index) => {
+      if (index > 0 && photo && typeof photo === 'string') {
+        const photoKey = `siamatch_photo_${index}_${Date.now()}`;
+        
+        // Сохраняем сильно сжатое фото
+        const compressedPhoto = compressPhotoForStorage(photo, 15000);
+        
+        // Сохраняем на 24 часа
+        const photoData = {
+          data: compressedPhoto,
+          timestamp: Date.now(),
+          expires: Date.now() + (24 * 60 * 60 * 1000) // 24 часа
+        };
+        
+        localStorage.setItem(photoKey, JSON.stringify(photoData));
+        console.log(`💾 Доп. фото ${index} сохранено под ключом: ${photoKey}`);
+      }
+    });
+    
+    // Очищаем старые фото
+    cleanupOldPhotos();
   } catch (e) {
-    console.error("❌ Ошибка загрузки профиля:", e);
-    return null;
+    console.error('❌ Ошибка сохранения доп. фото:', e);
   }
+}
+
+// ✅ Очистка старых фото
+function cleanupOldPhotos() {
+  const now = Date.now();
+  const keysToRemove = [];
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('siamatch_photo_')) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        if (data && data.expires && data.expires < now) {
+          keysToRemove.push(key);
+        }
+      } catch (e) {
+        keysToRemove.push(key); // Удаляем битые данные
+      }
+    }
+  }
+  
+  keysToRemove.forEach(key => {
+    localStorage.removeItem(key);
+    console.log(`🗑️ Удалено старое фото: ${key}`);
+  });
+}
+
+// ✅ Восстанавливаем фото из отдельного хранилища
+function restorePhotoFromStorage(photoId, index) {
+  try {
+    // Ищем фото по паттерну
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes(`photo_${index}_`)) {
+        const data = JSON.parse(localStorage.getItem(key));
+        
+        if (data && data.data && data.timestamp) {
+          // Проверяем не просрочено ли фото
+          const now = Date.now();
+          if (!data.expires || data.expires > now) {
+            console.log(`🔍 Восстановлено фото ${index} из: ${key}`);
+            return data.data;
+          } else {
+            console.log(`⏰ Фото ${index} просрочено: ${key}`);
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    }
+    
+    // Если не нашли по точному индексу, ищем любое фото с таким индексом
+    const photoKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('siamatch_photo_')) {
+        photoKeys.push(key);
+      }
+    }
+    
+    // Сортируем по времени (новые первыми)
+    photoKeys.sort((a, b) => {
+      const timeA = parseInt(a.split('_').pop()) || 0;
+      const timeB = parseInt(b.split('_').pop()) || 0;
+      return timeB - timeA;
+    });
+    
+    // Берем последнее сохраненное фото для этого индекса
+    if (photoKeys.length >= index) {
+      const data = JSON.parse(localStorage.getItem(photoKeys[index - 1]));
+      if (data && data.data) {
+        console.log(`🔍 Восстановлено фото ${index} из последнего сохранения`);
+        return data.data;
+      }
+    }
+    
+  } catch (e) {
+    console.error(`❌ Ошибка восстановления фото ${index}:`, e);
+  }
+  
+  return null;
 }
 
 function saveProfile(obj) {
   try {
-    localStorage.setItem("siamatch_profile", JSON.stringify(obj));
+    // Клонируем объект
+    const profileToSave = JSON.parse(JSON.stringify(obj));
+    
+    // ✅ УМНОЕ СОХРАНЕНИЕ ФОТО
+    if (profileToSave.photos && Array.isArray(profileToSave.photos)) {
+      const photosCount = profileToSave.photos.length;
+      
+      if (photosCount === 3) {
+        console.log('⚠️ 3 фото - используем экономное сохранение');
+        
+        // Сохраняем только ПЕРВОЕ фото полностью в профиле
+        // Остальные сохраняем в отдельном хранилище
+        profileToSave.photos = profileToSave.photos.map((photo, index) => {
+          if (index === 0) {
+            // Первое фото - сохраняем полностью (но сжатое)
+            return compressPhotoForStorage(photo);
+          } else {
+            // Остальные фото - сохраняем только ID/ссылку
+            return `photo_${index}_${Date.now()}`;
+          }
+        });
+        
+        // Сохраняем полные фото в отдельное место
+        saveExtraPhotosToSeparateStorage(obj.photos);
+      } else if (photosCount > 0) {
+        // 1-2 фото - сохраняем сжатыми
+        profileToSave.photos = profileToSave.photos.map(photo => 
+          compressPhotoForStorage(photo)
+        );
+      }
+    }
+    
+    localStorage.setItem("siamatch_profile", JSON.stringify(profileToSave));
+    console.log('✅ Профиль сохранен, фото:', profileToSave.photos?.length || 0);
     return true;
   } catch (e) {
     console.error("❌ Ошибка сохранения профиля:", e);
     return false;
+  }
+}
+
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem("siamatch_profile");
+    if (!raw) return null;
+    
+    const profile = JSON.parse(raw);
+    
+    // ✅ ВОССТАНАВЛИВАЕМ ФОТО ПРИ ЗАГРУЗКЕ
+    if (profile && profile.photos && Array.isArray(profile.photos)) {
+      profile.photos = profile.photos.map((photo, index) => {
+        if (typeof photo === 'string') {
+          // Если это ID фото (начинается с photo_), ищем в отдельном хранилище
+          if (photo.startsWith('photo_') && index > 0) {
+            const restoredPhoto = restorePhotoFromStorage(photo, index);
+            return restoredPhoto || ''; // Возвращаем восстановленное или пустую строку
+          }
+          // Иначе возвращаем как есть (первое фото или обычное)
+          return photo;
+        }
+        return '';
+      }).filter(photo => photo && photo.length > 100); // Фильтруем пустые
+    }
+    
+    return profile;
+  } catch (e) {
+    console.error("❌ Ошибка загрузки профиля:", e);
+    return null;
   }
 }
 
