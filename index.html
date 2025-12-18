@@ -724,32 +724,43 @@
   <div id="swipe-feedback" class="swipe-feedback hidden"></div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- ДОБАВЬТЕ ЭТОТ БЛОК СКРИПТОВ ЗДЕСЬ -->
-  <script>
-    // ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        
-        // Раскрываем на весь экран
-        tg.expand();
-        
-        // Убираем верхнюю панель
-        tg.setHeaderColor('#2AABEE');
-        tg.setBackgroundColor('#FFFFFF');
-        
-        // Включаем подтверждение закрытия
-        tg.enableClosingConfirmation();
-        
-        // Говорим Telegram, что приложение готово
-        tg.ready();
-        
-        console.log('Telegram Web App инициализирован, расширен на весь экран');
-      } else {
-        console.warn('Telegram Web App не найден. Запуск в браузере?');
+<script>
+  // ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      
+      // ВАЖНО: сначала говорим Telegram что приложение готово
+      tg.ready();
+      
+      // Раскрываем на весь экран - УБИРАЕМ ВЕРХНЮЮ ПАНЕЛЬ
+      tg.expand();
+      
+      // Устанавливаем цвет верхней панели в цвет фона
+      tg.setHeaderColor('#f4fff7'); // Цвет вашего фона
+      tg.setBackgroundColor('#f4fff7'); // Цвет фона приложения
+      
+      // Скрываем кнопку "Назад" (если она есть)
+      if (tg.BackButton && tg.BackButton.hide) {
+        tg.BackButton.hide();
       }
-    });
-  </script>
+      
+      // Включаем подтверждение закрытия
+      tg.enableClosingConfirmation();
+      
+      console.log('Telegram Web App инициализирован');
+      console.log('Init Data:', tg.initData);
+      console.log('Platform:', tg.platform);
+      console.log('Viewport height:', tg.viewportHeight);
+    } else {
+      console.warn('Telegram Web App не найден. Запуск в браузере?');
+      
+      // Для тестирования в браузере добавляем эмуляцию
+      document.documentElement.style.height = '100vh';
+      document.body.style.height = '100vh';
+    }
+  });
+</script>
   <script src="js/logic.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/main.js"></script>
