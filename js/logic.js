@@ -1381,10 +1381,6 @@ function initBonusSystem() {
   const inviteFriendBtn = document.getElementById('inviteFriendBtn');
   const shareStoriesBtn = document.getElementById('shareStoriesBtn');
   
-  if (inviteFriendBtn) {
-    inviteFriendBtn.addEventListener('click', handleInviteFriend);
-  }
-  
   if (shareStoriesBtn) {
     shareStoriesBtn.addEventListener('click', handleShareStories);
   }
