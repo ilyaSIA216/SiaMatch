@@ -705,6 +705,90 @@
           </div>
         </div>
       </div>
+
+      <!-- ЭКРАН ПРИГЛАШЕНИЯ ДРУГА -->
+      <div id="screen-invite" class="screen hidden">
+        <div class="screen-content">
+          <div class="invite-header">
+            <button id="back-from-invite-btn" class="back-btn">←</button>
+            <h2 class="screen-title">👥 Пригласить друга</h2>
+          </div>
+
+          <div class="invite-card">
+            <div class="invite-icon">🎁</div>
+            <h3 class="invite-title">+20 свайпов за друга!</h3>
+            <p class="invite-description">
+              Пригласите друга и получите <strong>+20 свайпов</strong> после его регистрации.
+            </p>
+
+            <div class="invite-steps">
+              <div class="invite-step">
+                <div class="step-number">1</div>
+                <div class="step-text">Скопируйте вашу ссылку</div>
+              </div>
+              <div class="invite-step">
+                <div class="step-number">2</div>
+                <div class="step-text">Отправьте её другу</div>
+              </div>
+              <div class="invite-step">
+                <div class="step-number">3</div>
+                <div class="step-text">Друг должен зарегистрироваться</div>
+              </div>
+              <div class="invite-step">
+                <div class="step-number">4</div>
+                <div class="step-text">Получите +20 свайпов</div>
+              </div>
+            </div>
+
+            <!-- КОНТЕЙНЕР ДЛЯ ССЫЛКИ С КНОПКОЙ КОПИРОВАНИЯ -->
+            <div class="invite-link-container">
+              <div class="invite-link-label">Ваша реферальная ссылка:</div>
+              <div class="invite-link-wrapper">
+                <div id="invite-link-text" class="invite-link-text">
+                  https://t.me/SiaMatchBot?start=REF_457264617_Z6AVO1
+                </div>
+                <button id="copy-invite-link" class="copy-link-btn" title="Скопировать ссылку">
+                  📋
+                </button>
+              </div>
+              <div id="copy-success" class="copy-success hidden">✓ Ссылка скопирована!</div>
+            </div>
+
+            <!-- АЛЬТЕРНАТИВНЫЙ ВАРИАНТ С QR-КОДОМ -->
+            <div class="invite-qr-section">
+              <div class="invite-qr-label">Или отсканируйте QR-код:</div>
+              <div id="qrcode" class="invite-qrcode"></div>
+            </div>
+
+            <!-- ПОЛЕ ДЛЯ ВВОДА ID ДРУГА -->
+            <div class="invite-friend-id-section">
+              <h4>Если друг уже зарегистрировался</h4>
+              <div class="field">
+                <label for="friend-id">ID вашего друга</label>
+                <input type="text" id="friend-id" placeholder="Введите ID друга" />
+                <div class="hint">ID можно найти в профиле друга</div>
+              </div>
+              <button id="submit-friend-id" class="primary">Подтвердить приглашение</button>
+            </div>
+
+            <!-- ЗАГРУЗКА СКРИНШОТА -->
+            <div class="invite-screenshot-section">
+              <h4>Или загрузите скриншот переписки</h4>
+              <div class="file-upload-area">
+                <input type="file" id="screenshot-upload" accept="image/*" class="hidden" />
+                <label for="screenshot-upload" class="file-upload-label">
+                  📎 Выбрать файл
+                </label>
+                <div id="screenshot-filename" class="file-upload-filename">
+                  файл не выбран
+                </div>
+              </div>
+              <img id="screenshot-preview" class="screenshot-preview hidden" />
+              <button id="submit-screenshot" class="secondary-btn" disabled>Отправить на проверку</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- НИЖНЯЯ НАВИГАЦИЯ -->
