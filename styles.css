@@ -3176,3 +3176,36 @@ select:focus {
     z-index: 1000 !important;
   }
 }
+
+/////////ПРАВКАПАНЕЛИ
+/* Скрываем возможные отступы от верхней панели */
+html {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+body {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Принудительно убираем любые верхние отступы */
+#app-root {
+  margin-top: -env(safe-area-inset-top, 0px) !important;
+  padding-top: 0 !important;
+  position: relative;
+  top: 0;
+}
+
+/* Скрываем возможные артефакты Telegram */
+.tg-header {
+  display: none !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Убедитесь, что контент начинается с самого верха */
+.screen-content {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
