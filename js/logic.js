@@ -1634,13 +1634,6 @@ function initBonusSystem() {
   const inviteFriendBtn = document.getElementById('inviteFriendBtn');
   const shareStoriesBtn = document.getElementById('shareStoriesBtn');
   
-  if (inviteFriendBtn) {
-    inviteFriendBtn.addEventListener('click', () => {
-      const referralLink = generateReferralLink();
-      showInviteVerificationModal(referralLink);
-    });
-  }
-  
   if (shareStoriesBtn) {
     shareStoriesBtn.addEventListener('click', handleShareStories);
   }
