@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🎬 Инициализация приложения...');
     
     // 1. Инициализация Telegram WebApp
-    initTelegram();
-
+    initTelegramApp(); // Изменено с initTelegram()
+    initUI();
+    initInviteScreen(); // Добавлен вызов инициализации экрана приглашения
       
     if (window.tg) {
       window.tg.expand(); // Расширяет на полный экран
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
     
     // 3. Инициализация интерфейса (UI уже видит profileData.current)
-    initUI();
+    // initUI() уже был вызван выше
     
     // 4. Показ экрана в зависимости от состояния
     const welcomeScreen = document.getElementById("welcome-screen");
