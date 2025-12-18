@@ -55,6 +55,13 @@ let swipeStartY = 0;
 let isSwiping = false;
 let currentCandidateId = null;
 
+// Конфигурация админки
+const ADMIN_CONFIG = {
+  botToken: 'ВАШ_BOT_TOKEN', // Замените на токен вашего админ-бота
+  chatId: 'ВАШ_CHAT_ID',     // Замените на ваш chat_id или ID чата админов
+  webhookUrl: 'https://ваш-сервер.com/api/admin/notifications' // Если используете вебхуки
+};
+
 // Демо-данные кандидатов
 const candidates = [
   {
@@ -518,14 +525,191 @@ function savePendingBonuses() {
   }
 }
 
+// ===== ОТПРАВКА ДАННЫХ В АДМИНКУ =====
+async function sendToAdminPanel(data) {
+  try {
+    console.log('📤 Отправка данных в админку:', data.type);
+    
+    // Формируем сообщение для админа
+    let messageText = '';
+    
+    switch(data.type) {
+      case 'invite_friend':
+      case 'invite_friend_screenshot':
+        messageText = `
+🎁 НОВАЯ ЗАЯВКА НА БОНУС ЗА ПРИГЛАШЕНИЕ
+
+👤 Пользователь:
+• ID: ${data.userId || 'Не указан'}
+• Имя: ${data.userName || 'Не указано'}
+• @username: ${data.userTgUsername || 'Не указан'}
+
+👥 Приглашенный друг:
+• @username: ${data.friendUsername || 'Не указан'}
+• С кейсом: ${data.friendUsernameWithAt || 'Не указан'}
+
+📅 Дата заявки: ${data.timestamp || new Date().toLocaleString('ru-RU')}
+🎁 Награда: ${data.reward?.value || 20} свайпов
+📊 Статус: ${data.status || 'pending'}
+
+${
+  data.screenshot ? '📸 В приложении: есть скриншот' : 
+  data.friendUsername ? `📝 Введён @username: ${data.friendUsername}` : 
+  '📝 Нет дополнительной информации'
+}
+
+#реферал #приглашение #бонус
+        `;
+        break;
+        
+      case 'share_stories':
+        messageText = `
+📱 НОВАЯ ЗАЯВКА НА БУСТ ЗА ШЕРИНГ
+
+👤 Пользователь:
+• ID: ${data.userId || 'Не указан'}
+• Имя: ${data.userName || 'Не указано'}
+• @username: ${data.userTgUsername || 'Не указан'}
+
+📅 Дата заявки: ${data.timestamp || new Date().toLocaleString('ru-RU')}
+🎁 Награда: ${data.reward?.value || 24}-часовой буст
+📊 Статус: ${data.status || 'pending'}
+
+${data.screenshot ? '📸 Приложен скриншот публикации' : '📝 Нет скриншота'}
+
+#шеринг #буст #реклама
+        `;
+        break;
+        
+      case 'verification':
+        messageText = `
+🔐 НОВАЯ ЗАЯВКА НА ВЕРИФИКАЦИЮ
+
+👤 Пользователь:
+• ID: ${data.userId || 'Не указан'}
+• Имя: ${data.userName || 'Не указано'}
+• @username: ${data.userTgUsername || 'Не указан'}
+
+📅 Дата заявки: ${data.timestamp || new Date().toLocaleString('ru-RU')}
+🎁 Награда: ${data.reward?.value || 20} свайпов
+📊 Статус: ${data.status || 'pending'}
+
+${data.photo ? '📸 Приложено селфи для верификации' : '📝 Нет фото'}
+
+#верификация #бонус
+        `;
+        break;
+    }
+    
+    // Отправляем через Telegram Bot API (если настроен токен)
+    if (ADMIN_CONFIG.botToken && ADMIN_CONFIG.chatId && ADMIN_CONFIG.botToken !== 'ВАШ_BOT_TOKEN') {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${ADMIN_CONFIG.botToken}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: ADMIN_CONFIG.chatId,
+            text: messageText,
+            parse_mode: 'HTML'
+          })
+        });
+        
+        const result = await response.json();
+        console.log('✅ Сообщение отправлено в админку:', result.ok);
+        
+        // Если есть скриншот, отправляем его отдельно
+        if (data.screenshot && result.ok) {
+          await sendScreenshotToAdmin(data.screenshot, data.userName);
+        }
+        
+      } catch (error) {
+        console.error('❌ Ошибка отправки в Telegram:', error);
+        saveFailedAdminNotification(data);
+      }
+    }
+    
+    // Также сохраняем в localStorage для админ-панели
+    saveToAdminStorage(data);
+    
+  } catch (error) {
+    console.error('❌ Ошибка отправки в админку:', error);
+    saveFailedAdminNotification(data);
+  }
+}
+
+// Отправка скриншота в админку
+async function sendScreenshotToAdmin(screenshotData, userName) {
+  try {
+    if (!ADMIN_CONFIG.botToken || !ADMIN_CONFIG.chatId) return;
+    
+    // Преобразуем base64 в blob
+    const base64Data = screenshotData.split(',')[1];
+    const blob = await fetch(`data:image/jpeg;base64,${base64Data}`).then(r => r.blob());
+    
+    // Создаем FormData
+    const formData = new FormData();
+    formData.append('chat_id', ADMIN_CONFIG.chatId);
+    formData.append('photo', blob, 'screenshot.jpg');
+    formData.append('caption', `📸 Скриншот от ${userName || 'пользователя'}`);
+    
+    await fetch(`https://api.telegram.org/bot${ADMIN_CONFIG.botToken}/sendPhoto`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    console.log('✅ Скриншот отправлен в админку');
+  } catch (error) {
+    console.error('❌ Ошибка отправки скриншота:', error);
+  }
+}
+
+// Сохранение в localStorage для админ-панели
+function saveToAdminStorage(data) {
+  try {
+    const adminData = JSON.parse(localStorage.getItem('siamatch_admin_data') || '[]');
+    adminData.push({
+      ...data,
+      receivedAt: new Date().toISOString(),
+      processed: false
+    });
+    
+    localStorage.setItem('siamatch_admin_data', JSON.stringify(adminData));
+    console.log('💾 Данные сохранены для админ-панели');
+  } catch (error) {
+    console.error('❌ Ошибка сохранения для админ-панели:', error);
+  }
+}
+
+// Сохранение неудачных отправок для повторной попытки
+function saveFailedAdminNotification(data) {
+  try {
+    const failed = JSON.parse(localStorage.getItem('siamatch_failed_notifications') || '[]');
+    failed.push({
+      ...data,
+      retryCount: 0,
+      lastRetry: Date.now(),
+      error: 'Не удалось отправить в админку'
+    });
+    
+    localStorage.setItem('siamatch_failed_notifications', JSON.stringify(failed));
+    console.log('⚠️ Уведомление сохранено для повторной отправки');
+  } catch (error) {
+    console.error('❌ Ошибка сохранения неудачной отправки:', error);
+  }
+}
+
 function submitShareForVerification(screenshotData) {
   const verificationRequest = {
     id: Date.now(),
     userId: window.profileData.current?.tg_id,
     userName: window.profileData.current?.first_name,
+    userTgUsername: window.profileData.current?.username,
     type: 'share_stories',
     screenshot: screenshotData,
     requestedAt: new Date().toISOString(),
+    timestamp: new Date().toLocaleString('ru-RU'),
     status: 'pending',
     reward: {
       type: 'boost',
@@ -537,17 +721,38 @@ function submitShareForVerification(screenshotData) {
   pendingBonusVerifications.push(verificationRequest);
   savePendingBonuses();
   
+  // Отправляем в админку
+  sendToAdminPanel(verificationRequest);
+  
   showNotification('📱 Скриншот отправлен на проверку!\n\nАдминистратор проверит вашу публикацию в течение 24 часов. После подтверждения вы получите 24-часовой буст!');
 }
 
-function submitInviteForVerification(invitedUserId) {
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ: Теперь принимает @username вместо ID =====
+function submitInviteForVerification(friendUsername, screenshotData = null) {
+  // Валидация @username
+  if (friendUsername) {
+    if (!friendUsername.startsWith('@')) {
+      showNotification('❌ Введите корректный @username\nДолжен начинаться с @\nПример: @ivanov');
+      return false;
+    }
+    
+    if (friendUsername.length < 2) {
+      showNotification('❌ Введите корректный @username\nСлишком короткий');
+      return false;
+    }
+  }
+  
   const verificationRequest = {
     id: Date.now(),
     userId: window.profileData.current?.tg_id,
     userName: window.profileData.current?.first_name,
-    type: 'invite_friend',
-    invitedUserId: invitedUserId,
+    userTgUsername: window.profileData.current?.username,
+    type: screenshotData ? 'invite_friend_screenshot' : 'invite_friend',
+    friendUsername: friendUsername ? friendUsername.replace('@', '') : null,
+    friendUsernameWithAt: friendUsername,
+    screenshot: screenshotData,
     requestedAt: new Date().toISOString(),
+    timestamp: new Date().toLocaleString('ru-RU'),
     status: 'pending',
     reward: {
       type: 'swipes',
@@ -559,7 +764,15 @@ function submitInviteForVerification(invitedUserId) {
   pendingBonusVerifications.push(verificationRequest);
   savePendingBonuses();
   
-  showNotification('👥 Запрос на проверку приглашения отправлен!\n\nАдминистратор проверит регистрацию вашего друга. После подтверждения вы получите +20 свайпов!');
+  // Отправляем в админку
+  sendToAdminPanel(verificationRequest);
+  
+  const message = friendUsername 
+    ? `✅ Заявка отправлена на проверку!\n\nДруг: ${friendUsername}\nПосле подтверждения: +20 свайпов!`
+    : `✅ Скриншот отправлен на проверку!\n\nАдминистратор проверит в течение 24 часов.\nПосле подтверждения: +20 свайпов!`;
+  
+  showNotification(message);
+  return true;
 }
 
 // ===== СИСТЕМА ЧАТОВ И ЖАЛОБ =====
@@ -1009,6 +1222,7 @@ function submitReport() {
     id: Date.now(),
     reporterId: window.profileData.current?.tg_id || 1,
     reporterName: window.profileData.current?.first_name || 'Пользователь',
+    reporterUsername: window.profileData.current?.username,
     reportedUserId: user.id,
     reportedUserName: user.name,
     reason: reason === 'other' ? customReason : reason,
@@ -1024,7 +1238,8 @@ function submitReport() {
   userReports.push(reportData);
   saveUserReports();
   
-  saveReportToAdmin(reportData);
+  // Отправляем жалобу в админку
+  sendReportToAdmin(reportData);
   
   showNotification('✅ Жалоба отправлена!\n\nВаша жалоба будет рассмотрена администратором в течение 24 часов. Диалог сохранён для проверки.');
   
@@ -1037,13 +1252,51 @@ function submitReport() {
   }
 }
 
-function saveReportToAdmin(reportData) {
+function sendReportToAdmin(reportData) {
   try {
-    const existingReports = JSON.parse(localStorage.getItem('siamatch_admin_reports') || '[]');
-    existingReports.push(reportData);
-    localStorage.setItem('siamatch_admin_reports', JSON.stringify(existingReports));
+    const messageText = `
+⚠️ НОВАЯ ЖАЛОБА НА ПОЛЬЗОВАТЕЛЯ
+
+👤 Жалобу отправил:
+• ID: ${reportData.reporterId}
+• Имя: ${reportData.reporterName}
+• @username: ${reportData.reporterUsername || 'Не указан'}
+
+👥 На пользователя:
+• Имя: ${reportData.reportedUserName}
+• ID чата: ${reportData.reportedUserId}
+
+📝 Причина: ${reportData.reason}
+${reportData.additionalInfo ? `📋 Дополнительно: ${reportData.additionalInfo}` : ''}
+
+💬 Сообщений в чате: ${reportData.chatMessages?.length || 0}
+📅 Дата жалобы: ${new Date(reportData.createdAt).toLocaleString('ru-RU')}
+
+#жалоба #модерация
+    `;
+    
+    // Сохраняем для админ-панели
+    const adminReports = JSON.parse(localStorage.getItem('siamatch_admin_reports') || '[]');
+    adminReports.push(reportData);
+    localStorage.setItem('siamatch_admin_reports', JSON.stringify(adminReports));
+    
+    // Отправляем в Telegram если настроен бот
+    if (ADMIN_CONFIG.botToken && ADMIN_CONFIG.chatId && ADMIN_CONFIG.botToken !== 'ВАШ_BOT_TOKEN') {
+      fetch(`https://api.telegram.org/bot${ADMIN_CONFIG.botToken}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: ADMIN_CONFIG.chatId,
+          text: messageText,
+          parse_mode: 'HTML'
+        })
+      });
+    }
+    
   } catch (e) {
-    console.error('❌ Ошибка сохранения жалобы для админа:', e);
+    console.error('❌ Ошибка отправки жалобы в админку:', e);
   }
 }
 
@@ -1381,6 +1634,13 @@ function initBonusSystem() {
   const inviteFriendBtn = document.getElementById('inviteFriendBtn');
   const shareStoriesBtn = document.getElementById('shareStoriesBtn');
   
+  if (inviteFriendBtn) {
+    inviteFriendBtn.addEventListener('click', () => {
+      const referralLink = generateReferralLink();
+      showInviteVerificationModal(referralLink);
+    });
+  }
+  
   if (shareStoriesBtn) {
     shareStoriesBtn.addEventListener('click', handleShareStories);
   }
@@ -1402,6 +1662,7 @@ function handleShareStories() {
   showShareVerificationModal();
 }
 
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ: Теперь принимает @username вместо ID =====
 function showInviteVerificationModal(referralLink) {
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
@@ -1423,14 +1684,21 @@ function showInviteVerificationModal(referralLink) {
         </div>
         
         <div class="field">
-          <label>ID вашего друга (если он уже зарегистрировался)</label>
-          <input type="number" id="friend-id-input" placeholder="Введите ID друга" style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #bbf7d0;" />
+          <label>@ник вашего друга в Telegram</label>
+          <input type="text" id="friend-username-input" 
+                 placeholder="Введите @username (например: @ivanov)" 
+                 style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #bbf7d0;" />
+          <div class="hint">Введите @username точно как в профиле друга</div>
         </div>
         
         <div class="field" style="margin-top: 20px;">
-          <label>Или загрузите скриншот переписки с другом</label>
+          <label>ИЛИ загрузите скриншот переписки с другом</label>
           <input type="file" id="invite-screenshot-input" accept="image/*" style="width: 100%; padding: 10px;" />
-          <div class="hint">Скриншот вашего приглашения в Telegram</div>
+          <div class="hint">Скриншот вашего приглашения в Telegram с видимым @username друга</div>
+        </div>
+        
+        <div id="screenshot-preview-invite" style="margin-top: 15px; display: none;">
+          <img id="preview-image-invite" style="max-width: 200px; border-radius: 10px; border: 2px solid #bbf7d0;" />
         </div>
         
         <div class="modal-actions" style="margin-top: 20px;">
@@ -1443,6 +1711,7 @@ function showInviteVerificationModal(referralLink) {
   
   document.body.appendChild(modal);
   
+  // Закрытие модального окна
   document.getElementById('close-invite-modal-btn').onclick = () => {
     document.body.removeChild(modal);
   };
@@ -1451,51 +1720,65 @@ function showInviteVerificationModal(referralLink) {
     document.body.removeChild(modal);
   };
   
+  // Превью скриншота
+  const screenshotInput = document.getElementById('invite-screenshot-input');
+  const previewDiv = document.getElementById('screenshot-preview-invite');
+  const previewImg = document.getElementById('preview-image-invite');
+  
+  screenshotInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        previewDiv.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Отправка заявки
   document.getElementById('submit-invite-verification').onclick = () => {
-    const friendIdInput = document.getElementById('friend-id-input');
+    const friendUsernameInput = document.getElementById('friend-username-input');
     const screenshotInput = document.getElementById('invite-screenshot-input');
     
-    const friendId = friendIdInput.value.trim();
+    const friendUsername = friendUsernameInput.value.trim();
     const screenshotFile = screenshotInput.files[0];
     
-    if (!friendId && !screenshotFile) {
-      showNotification('Заполните хотя бы одно поле: ID друга или загрузите скриншот');
+    if (!friendUsername && !screenshotFile) {
+      showNotification('Заполните хотя бы одно поле: @username друга или загрузите скриншот');
       return;
     }
     
-    if (friendId) {
-      submitInviteForVerification(parseInt(friendId));
-      document.body.removeChild(modal);
+    if (friendUsername) {
+      // Если есть скриншот, отправляем с ним
+      if (screenshotFile) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const screenshotData = event.target.result;
+          submitInviteForVerification(friendUsername, screenshotData);
+          document.body.removeChild(modal);
+        };
+        reader.readAsDataURL(screenshotFile);
+      } else {
+        // Отправляем только username
+        submitInviteForVerification(friendUsername, null);
+        document.body.removeChild(modal);
+      }
+      
     } else if (screenshotFile) {
+      // Только скриншот
       const reader = new FileReader();
       reader.onload = function(event) {
         const screenshotData = event.target.result;
-        
-        const verificationRequest = {
-          id: Date.now(),
-          userId: window.profileData.current?.tg_id,
-          userName: window.profileData.current?.first_name,
-          type: 'invite_friend_screenshot',
-          screenshot: screenshotData,
-          requestedAt: new Date().toISOString(),
-          status: 'pending',
-          reward: {
-            type: 'swipes',
-            value: 20,
-            description: '+20 свайпов за приглашение друга'
-          }
-        };
-        
-        pendingBonusVerifications.push(verificationRequest);
-        savePendingBonuses();
-        
+        submitInviteForVerification(null, screenshotData);
         document.body.removeChild(modal);
-        showNotification('📤 Скриншот отправлен на проверку!\n\nАдминистратор проверит ваше приглашение в течение 24 часов. После подтверждения вы получите +20 свайпов!');
       };
       reader.readAsDataURL(screenshotFile);
     }
   };
   
+  // Закрытие по клику вне модального окна
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       document.body.removeChild(modal);
@@ -1603,6 +1886,11 @@ function generateReferralCode() {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return `REF_${userId}_${code}`;
+}
+
+function generateReferralLink() {
+  const code = generateReferralCode();
+  return `https://t.me/SiaMatchBot?start=${code}`;
 }
 
 function showBonusNotification(title, message, link, type) {
@@ -1998,6 +2286,31 @@ function submitVerification() {
   const verificationSection = document.getElementById('verification-form-section');
   if (verificationSection) verificationSection.classList.add('hidden');
   
+  // Отправляем заявку на верификацию в админку
+  const verificationRequest = {
+    id: Date.now(),
+    userId: window.profileData.current?.tg_id,
+    userName: window.profileData.current?.first_name,
+    userTgUsername: window.profileData.current?.username,
+    type: 'verification',
+    photo: verificationPhoto,
+    requestedAt: new Date().toISOString(),
+    timestamp: new Date().toLocaleString('ru-RU'),
+    status: 'pending',
+    reward: {
+      type: 'swipes',
+      value: 20,
+      description: '+20 свайпов за верификацию'
+    }
+  };
+  
+  // Сохраняем локально
+  pendingBonusVerifications.push(verificationRequest);
+  savePendingBonuses();
+  
+  // Отправляем в админку
+  sendToAdminPanel(verificationRequest);
+  
   if (window.tg?.HapticFeedback) {
     try {
       window.tg.HapticFeedback.impactOccurred('medium');
@@ -2006,6 +2319,7 @@ function submitVerification() {
   
   showNotification('✅ Запрос на верификацию отправлен!\n\nАнкета будет проверена администратором в течение 24 часов.\n\nПосле успешной верификации вы получите +20 свайпов! 🎁');
   
+  // Демо: через 3 секунды "подтверждаем" верификацию
   setTimeout(() => {
     if (verificationStatus === 'pending') {
       completeVerificationWithBonus();
