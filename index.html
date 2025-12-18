@@ -360,34 +360,35 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ПРОФИЛЯ -->
-      <div id="screen-profile" class="screen hidden">
-        <div class="screen-content">
-          <!-- ОТОБРАЖЕНИЕ ПРОФИЛЯ -->
-          <div id="profile-display">
-            <div class="profile-header">
-              <h2 class="screen-title">Мой профиль</h2>
-              <button id="edit-profile-btn" class="settings-btn">⚙️</button>
-            </div>
-            
-            <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
-<div class="profile-info-card">
-  <div class="profile-photo-section">
-    <!-- СКРЫТЫЙ INPUT для загрузки файлов -->
-    <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" />
-    
-    <!-- Контейнер для фотографий -->
-    <div class="profile-photos-container"></div>
-    <div class="profile-photo-indicators"></div>
-    
-    <!-- КНОПКИ УПРАВЛЕНИЯ -->
-    <div class="profile-photo-controls">
-      <button id="add-photo-btn" class="add-photo-btn">📸 Добавить фото</button>
-      <button id="remove-photo-btn" class="remove-photo-btn">🗑️ Удалить фото</button>
+<!-- ЭКРАН ПРОФИЛЯ - ОБНОВЛЕННАЯ ВЕРСИЯ -->
+<div id="screen-profile" class="screen hidden">
+  <div class="screen-content">
+    <!-- ФИКСИРОВАННЫЙ ЗАГОЛОВОК -->
+    <div class="sticky-profile-header">
+      <h2 class="screen-title">Мой профиль</h2>
+      <button id="edit-profile-btn" class="settings-btn" style="z-index: 1000; position: relative;">⚙️</button>
     </div>
     
-    <div id="photos-count" class="photos-count">0/3 фото</div>
-  </div>
+    <!-- ПРОКРУЧИВАЕМЫЙ КОНТЕНТ -->
+    <div class="profile-scroll-content">
+      <!-- ФОТО И ОСНОВНАЯ ИНФОРМАЦИЯ -->
+      <div class="profile-info-card">
+        <div class="profile-photo-section">
+          <!-- СКРЫТЫЙ INPUT для загрузки файлов -->
+          <input type="file" id="profile-photo-upload" accept="image/*" class="hidden" />
+          
+          <!-- Контейнер для фотографий -->
+          <div class="profile-photos-container"></div>
+          <div class="profile-photo-indicators"></div>
+          
+          <!-- КНОПКИ УПРАВЛЕНИЯ -->
+          <div class="profile-photo-controls">
+            <button id="add-photo-btn" class="add-photo-btn">📸 Добавить фото</button>
+            <button id="remove-photo-btn" class="remove-photo-btn">🗑️ Удалить фото</button>
+          </div>
+          
+          <div id="photos-count" class="photos-count">0/3 фото</div>
+        </div>
               
               <div class="profile-details">
                 <div class="profile-name">
