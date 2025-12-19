@@ -3103,35 +3103,6 @@ function handleSaveProfile() {
   }, 300);
 }
 
-function handleSaveProfileChangesLogic() {
-  if (!window.profileData.current) {
-    showNotification("Сначала создайте профиль!");
-    return;
-  }
-  
-  window.profileData.current.age = Number(document.getElementById("edit-age").value);
-  window.profileData.current.gender = document.getElementById("edit-gender").value;
-  window.profileData.current.city = document.getElementById("edit-city").value;
-  window.profileData.current.bio = document.getElementById("edit-bio").value.trim();
-  
-  if (saveProfile(window.profileData.current)) {
-    updateProfileDisplay();
-    
-    document.getElementById('profile-display').classList.remove('hidden');
-    document.getElementById('profile-edit').classList.add('hidden');
-    
-    showNotification("✅ Профиль обновлён!");
-    
-    if (window.tg?.HapticFeedback) {
-      try {
-        window.tg.HapticFeedback.impactOccurred('light');
-    } catch (e) {}
-    }
-  } else {
-    showNotification("❌ Ошибка при обновлении профиля");
-  }
-}
-
 function handlePhotoUploadLogic(e) {
   const file = e.target.files[0];
   if (!file) return;
