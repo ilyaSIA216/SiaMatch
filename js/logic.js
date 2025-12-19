@@ -3576,6 +3576,261 @@ window.handleSaveProfileChangesLogic = function() {
   }
 };
 
+// ===== ФУНКЦИИ ДЛЯ ОТПРАВКИ ФОТО В ЧАТЕ =====
+
+// Глобальные переменные для чата с фото
+let currentChatPhoto = null;
+
+// Функция для загрузки фото в чат
+function handleChatPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Проверяем размер файла
+  if (file.size > 5 * 1024 * 1024) {
+    showNotification('Фото слишком большое (максимум 5MB)');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    currentChatPhoto = event.target.result;
+    showPhotoPreview(currentChatPhoto);
+  };
+  reader.readAsDataURL(file);
+  
+  // Сбрасываем input, чтобы можно было загрузить тот же файл снова
+  e.target.value = '';
+}
+
+function showPhotoPreview(photoData) {
+  const previewContainer = document.getElementById('chat-photo-preview');
+  const previewImg = document.getElementById('preview-photo');
+  
+  if (!previewContainer || !previewImg) return;
+  
+  previewImg.src = photoData;
+  previewContainer.classList.remove('hidden');
+  
+  // Прокручиваем к превью
+  setTimeout(() => {
+    previewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+function removePhotoPreview() {
+  currentChatPhoto = null;
+  const previewContainer = document.getElementById('chat-photo-preview');
+  if (previewContainer) {
+    previewContainer.classList.add('hidden');
+  }
+}
+
+// Обновленная функция отправки сообщения с фото
+function sendMessageWithPhoto() {
+  const input = document.getElementById('chat-message-input');
+  const messageText = input.value.trim();
+  
+  if (!messageText && !currentChatPhoto) {
+    if (window.tg?.HapticFeedback) {
+      try {
+        window.tg.HapticFeedback.impactOccurred('rigid');
+      } catch (e) {}
+    }
+    return;
+  }
+  
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const dateString = now.toISOString().split('T')[0];
+  
+  // Создаем сообщение
+  const newMessage = {
+    id: Date.now(),
+    sender: 'me',
+    text: messageText,
+    photo: currentChatPhoto,
+    hasPhoto: !!currentChatPhoto,
+    time: timeString,
+    date: dateString
+  };
+  
+  if (!chatMessages[currentChatId]) {
+    chatMessages[currentChatId] = [];
+  }
+  
+  chatMessages[currentChatId].push(newMessage);
+  saveChatMessages();
+  
+  // Добавляем сообщение в чат
+  addMessageToChat(newMessage);
+  
+  // Очищаем поля
+  input.value = '';
+  removePhotoPreview();
+  currentChatPhoto = null;
+  
+  // Прокручиваем вниз
+  setTimeout(() => {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }, 100);
+  
+  // Имитируем ответ (можно добавить фото в ответ)
+  setTimeout(() => {
+    simulateResponseWithPhoto(currentChatId);
+  }, 1000 + Math.random() * 2000);
+  
+  // Тактильная обратная связь
+  if (window.tg?.HapticFeedback) {
+    try {
+      window.tg.HapticFeedback.impactOccurred('light');
+    } catch (e) {}
+  }
+}
+
+// Функция для отображения сообщения с фото
+function addMessageToChat(message) {
+  const messagesContainer = document.getElementById('chat-messages');
+  if (!messagesContainer) return;
+  
+  const messageElement = document.createElement('div');
+  messageElement.className = `message ${message.sender === 'me' ? 'message-out' : 'message-in'} ${message.hasPhoto ? 'has-photo' : ''}`;
+  
+  let content = '';
+  if (message.hasPhoto && message.photo) {
+    content += `<img src="${message.photo}" alt="Фото" class="chat-photo" />`;
+  }
+  if (message.text) {
+    content += `<div class="message-content">${message.text}</div>`;
+  }
+  
+  messageElement.innerHTML = content + `<div class="message-time">${message.time}</div>`;
+  messagesContainer.appendChild(messageElement);
+}
+
+// Обновленная функция имитации ответа (может отправлять фото)
+function simulateResponseWithPhoto(chatId) {
+  const responses = [
+    { text: "Интересно!", hasPhoto: false },
+    { text: "Расскажи подробнее", hasPhoto: false },
+    { text: "Классное фото!", hasPhoto: false },
+    { text: "Вот моё фото", hasPhoto: true, photo: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800" },
+    { text: "Как дела?", hasPhoto: false },
+    { text: "Вау, красиво!", hasPhoto: false }
+  ];
+  
+  const response = responses[Math.floor(Math.random() * responses.length)];
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const dateString = now.toISOString().split('T')[0];
+  
+  const responseMessage = {
+    id: Date.now(),
+    sender: 'other',
+    text: response.text,
+    photo: response.photo || null,
+    hasPhoto: response.hasPhoto,
+    time: timeString,
+    date: dateString
+  };
+  
+  if (!chatMessages[chatId]) {
+    chatMessages[chatId] = [];
+  }
+  
+  chatMessages[chatId].push(responseMessage);
+  saveChatMessages();
+  
+  if (currentChatId === chatId) {
+    addMessageToChat(responseMessage);
+    
+    setTimeout(() => {
+      const messagesContainer = document.getElementById('chat-messages');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }, 100);
+  } else {
+    const user = matchedUsers.find(u => u.id === parseInt(chatId));
+    if (user) {
+      user.unread = (user.unread || 0) + 1;
+      saveMatchedUsers();
+      updateChatsList();
+    }
+  }
+}
+
+// Функция сжатия фото для чата (опционально, можно удалить если не нужно)
+function compressPhotoForChat(photoData, maxSizeKB = 300) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      const maxWidth = 800;
+      const maxHeight = 800;
+      
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > height && width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      } else if (height > maxHeight) {
+        width = Math.round((width * maxHeight) / height);
+        height = maxHeight;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      
+      if (compressedDataUrl.length / 1024 > maxSizeKB) {
+        const finalDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+        resolve(finalDataUrl);
+      } else {
+        resolve(compressedDataUrl);
+      }
+    };
+    
+    img.src = photoData;
+  });
+}
+
+// Обновляем функцию loadMessagesForChat для поддержки фото
+function loadMessagesForChat(userId) {
+  const messagesContainer = document.getElementById('chat-messages');
+  if (!messagesContainer) return;
+  
+  messagesContainer.innerHTML = '';
+  
+  const messages = chatMessages[userId] || [];
+  
+  if (messages.length === 0) {
+    messagesContainer.innerHTML = `
+      <div class="no-messages">
+        <div class="no-messages-icon">💬</div>
+        <div class="no-messages-text">Начните общение первым!</div>
+      </div>
+    `;
+    return;
+  }
+  
+  messages.forEach(msg => {
+    addMessageToChat(msg);
+  });
+  
+  setTimeout(() => {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }, 100);
+}
+
 // ===== ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ =====
 window.switchPhoto = switchPhoto;
 window.initSwipeSystem = initSwipeSystem;
